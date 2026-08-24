@@ -411,12 +411,21 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
     const snap = await getDocs(collection(db, 'productDetails'));
     snap.forEach(d => {
       const key = d.id;
-      if (deletedKeys.has(key)) return;
       const data = d.data() as ProductDetailItem;
-      if (data && !data.deleted) {
+      if (deletedKeys.has(key) || data?.deleted) {
         merged[key] = {
           ...merged[key],
-          ...data
+          deleted: true,
+          pdfUrls: [],
+          pdfNames: [],
+          pdfUrl: '',
+          pdfName: ''
+        };
+      } else if (data && !data.deleted) {
+        merged[key] = {
+          ...merged[key],
+          ...data,
+          deleted: false
         };
       }
     });
@@ -431,7 +440,14 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
       const parsed = JSON.parse(localStr);
       Object.keys(parsed).forEach((k) => {
         if (parsed[k]?.deleted || deletedKeys.has(k)) {
-          delete merged[k];
+          merged[k] = {
+            ...merged[k],
+            deleted: true,
+            pdfUrls: [],
+            pdfNames: [],
+            pdfUrl: '',
+            pdfName: ''
+          };
         } else {
           merged[k] = { ...merged[k], ...parsed[k] };
         }
@@ -442,13 +458,18 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
   }
 
   // 4. Read from local IndexedDB for large cached assets
-
   try {
     const idbData = await loadAllBrandPdfs();
     Object.keys(idbData).forEach((k) => {
       if (k.startsWith('product-')) {
-        if (deletedKeys.has(k)) {
-          delete merged[k];
+        if (deletedKeys.has(k) || merged[k]?.deleted) {
+          merged[k] = {
+            deleted: true,
+            pdfUrls: [],
+            pdfNames: [],
+            pdfUrl: '',
+            pdfName: ''
+          };
           return;
         }
         const item = idbData[k];
@@ -466,11 +487,6 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
     console.warn('Error reading product details from IndexedDB:', err);
   }
 
-  // Final cleanup: ensure no deleted keys slip through
-  deletedKeys.forEach(k => {
-    delete merged[k];
-  });
-
   return merged;
 }
 
@@ -479,6 +495,7 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
  */
 export async function saveUnifiedProductDetail(productId: string, detailData: ProductDetailItem): Promise<void> {
   const key = productId.startsWith('product-') ? productId : `product-${productId}`;
+  const rawId = productId.replace(/^product-/, '');
 
   // 1. Upload any base64 Data URLs to Firebase Storage
   let processedData = { ...detailData };
@@ -513,10 +530,10 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
   // 2. Clear deletion flag
   try {
     const deletedKeys = getDeletedDetailKeys();
-    if (deletedKeys.has(key)) {
-      deletedKeys.delete(key);
-      localStorage.setItem('sy_cms_deleted_product_details', JSON.stringify(Array.from(deletedKeys)));
-    }
+    deletedKeys.delete(key);
+    deletedKeys.delete(rawId);
+    deletedKeys.delete(productId);
+    localStorage.setItem('sy_cms_deleted_product_details', JSON.stringify(Array.from(deletedKeys)));
   } catch (e) {}
 
   // 3. Save to IndexedDB (for quick offline cache)
@@ -541,6 +558,9 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
   try {
     const docRef = doc(db, 'productDetails', key);
     await setDoc(docRef, updatedPayload, { merge: true });
+    if (rawId !== key) {
+      await setDoc(doc(db, 'productDetails', rawId), updatedPayload, { merge: true });
+    }
   } catch (firestoreErr) {
     console.warn('Firestore productDetails write failed:', firestoreErr);
   }
@@ -557,6 +577,10 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
 
     currentMap[key] = {
       ...currentMap[key],
+      ...updatedPayload
+    };
+    currentMap[rawId] = {
+      ...currentMap[rawId],
       ...updatedPayload
     };
 
@@ -576,28 +600,44 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
  */
 export async function deleteUnifiedProductDetail(productId: string): Promise<void> {
   const key = productId.startsWith('product-') ? productId : `product-${productId}`;
+  const rawId = productId.replace(/^product-/, '');
 
   // 1. Record in persistent deleted list
   try {
     const deletedKeys = getDeletedDetailKeys();
     deletedKeys.add(key);
-    // Also record alias if applicable
-    if (productId.startsWith('product-')) {
-      deletedKeys.add(productId.replace('product-', ''));
-    } else {
-      deletedKeys.add(productId);
-    }
+    deletedKeys.add(rawId);
+    deletedKeys.add(productId);
     localStorage.setItem('sy_cms_deleted_product_details', JSON.stringify(Array.from(deletedKeys)));
   } catch (e) {}
 
-  // 2. Delete from Firestore collection 'productDetails'
+  const deletePayload: ProductDetailItem = {
+    deleted: true,
+    pdfUrls: [],
+    pdfNames: [],
+    pdfUrl: '',
+    pdfName: '',
+    specs: {},
+    features: [],
+    updatedAt: new Date().toISOString()
+  };
+
+  // 2. Persist deleted marker to Firestore collection 'productDetails'
   try {
-    await deleteDoc(doc(db, 'productDetails', key));
-  } catch (e) {}
+    await setDoc(doc(db, 'productDetails', key), deletePayload, { merge: true });
+    if (rawId !== key) {
+      await setDoc(doc(db, 'productDetails', rawId), deletePayload, { merge: true });
+    }
+  } catch (e) {
+    console.warn('Firestore productDetails delete marker failed:', e);
+  }
 
   // 3. Delete from IndexedDB
   try {
     await deleteBrandPdf(key);
+    if (rawId !== key) {
+      await deleteBrandPdf(rawId);
+    }
   } catch (e) {}
 
   // 4. Mark as deleted/empty in localStorage sy_cms_product_details
@@ -609,16 +649,8 @@ export async function deleteUnifiedProductDetail(productId: string): Promise<voi
         parsed = JSON.parse(localStr);
       } catch (e) {}
     }
-    parsed[key] = {
-      deleted: true,
-      pdfUrls: [],
-      pdfNames: [],
-      pdfUrl: '',
-      pdfName: '',
-      specs: {},
-      features: [],
-      updatedAt: new Date().toISOString()
-    };
+    parsed[key] = deletePayload;
+    parsed[rawId] = deletePayload;
     localStorage.setItem('sy_cms_product_details', JSON.stringify(parsed));
   } catch (e) {}
 
@@ -815,6 +847,7 @@ function sanitizeItemUrls(item: ProductDetailItem): ProductDetailItem {
  * Intelligent resolver for any product detail:
  * Checks exact key and custom uploaded data FIRST.
  * Seamlessly resolves defaults and static assets for guest/mobile/incognito visitors.
+ * STRICTLY respects user deletion states.
  */
 export function resolveDetailData(
   product: { id?: string; name?: string; power?: string; type?: string; image?: string; specs?: Record<string, string>; features?: string[] },
@@ -824,14 +857,35 @@ export function resolveDetailData(
 
   const id = product.id || '';
   const name = product.name || '';
+  const directKey = id.startsWith('product-') ? id : `product-${id}`;
+  const rawId = id.replace(/^product-/, '');
+  const nameKey = name ? `product-${name.trim()}` : '';
+
   const deletedKeys = getDeletedDetailKeys();
 
-  if (deletedKeys.has(`product-${id}`) || deletedKeys.has(id)) {
-    return {};
-  }
+  // If explicitly deleted by user (in local deletedKeys or marked deleted in detailsMap)
+  const isDeleted = (
+    deletedKeys.has(directKey) ||
+    deletedKeys.has(rawId) ||
+    deletedKeys.has(id) ||
+    (nameKey && deletedKeys.has(nameKey)) ||
+    detailsMap[directKey]?.deleted === true ||
+    detailsMap[rawId]?.deleted === true ||
+    detailsMap[id]?.deleted === true ||
+    (nameKey && detailsMap[nameKey]?.deleted === true)
+  );
 
-  const directKey = id.startsWith('product-') ? id : `product-${id}`;
-  const rawId = id.replace('product-', '');
+  if (isDeleted) {
+    return {
+      deleted: true,
+      pdfUrls: [],
+      pdfNames: [],
+      pdfUrl: '',
+      pdfName: '',
+      specs: {},
+      features: []
+    };
+  }
 
   // 1. Direct ID match in loaded detailsMap
   if (detailsMap[directKey] && !detailsMap[directKey].deleted) {
@@ -851,40 +905,23 @@ export function resolveDetailData(
   }
 
   // 2. Direct Name match in detailsMap
-  if (name) {
-    const nameKey = `product-${name.trim()}`;
-    if (!deletedKeys.has(nameKey) && detailsMap[nameKey] && !detailsMap[nameKey].deleted) {
-      const item = sanitizeItemUrls(detailsMap[nameKey]);
-      const hasFiles = (item.pdfUrls && item.pdfUrls.length > 0) || !!item.pdfUrl;
-      if (hasFiles || (item.specs && Object.keys(item.specs).length > 0)) {
-        return item;
-      }
+  if (nameKey && detailsMap[nameKey] && !detailsMap[nameKey].deleted) {
+    const item = sanitizeItemUrls(detailsMap[nameKey]);
+    const hasFiles = (item.pdfUrls && item.pdfUrls.length > 0) || !!item.pdfUrl;
+    if (hasFiles || (item.specs && Object.keys(item.specs).length > 0)) {
+      return item;
     }
   }
 
-  // 3. Fallback to DEFAULT_PRODUCT_DETAILS
+  // 3. Fallback to DEFAULT_PRODUCT_DETAILS (Only if NOT deleted)
   if (DEFAULT_PRODUCT_DETAILS[directKey] && !DEFAULT_PRODUCT_DETAILS[directKey].deleted) {
     return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[directKey]);
   }
   if (DEFAULT_PRODUCT_DETAILS[rawId] && !DEFAULT_PRODUCT_DETAILS[rawId].deleted) {
     return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[rawId]);
   }
-  if (name) {
-    const nameKey = `product-${name.trim()}`;
-    if (DEFAULT_PRODUCT_DETAILS[nameKey] && !DEFAULT_PRODUCT_DETAILS[nameKey].deleted) {
-      return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[nameKey]);
-    }
-  }
-
-  // 4. Guaranteed static asset fallback using product.image & product.specs
-  if (product.image && !product.image.includes('unsplash.com')) {
-    return {
-      pdfUrl: product.image,
-      pdfUrls: [product.image],
-      pdfNames: [`${name || '전기차 충전기'} 공식 상세 이미지`],
-      specs: product.specs || {},
-      features: product.features || []
-    };
+  if (nameKey && DEFAULT_PRODUCT_DETAILS[nameKey] && !DEFAULT_PRODUCT_DETAILS[nameKey].deleted) {
+    return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[nameKey]);
   }
 
   return {};

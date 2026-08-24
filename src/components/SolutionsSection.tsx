@@ -25,7 +25,8 @@ import {
   saveUnifiedProductDetail, 
   deleteUnifiedProductDetail, 
   resolveDetailData, 
-  DEFAULT_PRODUCT_DETAILS 
+  DEFAULT_PRODUCT_DETAILS,
+  ProductDetailItem
 } from '../lib/detailPagesData';
 
 export const BRAND_METADATA: Record<string, {
@@ -461,7 +462,7 @@ export default function SolutionsSection({
   const [localDetailModes, setLocalDetailModes] = useState<Record<string, 'scroll' | 'unfold'>>({});
   const [sortBy, setSortBy] = useState<'new' | 'priceAsc' | 'priceDesc' | 'popular'>('new');
   const [activeDetailProduct, setActiveDetailProduct] = useState<SolutionProduct | null>(null);
-  const [productDetails, setProductDetails] = useState<Record<string, { pdfUrl?: string; pdfName?: string; pdfUrls?: string[]; pdfNames?: string[] }>>({});
+  const [productDetails, setProductDetails] = useState<Record<string, ProductDetailItem>>({});
   
   const [selectedConnector, setSelectedConnector] = useState<string>('');
   const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<string, string>>({});
@@ -1316,7 +1317,17 @@ export default function SolutionsSection({
             if (data && !data.deleted) {
               updated[key] = {
                 ...updated[key],
-                ...data
+                ...data,
+                deleted: false
+              };
+            } else if (data?.deleted) {
+              updated[key] = {
+                ...updated[key],
+                deleted: true,
+                pdfUrls: [],
+                pdfNames: [],
+                pdfUrl: '',
+                pdfName: ''
               };
             }
           });
@@ -1401,37 +1412,45 @@ export default function SolutionsSection({
 
   const handleDeleteProductSingleFile = async (productId: string, index: number) => {
     const key = `product-${productId}`;
-    const existing = productDetails[key];
-    if (!existing) return;
+    const rawId = productId.replace(/^product-/, '');
+    const currentDetail = resolveDetailData(
+      activeDetailProduct || { id: productId },
+      productDetails
+    );
 
-    const existingUrls = existing.pdfUrls && existing.pdfUrls.length > 0
-      ? existing.pdfUrls
-      : (existing.pdfUrl ? [existing.pdfUrl] : []);
-    const existingNames = existing.pdfNames && existing.pdfNames.length > 0
-      ? existing.pdfNames
-      : (existing.pdfName ? [existing.pdfName] : []);
+    const existingUrls = currentDetail.pdfUrls && currentDetail.pdfUrls.length > 0
+      ? currentDetail.pdfUrls
+      : (currentDetail.pdfUrl ? [currentDetail.pdfUrl] : []);
+    const existingNames = currentDetail.pdfNames && currentDetail.pdfNames.length > 0
+      ? currentDetail.pdfNames
+      : (currentDetail.pdfName ? [currentDetail.pdfName] : []);
+
+    if (existingUrls.length === 0) return;
 
     const updatedUrls = existingUrls.filter((_, i) => i !== index);
     const updatedNames = existingNames.filter((_, i) => i !== index);
 
     if (updatedUrls.length === 0) {
       await deleteUnifiedProductDetail(key);
-      setProductDetails(prev => {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      });
+      await deleteUnifiedProductDetail(rawId);
+      setProductDetails(prev => ({
+        ...prev,
+        [key]: { deleted: true, pdfUrls: [], pdfNames: [], pdfUrl: '', pdfName: '' },
+        [rawId]: { deleted: true, pdfUrls: [], pdfNames: [], pdfUrl: '', pdfName: '' }
+      }));
     } else {
       const updatedObj = {
         pdfUrls: updatedUrls,
         pdfNames: updatedNames,
         pdfUrl: updatedUrls[0],
-        pdfName: updatedNames[0]
+        pdfName: updatedNames[0],
+        deleted: false
       };
       await saveUnifiedProductDetail(key, updatedObj);
       setProductDetails(prev => ({
         ...prev,
-        [key]: updatedObj
+        [key]: updatedObj,
+        [rawId]: updatedObj
       }));
     }
   };
@@ -1450,11 +1469,14 @@ export default function SolutionsSection({
 
   const handleReorderProductFile = async (productId: string, fromIndex: number, toIndex: number) => {
     const key = `product-${productId}`;
-    const existing = productDetails[key];
-    if (!existing) return;
+    const rawId = productId.replace(/^product-/, '');
+    const currentDetail = resolveDetailData(
+      activeDetailProduct || { id: productId },
+      productDetails
+    );
 
-    const existingUrls = [...(existing.pdfUrls && existing.pdfUrls.length > 0 ? existing.pdfUrls : (existing.pdfUrl ? [existing.pdfUrl] : []))];
-    const existingNames = [...(existing.pdfNames && existing.pdfNames.length > 0 ? existing.pdfNames : (existing.pdfName ? [existing.pdfName] : []))];
+    const existingUrls = [...(currentDetail.pdfUrls && currentDetail.pdfUrls.length > 0 ? currentDetail.pdfUrls : (currentDetail.pdfUrl ? [currentDetail.pdfUrl] : []))];
+    const existingNames = [...(currentDetail.pdfNames && currentDetail.pdfNames.length > 0 ? currentDetail.pdfNames : (currentDetail.pdfName ? [currentDetail.pdfName] : []))];
 
     if (toIndex < 0 || toIndex >= existingUrls.length) return;
 
@@ -1468,24 +1490,28 @@ export default function SolutionsSection({
       pdfUrls: existingUrls,
       pdfNames: existingNames,
       pdfUrl: existingUrls[0],
-      pdfName: existingNames[0]
+      pdfName: existingNames[0],
+      deleted: false
     };
     await saveUnifiedProductDetail(key, updatedObj);
     setProductDetails(prev => ({
       ...prev,
-      [key]: updatedObj
+      [key]: updatedObj,
+      [rawId]: updatedObj
     }));
   };
 
   const handleDeleteProductPdf = async (productId: string) => {
     const key = `product-${productId}`;
+    const rawId = productId.replace(/^product-/, '');
     try {
       await deleteUnifiedProductDetail(key);
-      setProductDetails(prev => {
-        const updated = { ...prev };
-        delete updated[key];
-        return updated;
-      });
+      await deleteUnifiedProductDetail(rawId);
+      setProductDetails(prev => ({
+        ...prev,
+        [key]: { deleted: true, pdfUrls: [], pdfNames: [], pdfUrl: '', pdfName: '' },
+        [rawId]: { deleted: true, pdfUrls: [], pdfNames: [], pdfUrl: '', pdfName: '' }
+      }));
     } catch (dbError) {
       console.error('Failed to delete product detail:', dbError);
     }
@@ -1497,7 +1523,7 @@ export default function SolutionsSection({
       title: '상세페이지 전체 삭제 확인',
       targetName: prodName ? `${prodName} 상세페이지 전체` : '등록된 상세페이지 전체',
       description: '등록된 모든 상세페이지 이미지와 PDF 문서를 전체 삭제하시겠습니까?',
-      warningNote: '삭제 시 기존에 등록된 모든 커스텀 상세페이지가 제거되고 기본 사양서로 대체됩니다.',
+      warningNote: '삭제 시 등록된 모든 상세페이지가 즉시 삭제되며, 새로운 상세페이지 이미지를 언제든 다시 등록하실 수 있습니다.',
       confirmLabel: '상세페이지 전체 삭제',
       onConfirm: () => handleDeleteProductPdf(productId)
     });
