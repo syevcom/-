@@ -1,0 +1,6 @@
+{
+  "name": "SY.com",
+  "description": "대한민국 최대 전기차 충전기 토탈 솔루션 SY.com - 설계, 보조금 신청, 시공 및 A/S 원스톱 플랫폼",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

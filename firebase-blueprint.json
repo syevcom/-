@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "CmsData": {
+      "title": "CmsData",
+      "description": "Real-time key-value pairs of CMS configuration and products",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Serialized JSON or string value of the CMS key"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["value", "updatedAt"]
+    },
+    "CmsBackup": {
+      "title": "CmsBackup",
+      "description": "Periodic and on-change full snapshot backup of all local storage keys",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique backup document ID with timestamp"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp in milliseconds"
+        },
+        "isoDate": {
+          "type": "string",
+          "description": "ISO date string"
+        },
+        "formattedDate": {
+          "type": "string",
+          "description": "Human readable date string in KST"
+        },
+        "trigger": {
+          "type": "string",
+          "description": "Trigger source: hourly, on_change, manual, or boot"
+        },
+        "keyCount": {
+          "type": "number",
+          "description": "Total number of backed up keys"
+        },
+        "data": {
+          "type": "string",
+          "description": "JSON stringified Record<string, string> of all sy_ keys"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Brief description of the snapshot contents"
+        }
+      },
+      "required": ["id", "timestamp", "isoDate", "keyCount", "data"]
+    },
+    "DailyVisitor": {
+      "title": "DailyVisitor",
+      "description": "Real aggregated daily visitor statistics in Firestore",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "description": "Date formatted YYYY-MM-DD" },
+        "uniqueVisitors": { "type": "number", "description": "Actual unique visitor count" },
+        "pageViews": { "type": "number", "description": "Actual pageview count" },
+        "mobileVisitors": { "type": "number", "description": "Mobile visits" },
+        "desktopVisitors": { "type": "number", "description": "Desktop PC visits" },
+        "tabletVisitors": { "type": "number", "description": "Tablet visits" },
+        "inquiryConversions": { "type": "number", "description": "Inquiries submitted" },
+        "hourlyDistribution": { "type": "array", "description": "24-hour hits array" },
+        "pageViewsMap": { "type": "object", "description": "Page hit counts" },
+        "referrersMap": { "type": "object", "description": "Referrer hit counts" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["date", "uniqueVisitors", "pageViews"]
+    },
+    "VisitorLog": {
+      "title": "VisitorLog",
+      "description": "Real-time access log of page hits",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Log ID" },
+        "timestamp": { "type": "number", "description": "Timestamp ms" },
+        "date": { "type": "string", "description": "Date YYYY-MM-DD" },
+        "time": { "type": "string", "description": "Time string" },
+        "page": { "type": "string", "description": "Visited page" },
+        "device": { "type": "string", "description": "Device type" },
+        "browser": { "type": "string", "description": "Browser name" },
+        "referrer": { "type": "string", "description": "Referrer URL" }
+      },
+      "required": ["id", "timestamp", "date", "page"]
+    }
+  },
+  "firestore": {
+    "rules": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /sy_cms_data/{document} {\n      allow read, write: if true;\n    }\n    match /sy_cms_backups/{document} {\n      allow read, write: if true;\n    }\n    match /sy_visitor_daily/{document} {\n      allow read, write: if true;\n    }\n    match /sy_visitor_logs/{document} {\n      allow read, write: if true;\n    }\n  }\n}"
+  }
+}
