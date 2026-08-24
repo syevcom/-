@@ -12,7 +12,8 @@ import PdfImageRenderer from './PdfImageRenderer';
 import { saveBrandPdf, deleteBrandPdf, loadAllBrandPdfs } from '../lib/indexedDb';
 import { compressImage } from '../lib/imageCompressor';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
-import { uploadFileToFirebaseStorage } from '../lib/firebase';
+import { uploadFileToFirebaseStorage, db } from '../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { OptionPreset, INITIAL_OPTION_PRESETS } from './AdminPage';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { 
@@ -1225,7 +1226,7 @@ export default function SolutionsSection({
     return base;
   });
 
-  // Load merged catalogs and product details across IndexedDB, localStorage, and Firestore
+  // Load merged catalogs and product details across IndexedDB, localStorage, and Firestore with live real-time sync
   useEffect(() => {
     let isMounted = true;
     const loadAllCatalogsAndDetails = async () => {
@@ -1265,13 +1266,79 @@ export default function SolutionsSection({
     window.addEventListener('sy_cms_product_details_update', handleDetailsUpdate);
     window.addEventListener('sy_cms_data_sync_completed', handleDetailsUpdate);
 
+    // Real-time Firestore onSnapshot listener for instant sync on guest and mobile devices
+    let unsubscribeBrandCatalogs: (() => void) | undefined;
+    let unsubscribeProductDetails: (() => void) | undefined;
+
+    try {
+      unsubscribeBrandCatalogs = onSnapshot(collection(db, 'brandCatalogs'), (snapshot) => {
+        if (!isMounted) return;
+        setBrands(prev => {
+          const updated = { ...prev };
+          snapshot.forEach(docSnap => {
+            const brandKey = docSnap.id;
+            const data = docSnap.data() as { pdfUrl?: string; pdfName?: string; deleted?: boolean };
+            if (data && !data.deleted && (data.pdfUrl || data.pdfName)) {
+              if (updated[brandKey]) {
+                updated[brandKey] = {
+                  ...updated[brandKey],
+                  pdfUrl: data.pdfUrl,
+                  pdfName: data.pdfName
+                };
+              }
+            } else if (data?.deleted) {
+              if (updated[brandKey]) {
+                updated[brandKey] = {
+                  ...updated[brandKey],
+                  pdfUrl: undefined,
+                  pdfName: undefined
+                };
+              }
+            }
+          });
+          return updated;
+        });
+      }, (err) => {
+        console.warn('brandCatalogs real-time listener error:', err);
+      });
+    } catch (e) {
+      console.warn('Failed to attach brandCatalogs snapshot listener:', e);
+    }
+
+    try {
+      unsubscribeProductDetails = onSnapshot(collection(db, 'productDetails'), (snapshot) => {
+        if (!isMounted) return;
+        setProductDetails(prev => {
+          const updated = { ...prev };
+          snapshot.forEach(docSnap => {
+            const key = docSnap.id;
+            const data = docSnap.data() as any;
+            if (data && !data.deleted) {
+              updated[key] = {
+                ...updated[key],
+                ...data
+              };
+            }
+          });
+          return updated;
+        });
+      }, (err) => {
+        console.warn('productDetails real-time listener error:', err);
+      });
+    } catch (e) {
+      console.warn('Failed to attach productDetails snapshot listener:', e);
+    }
+
     return () => {
       isMounted = false;
       window.removeEventListener('sy_cms_brand_catalogs_update', handleDetailsUpdate);
       window.removeEventListener('sy_cms_product_details_update', handleDetailsUpdate);
       window.removeEventListener('sy_cms_data_sync_completed', handleDetailsUpdate);
+      if (unsubscribeBrandCatalogs) unsubscribeBrandCatalogs();
+      if (unsubscribeProductDetails) unsubscribeProductDetails();
     };
   }, []);
+
 
   const [isDraggingProductPdf, setIsDraggingProductPdf] = useState<Record<string, boolean>>({});
 

@@ -5,7 +5,8 @@
  */
 
 import { loadAllBrandPdfs, saveBrandPdf, deleteBrandPdf } from './indexedDb';
-import { uploadFileToFirebaseStorage } from './firebase';
+import { uploadFileToFirebaseStorage, db } from './firebase';
+import { doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 import {
   BIZ_7KW_PLC_IMAGE,
   BIZ_11KW_STORMSHIELD_IMAGE,
@@ -405,7 +406,25 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
     }
   });
 
-  // 2. Read from localStorage (synced with Firestore)
+  // 2. Read from Firestore 'productDetails' collection (Direct cloud source of truth)
+  try {
+    const snap = await getDocs(collection(db, 'productDetails'));
+    snap.forEach(d => {
+      const key = d.id;
+      if (deletedKeys.has(key)) return;
+      const data = d.data() as ProductDetailItem;
+      if (data && !data.deleted) {
+        merged[key] = {
+          ...merged[key],
+          ...data
+        };
+      }
+    });
+  } catch (firestoreErr) {
+    console.warn('Could not read productDetails from Firestore:', firestoreErr);
+  }
+
+  // 3. Read from localStorage (synced with Firestore)
   try {
     const localStr = localStorage.getItem('sy_cms_product_details');
     if (localStr) {
@@ -422,7 +441,8 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
     console.warn('Error parsing sy_cms_product_details from localStorage:', err);
   }
 
-  // 3. Read from local IndexedDB for large cached assets
+  // 4. Read from local IndexedDB for large cached assets
+
   try {
     const idbData = await loadAllBrandPdfs();
     Object.keys(idbData).forEach((k) => {
@@ -455,7 +475,7 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
 }
 
 /**
- * Saves a product detail item to all storage layers and clears any prior deletion flag.
+ * Saves a product detail item to all storage layers (Firestore, localStorage, IndexedDB) and clears any prior deletion flag.
  */
 export async function saveUnifiedProductDetail(productId: string, detailData: ProductDetailItem): Promise<void> {
   const key = productId.startsWith('product-') ? productId : `product-${productId}`;
@@ -511,7 +531,21 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
     console.error('IndexedDB save failed:', err);
   }
 
-  // 4. Save to localStorage (triggers Firestore sync via firebase.ts)
+  const updatedPayload: ProductDetailItem = {
+    ...processedData,
+    deleted: false,
+    updatedAt: new Date().toISOString()
+  };
+
+  // 4. Save to Firestore collection 'productDetails'
+  try {
+    const docRef = doc(db, 'productDetails', key);
+    await setDoc(docRef, updatedPayload, { merge: true });
+  } catch (firestoreErr) {
+    console.warn('Firestore productDetails write failed:', firestoreErr);
+  }
+
+  // 5. Save to localStorage (triggers global CMS syncing)
   try {
     let currentMap: Record<string, ProductDetailItem> = {};
     const localStr = localStorage.getItem('sy_cms_product_details');
@@ -523,9 +557,7 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
 
     currentMap[key] = {
       ...currentMap[key],
-      ...processedData,
-      deleted: false,
-      updatedAt: new Date().toISOString()
+      ...updatedPayload
     };
 
     localStorage.setItem('sy_cms_product_details', JSON.stringify(currentMap));
@@ -533,13 +565,13 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
     console.error('Failed to save product detail to localStorage:', err);
   }
 
-  // 5. Dispatch global refresh events
+  // 6. Dispatch global refresh events
   window.dispatchEvent(new Event('sy_cms_product_details_update'));
   window.dispatchEvent(new Event('sy_cms_data_sync_completed'));
 }
 
 /**
- * Permanently deletes a product detail item from all layers (IndexedDB, localStorage, Firestore)
+ * Permanently deletes a product detail item from all layers (Firestore, IndexedDB, localStorage)
  * and records it in sy_cms_deleted_product_details to ensure built-in defaults NEVER return.
  */
 export async function deleteUnifiedProductDetail(productId: string): Promise<void> {
@@ -558,12 +590,17 @@ export async function deleteUnifiedProductDetail(productId: string): Promise<voi
     localStorage.setItem('sy_cms_deleted_product_details', JSON.stringify(Array.from(deletedKeys)));
   } catch (e) {}
 
-  // 2. Delete from IndexedDB
+  // 2. Delete from Firestore collection 'productDetails'
+  try {
+    await deleteDoc(doc(db, 'productDetails', key));
+  } catch (e) {}
+
+  // 3. Delete from IndexedDB
   try {
     await deleteBrandPdf(key);
   } catch (e) {}
 
-  // 3. Mark as deleted/empty in localStorage sy_cms_product_details
+  // 4. Mark as deleted/empty in localStorage sy_cms_product_details
   try {
     const localStr = localStorage.getItem('sy_cms_product_details');
     let parsed: Record<string, ProductDetailItem> = {};
@@ -585,7 +622,7 @@ export async function deleteUnifiedProductDetail(productId: string): Promise<voi
     localStorage.setItem('sy_cms_product_details', JSON.stringify(parsed));
   } catch (e) {}
 
-  // 4. Dispatch update events to all active views
+  // 5. Dispatch update events to all active views
   window.dispatchEvent(new Event('sy_cms_product_details_update'));
   window.dispatchEvent(new Event('sy_cms_data_sync_completed'));
 }
@@ -605,7 +642,26 @@ export async function loadUnifiedBrandCatalogs(): Promise<Record<string, { pdfUr
     }
   });
 
-  // 2. Read from localStorage
+  // 2. Read from Firestore 'brandCatalogs' collection (Single Source of Truth for guest & all devices)
+  try {
+    const snap = await getDocs(collection(db, 'brandCatalogs'));
+    snap.forEach(d => {
+      const bKey = d.id;
+      if (deletedKeys.has(bKey)) return;
+      const data = d.data() as { pdfUrl?: string; pdfName?: string; deleted?: boolean };
+      if (data && !data.deleted && (data.pdfUrl || data.pdfName)) {
+        merged[bKey] = {
+          ...merged[bKey],
+          pdfUrl: data.pdfUrl || merged[bKey]?.pdfUrl,
+          pdfName: data.pdfName || merged[bKey]?.pdfName
+        };
+      }
+    });
+  } catch (firestoreErr) {
+    console.warn('Could not read brandCatalogs from Firestore, falling back to local storage:', firestoreErr);
+  }
+
+  // 3. Read from localStorage
   try {
     const localStr = localStorage.getItem('sy_cms_brand_catalogs');
     if (localStr) {
@@ -620,7 +676,7 @@ export async function loadUnifiedBrandCatalogs(): Promise<Record<string, { pdfUr
     }
   } catch (e) {}
 
-  // 3. Read from IndexedDB
+  // 4. Read from IndexedDB
   try {
     const idbData = await loadAllBrandPdfs();
     Object.keys(idbData).forEach((k) => {
@@ -647,10 +703,10 @@ export async function loadUnifiedBrandCatalogs(): Promise<Record<string, { pdfUr
 }
 
 /**
- * Saves a brand catalog item and clears any deletion flag.
+ * Saves a brand catalog item to Firestore, IndexedDB, and localStorage, and clears any deletion flag.
  */
 export async function saveUnifiedBrandCatalog(brandKey: string, pdfUrl: string, pdfName: string): Promise<void> {
-  // 1. Upload base64 catalog to Firebase Storage
+  // 1. Upload base64 catalog to Firebase Storage if needed
   let finalPdfUrl = pdfUrl;
   if (finalPdfUrl && finalPdfUrl.startsWith('data:')) {
     try {
@@ -668,10 +724,26 @@ export async function saveUnifiedBrandCatalog(brandKey: string, pdfUrl: string, 
     }
   } catch (e) {}
 
+  // 2. Save to Firestore collection 'brandCatalogs' for instant multi-device / guest availability
+  try {
+    const brandDocRef = doc(db, 'brandCatalogs', brandKey);
+    await setDoc(brandDocRef, {
+      brandKey,
+      pdfUrl: finalPdfUrl,
+      pdfName,
+      deleted: false,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch (err) {
+    console.warn('Failed to save brand catalog to Firestore:', err);
+  }
+
+  // 3. Save to IndexedDB (local offline cache)
   try {
     await saveBrandPdf(brandKey, { pdfUrl: finalPdfUrl, pdfName });
   } catch (e) {}
 
+  // 4. Save to localStorage
   try {
     let currentMap: Record<string, any> = {};
     const localStr = localStorage.getItem('sy_cms_brand_catalogs');
@@ -690,7 +762,7 @@ export async function saveUnifiedBrandCatalog(brandKey: string, pdfUrl: string, 
 }
 
 /**
- * Permanently deletes a brand catalog.
+ * Permanently deletes a brand catalog from Firestore, IndexedDB, and localStorage.
  */
 export async function deleteUnifiedBrandCatalog(brandKey: string): Promise<void> {
   try {
@@ -699,10 +771,17 @@ export async function deleteUnifiedBrandCatalog(brandKey: string): Promise<void>
     localStorage.setItem('sy_cms_deleted_brand_catalogs', JSON.stringify(Array.from(deletedKeys)));
   } catch (e) {}
 
+  // 1. Delete from Firestore collection 'brandCatalogs'
+  try {
+    await deleteDoc(doc(db, 'brandCatalogs', brandKey));
+  } catch (e) {}
+
+  // 2. Delete from IndexedDB
   try {
     await deleteBrandPdf(brandKey);
   } catch (e) {}
 
+  // 3. Mark as deleted in localStorage
   try {
     let currentMap: Record<string, any> = {};
     const localStr = localStorage.getItem('sy_cms_brand_catalogs');
@@ -719,6 +798,7 @@ export async function deleteUnifiedBrandCatalog(brandKey: string): Promise<void>
   window.dispatchEvent(new Event('sy_cms_product_details_update'));
   window.dispatchEvent(new Event('sy_cms_data_sync_completed'));
 }
+
 
 function sanitizeItemUrls(item: ProductDetailItem): ProductDetailItem {
   if (!item) return item;
