@@ -5,6 +5,7 @@
  */
 
 import { loadAllBrandPdfs, saveBrandPdf, deleteBrandPdf } from './indexedDb';
+import { uploadFileToFirebaseStorage } from './firebase';
 import {
   BIZ_7KW_PLC_IMAGE,
   BIZ_11KW_STORMSHIELD_IMAGE,
@@ -213,33 +214,147 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
       '/50kw-쿨차지.png'
     ],
     pdfNames: ['200kW 초급속 수랭식 디스펜서 사양서']
+  },
+  'product-sy-fc200': {
+    pdfUrl: '/50kw-쿨차지.png',
+    pdfName: 'SY-FC200 200kW 초급속 수랭식 충전기 사양서',
+    pdfUrls: ['/50kw-쿨차지.png'],
+    pdfNames: ['SY-FC200 200kW 초급속 사양서']
+  },
+  'sy-fc200': {
+    pdfUrl: '/50kw-쿨차지.png',
+    pdfName: 'SY-FC200 200kW 초급속 충전기 사양서',
+    pdfUrls: ['/50kw-쿨차지.png']
+  },
+  'sy-ac05': {
+    pdfUrl: '/스필.png',
+    pdfUrls: ['/스필.png'],
+    pdfName: '스필 5kW 슬림 스마트 홈 충전기 상세페이지'
+  },
+  'res-5kw-spil': {
+    pdfUrl: '/스필.png',
+    pdfUrls: ['/스필.png'],
+    pdfName: '스필 5kW 슬림형 상세페이지'
+  },
+  'res-5kw-coolcharge': {
+    pdfUrl: '/쿨차지.png',
+    pdfUrls: ['/쿨차지.png'],
+    pdfName: '쿨차지 5kW 슬림형 상세페이지'
+  },
+  'res-5kw-electree': {
+    pdfUrl: '/일렉트리.png',
+    pdfUrls: ['/일렉트리.png'],
+    pdfName: '일렉트리 5kW 개인용 충전기 상세페이지'
+  },
+  'res-5kw-chargego': {
+    pdfUrl: '/차지고.png',
+    pdfUrls: ['/차지고.png'],
+    pdfName: '차지고 5kW 개인용 충전기 상세페이지'
+  },
+  'sy-ac07': {
+    pdfUrl: '/스필.png',
+    pdfUrls: ['/스필.png'],
+    pdfName: '스필 7kW 완속 스마트홈 상세페이지'
+  },
+  'res-7kw-spil': {
+    pdfUrl: '/스필.png',
+    pdfUrls: ['/스필.png'],
+    pdfName: '스필 7kW 홈충전기 상세 스펙'
+  },
+  'res-7kw-chargego': {
+    pdfUrl: '/차지고.png',
+    pdfUrls: ['/차지고.png'],
+    pdfName: '차지고 7kW 가정용 충전기 상세페이지'
+  },
+  'res-7kw-electree': {
+    pdfUrl: '/일렉트리.png',
+    pdfUrls: ['/일렉트리.png'],
+    pdfName: '일렉트리 7kW 가정용 충전기 상세페이지'
+  },
+  'res-7kw-coolcharge': {
+    pdfUrl: '/쿨차지.png',
+    pdfUrls: ['/쿨차지.png'],
+    pdfName: '쿨차지 7kW 개인용 충전기 상세페이지'
+  },
+  'sy-ac11-bi': {
+    pdfUrl: '/스필.png',
+    pdfUrls: ['/스필.png'],
+    pdfName: '스필 11kW 고속형 상세페이지'
+  },
+  'res-11kw-spil': {
+    pdfUrl: '/스필.png',
+    pdfUrls: ['/스필.png'],
+    pdfName: '스필 11kW 고속형 상세페이지'
+  },
+  'res-11kw-coolcharge': {
+    pdfUrl: '/쿨차지.png',
+    pdfUrls: ['/쿨차지.png'],
+    pdfName: '쿨차지 11kW 개인용 충전기 상세페이지'
+  },
+  'res-11kw-electree': {
+    pdfUrl: '/일렉트리.png',
+    pdfUrls: ['/일렉트리.png'],
+    pdfName: '일렉트리 11kW 3상 충전기 상세페이지'
+  },
+  'park-7kw-plc-biz': {
+    pdfUrl: BIZ_7KW_PLC_IMAGE,
+    pdfUrls: [BIZ_7KW_PLC_IMAGE],
+    pdfName: '스마트제어 PLC 7kW BIZ 공용 충전기 상세 사양서'
+  },
+  'park-11kw-stormshield': {
+    pdfUrl: BIZ_11KW_STORMSHIELD_IMAGE,
+    pdfUrls: [BIZ_11KW_STORMSHIELD_IMAGE],
+    pdfName: '11kW BIZ 공용 스톰쉴드 사양서'
+  },
+  'park-35kw-stormshield': {
+    pdfUrl: BIZ_35KW_STORMSHIELD_IMAGE,
+    pdfUrls: [BIZ_35KW_STORMSHIELD_IMAGE],
+    pdfName: '35kW BIZ 중급속 스톰쉴드 브로셔'
+  },
+  'park-50kw-1ch-coolcharge': {
+    pdfUrl: '/50kw-쿨차지.png',
+    pdfUrls: ['/50kw-쿨차지.png'],
+    pdfName: '쿨차지 50kW 급속 충전기 상세 사양서'
+  },
+  'sy-dc50': {
+    pdfUrl: '/50kw-쿨차지.png',
+    pdfUrls: ['/50kw-쿨차지.png'],
+    pdfName: 'SY-DC50 50kW 공용 급속 충전기 사양서'
   }
 };
 
 // 2. Initial brand catalogs for Apartment category
 export const DEFAULT_BRAND_CATALOGS: Record<string, { pdfUrl?: string; pdfName?: string; description?: string; deleted?: boolean }> = {
   'sk일렉링크': {
+    pdfUrl: '/스필.png',
     pdfName: 'SK일렉링크 아파트 공식 브로셔 및 무상 설치 제안서'
   },
   '플러그링크': {
+    pdfUrl: '/쿨차지.png',
     pdfName: '플러그링크 스마트 로드밸런싱 아파트 공식 카탈로그'
   },
   '이엘일렉트릭': {
+    pdfUrl: '/일렉트리.png',
     pdfName: '이엘일렉트릭 화재안심 완속 충전기 공식 브로셔'
   },
   '나이스차져': {
+    pdfUrl: '/차지고.png',
     pdfName: '나이스차져 금융 인프라 기반 전기차 충전 카탈로그'
   },
   '에버온': {
+    pdfUrl: '/스필.png',
     pdfName: '에버온 전국 1위 완속 충전 인프라 공식 카탈로그'
   },
   'NICE인프라': {
+    pdfUrl: '/차지고.png',
     pdfName: 'NICE인프라 아파트 완속/급속 솔루션 브로셔'
   },
   '아이파킹': {
+    pdfUrl: '/50kw-쿨차지.png',
     pdfName: '아이파킹 EV 무인 주차관제 연동 충전 솔루션'
   },
   'LG유플러스볼트업': {
+    pdfUrl: '/쿨차지.png',
     pdfName: 'LG유플러스 볼트업(VoltUp) 프리미엄 충전망 브로셔'
   }
 };
@@ -345,7 +460,37 @@ export async function loadUnifiedProductDetails(): Promise<Record<string, Produc
 export async function saveUnifiedProductDetail(productId: string, detailData: ProductDetailItem): Promise<void> {
   const key = productId.startsWith('product-') ? productId : `product-${productId}`;
 
-  // 1. Clear deletion flag
+  // 1. Upload any base64 Data URLs to Firebase Storage
+  let processedData = { ...detailData };
+  if (processedData.pdfUrl && processedData.pdfUrl.startsWith('data:')) {
+    try {
+      processedData.pdfUrl = await uploadFileToFirebaseStorage(processedData.pdfUrl, 'product-details', `${key}_main_doc`);
+    } catch (err) {
+      console.warn('Failed to upload pdfUrl to Firebase Storage:', err);
+    }
+  }
+
+  if (processedData.pdfUrls && processedData.pdfUrls.length > 0) {
+    try {
+      const uploadedUrls = await Promise.all(
+        processedData.pdfUrls.map(async (url, idx) => {
+          if (url && url.startsWith('data:')) {
+            const fileName = processedData.pdfNames?.[idx] || `${key}_doc_${idx}`;
+            return await uploadFileToFirebaseStorage(url, 'product-details', fileName);
+          }
+          return url;
+        })
+      );
+      processedData.pdfUrls = uploadedUrls;
+      if (!processedData.pdfUrl && uploadedUrls.length > 0) {
+        processedData.pdfUrl = uploadedUrls[0];
+      }
+    } catch (err) {
+      console.warn('Failed to upload pdfUrls to Firebase Storage:', err);
+    }
+  }
+
+  // 2. Clear deletion flag
   try {
     const deletedKeys = getDeletedDetailKeys();
     if (deletedKeys.has(key)) {
@@ -354,19 +499,19 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
     }
   } catch (e) {}
 
-  // 2. Save to IndexedDB
+  // 3. Save to IndexedDB (for quick offline cache)
   try {
     await saveBrandPdf(key, {
-      pdfUrl: detailData.pdfUrl,
-      pdfName: detailData.pdfName,
-      pdfUrls: detailData.pdfUrls,
-      pdfNames: detailData.pdfNames
+      pdfUrl: processedData.pdfUrl,
+      pdfName: processedData.pdfName,
+      pdfUrls: processedData.pdfUrls,
+      pdfNames: processedData.pdfNames
     });
   } catch (err) {
     console.error('IndexedDB save failed:', err);
   }
 
-  // 3. Save to localStorage (triggers Firestore sync via firebase.ts)
+  // 4. Save to localStorage (triggers Firestore sync via firebase.ts)
   try {
     let currentMap: Record<string, ProductDetailItem> = {};
     const localStr = localStorage.getItem('sy_cms_product_details');
@@ -378,7 +523,7 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
 
     currentMap[key] = {
       ...currentMap[key],
-      ...detailData,
+      ...processedData,
       deleted: false,
       updatedAt: new Date().toISOString()
     };
@@ -388,7 +533,7 @@ export async function saveUnifiedProductDetail(productId: string, detailData: Pr
     console.error('Failed to save product detail to localStorage:', err);
   }
 
-  // 4. Dispatch global refresh events
+  // 5. Dispatch global refresh events
   window.dispatchEvent(new Event('sy_cms_product_details_update'));
   window.dispatchEvent(new Event('sy_cms_data_sync_completed'));
 }
@@ -505,6 +650,16 @@ export async function loadUnifiedBrandCatalogs(): Promise<Record<string, { pdfUr
  * Saves a brand catalog item and clears any deletion flag.
  */
 export async function saveUnifiedBrandCatalog(brandKey: string, pdfUrl: string, pdfName: string): Promise<void> {
+  // 1. Upload base64 catalog to Firebase Storage
+  let finalPdfUrl = pdfUrl;
+  if (finalPdfUrl && finalPdfUrl.startsWith('data:')) {
+    try {
+      finalPdfUrl = await uploadFileToFirebaseStorage(finalPdfUrl, 'brand-catalogs', `${brandKey}_catalog`);
+    } catch (err) {
+      console.warn('Failed to upload brand catalog to Firebase Storage:', err);
+    }
+  }
+
   try {
     const deletedKeys = getDeletedBrandKeys();
     if (deletedKeys.has(brandKey)) {
@@ -514,7 +669,7 @@ export async function saveUnifiedBrandCatalog(brandKey: string, pdfUrl: string, 
   } catch (e) {}
 
   try {
-    await saveBrandPdf(brandKey, { pdfUrl, pdfName });
+    await saveBrandPdf(brandKey, { pdfUrl: finalPdfUrl, pdfName });
   } catch (e) {}
 
   try {
@@ -525,7 +680,7 @@ export async function saveUnifiedBrandCatalog(brandKey: string, pdfUrl: string, 
         currentMap = JSON.parse(localStr);
       } catch (e) {}
     }
-    currentMap[brandKey] = { pdfUrl, pdfName, deleted: false, updatedAt: new Date().toISOString() };
+    currentMap[brandKey] = { pdfUrl: finalPdfUrl, pdfName, deleted: false, updatedAt: new Date().toISOString() };
     localStorage.setItem('sy_cms_brand_catalogs', JSON.stringify(currentMap));
   } catch (e) {}
 
@@ -579,13 +734,13 @@ function sanitizeItemUrls(item: ProductDetailItem): ProductDetailItem {
 /**
  * Intelligent resolver for any product detail:
  * Checks exact key and custom uploaded data FIRST.
- * NEVER forcefully injects default placeholders if the item has been deleted or has no custom details!
+ * Seamlessly resolves defaults and static assets for guest/mobile/incognito visitors.
  */
 export function resolveDetailData(
-  product: { id?: string; name?: string; power?: string; type?: string },
-  detailsMap: Record<string, ProductDetailItem>
+  product: { id?: string; name?: string; power?: string; type?: string; image?: string; specs?: Record<string, string>; features?: string[] },
+  detailsMap: Record<string, ProductDetailItem> = {}
 ): ProductDetailItem {
-  if (!product || !detailsMap) return {};
+  if (!product) return {};
 
   const id = product.id || '';
   const name = product.name || '';
@@ -595,8 +750,10 @@ export function resolveDetailData(
     return {};
   }
 
+  const directKey = id.startsWith('product-') ? id : `product-${id}`;
+  const rawId = id.replace('product-', '');
+
   // 1. Direct ID match in loaded detailsMap
-  const directKey = `product-${id}`;
   if (detailsMap[directKey] && !detailsMap[directKey].deleted) {
     const item = sanitizeItemUrls(detailsMap[directKey]);
     const hasFiles = (item.pdfUrls && item.pdfUrls.length > 0) || !!item.pdfUrl;
@@ -605,24 +762,51 @@ export function resolveDetailData(
     }
   }
 
-  if (detailsMap[id] && !detailsMap[id].deleted) {
-    const item = sanitizeItemUrls(detailsMap[id]);
+  if (detailsMap[rawId] && !detailsMap[rawId].deleted) {
+    const item = sanitizeItemUrls(detailsMap[rawId]);
     const hasFiles = (item.pdfUrls && item.pdfUrls.length > 0) || !!item.pdfUrl;
     if (hasFiles || (item.specs && Object.keys(item.specs).length > 0)) {
       return item;
     }
   }
 
-  // 2. Direct Name match
+  // 2. Direct Name match in detailsMap
   if (name) {
     const nameKey = `product-${name.trim()}`;
     if (!deletedKeys.has(nameKey) && detailsMap[nameKey] && !detailsMap[nameKey].deleted) {
-      return sanitizeItemUrls(detailsMap[nameKey]);
+      const item = sanitizeItemUrls(detailsMap[nameKey]);
+      const hasFiles = (item.pdfUrls && item.pdfUrls.length > 0) || !!item.pdfUrl;
+      if (hasFiles || (item.specs && Object.keys(item.specs).length > 0)) {
+        return item;
+      }
     }
   }
 
-  // If no explicit detail page was found or if it has been deleted, return empty object!
-  // Do NOT forcefully return unrequested default placeholder images.
+  // 3. Fallback to DEFAULT_PRODUCT_DETAILS
+  if (DEFAULT_PRODUCT_DETAILS[directKey] && !DEFAULT_PRODUCT_DETAILS[directKey].deleted) {
+    return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[directKey]);
+  }
+  if (DEFAULT_PRODUCT_DETAILS[rawId] && !DEFAULT_PRODUCT_DETAILS[rawId].deleted) {
+    return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[rawId]);
+  }
+  if (name) {
+    const nameKey = `product-${name.trim()}`;
+    if (DEFAULT_PRODUCT_DETAILS[nameKey] && !DEFAULT_PRODUCT_DETAILS[nameKey].deleted) {
+      return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[nameKey]);
+    }
+  }
+
+  // 4. Guaranteed static asset fallback using product.image & product.specs
+  if (product.image && !product.image.includes('unsplash.com')) {
+    return {
+      pdfUrl: product.image,
+      pdfUrls: [product.image],
+      pdfNames: [`${name || '전기차 충전기'} 공식 상세 이미지`],
+      specs: product.specs || {},
+      features: product.features || []
+    };
+  }
+
   return {};
 }
 

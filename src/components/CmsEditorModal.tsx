@@ -54,6 +54,7 @@ import {
   getBackupHistory, 
   verifyDataIntegrity, 
   formatBackupDate,
+  uploadFileToFirebaseStorage,
   BackupMetadata 
 } from '../lib/firebase';
 

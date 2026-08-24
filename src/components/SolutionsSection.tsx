@@ -12,6 +12,7 @@ import PdfImageRenderer from './PdfImageRenderer';
 import { saveBrandPdf, deleteBrandPdf, loadAllBrandPdfs } from '../lib/indexedDb';
 import { compressImage } from '../lib/imageCompressor';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
+import { uploadFileToFirebaseStorage } from '../lib/firebase';
 import { OptionPreset, INITIAL_OPTION_PRESETS } from './AdminPage';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { 
@@ -1274,7 +1275,7 @@ export default function SolutionsSection({
 
   const [isDraggingProductPdf, setIsDraggingProductPdf] = useState<Record<string, boolean>>({});
 
-  const handleProductPdfUpload = (productId: string, fileInput: FileList | File[] | File) => {
+  const handleProductPdfUpload = async (productId: string, fileInput: FileList | File[] | File) => {
     const fileArray = fileInput instanceof FileList ? Array.from(fileInput) : Array.isArray(fileInput) ? fileInput : [fileInput];
     if (fileArray.length === 0) return;
 
@@ -1284,16 +1285,7 @@ export default function SolutionsSection({
       return;
     }
 
-    const promises = validFiles.map(file => {
-      return new Promise<{ url: string; name: string }>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve({ url: reader.result as string, name: file.name });
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    });
-
-    Promise.all(promises).then(async (newAssets) => {
+    try {
       const key = `product-${productId}`;
       const existing = productDetails[key] || {};
       const existingUrls = existing.pdfUrls && existing.pdfUrls.length > 0
@@ -1302,6 +1294,22 @@ export default function SolutionsSection({
       const existingNames = existing.pdfNames && existing.pdfNames.length > 0
         ? existing.pdfNames
         : (existing.pdfName ? [existing.pdfName] : []);
+
+      const newAssets: { url: string; name: string }[] = [];
+      for (const file of validFiles) {
+        const downloadUrl = await uploadFileToFirebaseStorage(file, 'product-details', `${productId}_${file.name}`);
+        if (downloadUrl) {
+          newAssets.push({ url: downloadUrl, name: file.name });
+        } else {
+          // Fallback to FileReader if offline
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+          newAssets.push({ url: dataUrl, name: file.name });
+        }
+      }
 
       const updatedUrls = [...existingUrls, ...newAssets.map(a => a.url)];
       const updatedNames = [...existingNames, ...newAssets.map(a => a.name)];
@@ -1318,10 +1326,10 @@ export default function SolutionsSection({
         ...prev,
         [key]: updatedObj
       }));
-    }).catch(err => {
-      console.error('Error reading files:', err);
-      alert('파일을 읽는 도중 오류가 발생했습니다.');
-    });
+    } catch (err) {
+      console.error('Error uploading product files to Firebase Storage:', err);
+      alert('파일 업로드 도중 오류가 발생했습니다.');
+    }
   };
 
   const handleDeleteProductSingleFile = async (productId: string, index: number) => {
@@ -1723,7 +1731,7 @@ export default function SolutionsSection({
 
   const [isDraggingPdf, setIsDraggingPdf] = useState<Record<string, boolean>>({});
 
-  const handlePdfUpload = (brandKey: string, file: File) => {
+  const handlePdfUpload = async (brandKey: string, file: File) => {
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
     const isImage = file.type.startsWith('image/');
 
@@ -1732,26 +1740,32 @@ export default function SolutionsSection({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const dataUrl = reader.result as string;
-      try {
-        await saveUnifiedBrandCatalog(brandKey, dataUrl, file.name);
-
-        setBrands(prev => ({
-          ...prev,
-          [brandKey]: {
-            ...prev[brandKey],
-            pdfUrl: dataUrl,
-            pdfName: file.name
-          }
-        }));
-      } catch (dbError) {
-        console.error('Failed to save to IndexedDB:', dbError);
-        alert('브라우저 데이터베이스(IndexedDB) 저장에 실패했습니다. 프라이빗 브라우징 모드를 해제해 주십시오.');
+    try {
+      const downloadUrl = await uploadFileToFirebaseStorage(file, 'brand-catalogs', `${brandKey}_${file.name}`);
+      let finalUrl = downloadUrl;
+      if (!finalUrl) {
+        // Fallback to FileReader if offline
+        finalUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
       }
-    };
-    reader.readAsDataURL(file);
+
+      await saveUnifiedBrandCatalog(brandKey, finalUrl, file.name);
+
+      setBrands(prev => ({
+        ...prev,
+        [brandKey]: {
+          ...prev[brandKey],
+          pdfUrl: finalUrl,
+          pdfName: file.name
+        }
+      }));
+    } catch (dbError) {
+      console.error('Failed to upload/save brand catalog:', dbError);
+      alert('카탈로그 파일 저장 중 오류가 발생했습니다.');
+    }
   };
 
   const handleDeletePdf = async (brandKey: string) => {
@@ -2102,16 +2116,23 @@ export default function SolutionsSection({
                       onDragLeave={() => {
                         setIsDraggingProductImage(false);
                       }}
-                      onDrop={(e) => {
+                      onDrop={async (e) => {
                         e.preventDefault();
                         setIsDraggingProductImage(false);
                         const file = e.dataTransfer.files?.[0];
                         if (file && file.type.startsWith('image/')) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setEditImage(reader.result as string);
-                          };
-                          reader.readAsDataURL(file);
+                          try {
+                            const downloadUrl = await uploadFileToFirebaseStorage(file, 'products', file.name);
+                            if (downloadUrl) {
+                              setEditImage(downloadUrl);
+                            } else {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setEditImage(reader.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          } catch (err) {
+                            console.error(err);
+                          }
                         } else {
                           alert('이미지 파일(PNG, JPG, JPEG, GIF 등)만 업로드할 수 있습니다.');
                         }
@@ -2138,14 +2159,21 @@ export default function SolutionsSection({
                     id="product-image-file-input"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setEditImage(reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
+                        try {
+                          const downloadUrl = await uploadFileToFirebaseStorage(file, 'products', file.name);
+                          if (downloadUrl) {
+                            setEditImage(downloadUrl);
+                          } else {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setEditImage(reader.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        } catch (err) {
+                          console.error(err);
+                        }
                       }
                     }}
                   />
@@ -2559,17 +2587,24 @@ export default function SolutionsSection({
                 if (!isEditMode) return;
                 setIsLeftImageDragging(false);
               }}
-              onDrop={(e) => {
+              onDrop={async (e) => {
                 if (!isEditMode) return;
                 e.preventDefault();
                 setIsLeftImageDragging(false);
                 const file = e.dataTransfer.files?.[0];
                 if (file && file.type.startsWith('image/')) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    handleApplyLeftImageChange(reader.result as string);
-                  };
-                  reader.readAsDataURL(file);
+                  try {
+                    const downloadUrl = await uploadFileToFirebaseStorage(file, 'products', file.name);
+                    if (downloadUrl) {
+                      handleApplyLeftImageChange(downloadUrl);
+                    } else {
+                      const reader = new FileReader();
+                      reader.onloadend = () => handleApplyLeftImageChange(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
                 } else {
                   alert('이미지 파일(PNG, JPG, WebP 등)만 올릴 수 있습니다.');
                 }
@@ -2629,14 +2664,21 @@ export default function SolutionsSection({
               id="left-image-direct-file-input"
               accept="image/*"
               className="hidden"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    handleApplyLeftImageChange(reader.result as string);
-                  };
-                  reader.readAsDataURL(file);
+                  try {
+                    const downloadUrl = await uploadFileToFirebaseStorage(file, 'products', file.name);
+                    if (downloadUrl) {
+                      handleApplyLeftImageChange(downloadUrl);
+                    } else {
+                      const reader = new FileReader();
+                      reader.onloadend = () => handleApplyLeftImageChange(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
                 }
               }}
             />
@@ -2645,14 +2687,21 @@ export default function SolutionsSection({
               id="left-image-add-gallery-file-input"
               accept="image/*"
               className="hidden"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    handleAddGalleryImage(reader.result as string);
-                  };
-                  reader.readAsDataURL(file);
+                  try {
+                    const downloadUrl = await uploadFileToFirebaseStorage(file, 'products', file.name);
+                    if (downloadUrl) {
+                      handleAddGalleryImage(downloadUrl);
+                    } else {
+                      const reader = new FileReader();
+                      reader.onloadend = () => handleAddGalleryImage(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
                 }
               }}
             />

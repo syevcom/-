@@ -13,15 +13,87 @@ import {
   onSnapshot,
   Unsubscribe
 } from 'firebase/firestore';
+import { 
+  getStorage, 
+  ref, 
+  uploadBytes, 
+  getDownloadURL, 
+  uploadString 
+} from 'firebase/storage';
 import { useState, useEffect } from 'react';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
+export const storage = getStorage(app, firebaseConfig.storageBucket || 'gen-lang-client-0350333221.firebasestorage.app');
 
 export const CMS_COLLECTION = 'sy_cms_data';
 export const BACKUP_COLLECTION = 'sy_cms_backups';
 export const LATEST_BACKUP_DOC_ID = 'latest_snapshot';
+
+/**
+ * Uploads a File, Blob, or base64 Data URL to Firebase Storage.
+ * Returns the permanent public HTTPS download URL (https://firebasestorage.googleapis.com/...).
+ */
+export async function uploadFileToFirebaseStorage(
+  fileOrBlobOrDataUrl: File | Blob | string,
+  folder: string = 'uploads',
+  customFileName?: string
+): Promise<string> {
+  try {
+    if (!fileOrBlobOrDataUrl) return '';
+
+    // If it's already an http/https URL or local asset path, no need to upload
+    if (typeof fileOrBlobOrDataUrl === 'string' && (
+      fileOrBlobOrDataUrl.startsWith('http://') || 
+      fileOrBlobOrDataUrl.startsWith('https://') || 
+      fileOrBlobOrDataUrl.startsWith('/')
+    ) && !fileOrBlobOrDataUrl.startsWith('data:')) {
+      return fileOrBlobOrDataUrl;
+    }
+
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+
+    if (typeof fileOrBlobOrDataUrl === 'string' && fileOrBlobOrDataUrl.startsWith('data:')) {
+      // Base64 Data URL
+      const mimeMatch = fileOrBlobOrDataUrl.match(/^data:([^;]+);base64,/);
+      const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+      const extension = mimeType.includes('pdf') ? 'pdf' : mimeType.includes('jpeg') || mimeType.includes('jpg') ? 'jpg' : mimeType.includes('webp') ? 'webp' : 'png';
+      const fileName = customFileName || `${timestamp}_${randomSuffix}.${extension}`;
+      const storageRef = ref(storage, `${folder}/${fileName}`);
+      
+      const snapshot = await uploadString(storageRef, fileOrBlobOrDataUrl, 'data_url', {
+        contentType: mimeType
+      });
+      const downloadUrl = await getDownloadURL(snapshot.ref);
+      return downloadUrl;
+    }
+
+    if (fileOrBlobOrDataUrl instanceof File || fileOrBlobOrDataUrl instanceof Blob) {
+      const file = fileOrBlobOrDataUrl as File;
+      const extension = file.name ? file.name.split('.').pop() || 'bin' : (file.type.includes('pdf') ? 'pdf' : 'png');
+      const safeName = file.name ? file.name.replace(/[^a-zA-Z0-9._-]/g, '_') : `file.${extension}`;
+      const fileName = customFileName || `${timestamp}_${randomSuffix}_${safeName}`;
+      const storageRef = ref(storage, `${folder}/${fileName}`);
+
+      const snapshot = await uploadBytes(storageRef, fileOrBlobOrDataUrl, {
+        contentType: file.type || (fileName.endsWith('.pdf') ? 'application/pdf' : 'image/png')
+      });
+      const downloadUrl = await getDownloadURL(snapshot.ref);
+      return downloadUrl;
+    }
+
+    return String(fileOrBlobOrDataUrl);
+  } catch (error) {
+    console.error('[Firebase Storage] Upload failed:', error);
+    // If upload fails (e.g. network issue or offline), return original string or dataUrl as fallback
+    if (typeof fileOrBlobOrDataUrl === 'string') {
+      return fileOrBlobOrDataUrl;
+    }
+    return '';
+  }
+}
 
 // Excluded user session, auth credentials and private state keys (MUST NOT be synced to Firestore or shared)
 export const NON_SYNCABLE_KEYS = new Set([

@@ -5,6 +5,7 @@ import { HomePopupConfig, DEFAULT_HOME_POPUP_CONFIG } from './HomePopupModal';
 import { AdminVisitorAnalytics } from './AdminVisitorAnalytics';
 import { getVisitorAnalytics, fetchRealVisitorAnalyticsFromFirestore } from '../lib/visitorAnalytics';
 import { compressImage } from '../lib/imageCompressor';
+import { uploadFileToFirebaseStorage } from '../lib/firebase';
 import { 
   Package, 
   Building2, 
@@ -1097,55 +1098,43 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     return { isValid: false, message: '⚠️ 유효하지 않은 URL 형식', type: 'invalid' };
   };
 
-  // Handle Product Image File Upload (Directly convert local photo file to Data URL with canvas compression)
-  const handleProductImageUpload = (index: number, file: File) => {
+  // Handle Product Image File Upload (Uploads to Firebase Storage and returns permanent public URL)
+  const handleProductImageUpload = async (index: number, file: File) => {
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) {
-      alert('이미지 파일 크기가 너무 큽니다. 15MB 이하의 JPG/PNG 이미지를 선택해 주세요.');
+    if (file.size > 25 * 1024 * 1024) {
+      alert('이미지 파일 크기가 너무 큽니다. 25MB 이하의 JPG/PNG 이미지를 선택해 주세요.');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      if (dataUrl) {
-        // Compress image using HTML5 Canvas to keep local storage lightweight
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const maxDim = 800; // Limit max resolution to 800px
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          let finalImg = dataUrl;
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            finalImg = canvas.toDataURL('image/jpeg', 0.82);
-          }
-          
+
+    try {
+      const prodName = productList[index]?.name || `prod_${index}`;
+      const downloadUrl = await uploadFileToFirebaseStorage(file, 'products', `${prodName}_${file.name}`);
+      if (downloadUrl) {
+        const updated = [...productList];
+        if (updated[index]) {
+          updated[index] = { ...updated[index], image: downloadUrl };
+          setProductList(updated);
+          onSaveProducts(updated);
+          setSaveSuccessMsg(`'${updated[index].name}' 대표 사진이 Firebase Storage에 저장되어 실시간 동기화되었습니다!`);
+          setTimeout(() => setSaveSuccessMsg(''), 3500);
+        }
+      }
+    } catch (err) {
+      console.warn('Firebase Storage upload fallback:', err);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        if (dataUrl) {
           const updated = [...productList];
           if (updated[index]) {
-            updated[index] = { ...updated[index], image: finalImg };
+            updated[index] = { ...updated[index], image: dataUrl };
             setProductList(updated);
             onSaveProducts(updated);
-            setSaveSuccessMsg(`'${updated[index].name}' 대표 사진이 압축되어 로컬스토리지에 저장 및 실시간 동기화되었습니다!`);
-            setTimeout(() => setSaveSuccessMsg(''), 3500);
           }
-        };
-        img.src = dataUrl;
-      }
-    };
-    reader.readAsDataURL(file);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Add New Product
@@ -3426,8 +3415,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               const file = e.target.files?.[0];
                               if (file) {
                                 try {
-                                  const compressed = await compressImage(file, 800, 800, 0.8);
-                                  setPopupState({ ...popupState, imageUrl: compressed });
+                                  const downloadUrl = await uploadFileToFirebaseStorage(file, 'popups', `popup_${file.name}`);
+                                  if (downloadUrl) {
+                                    setPopupState({ ...popupState, imageUrl: downloadUrl });
+                                  } else {
+                                    const compressed = await compressImage(file, 800, 800, 0.8);
+                                    setPopupState({ ...popupState, imageUrl: compressed });
+                                  }
                                 } catch (err) {
                                   console.error(err);
                                 }
