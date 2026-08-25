@@ -9,6 +9,7 @@ import { Check, ArrowRight, Zap, RefreshCw, Building2, Home, ParkingCircle, Laye
 import { motion, AnimatePresence } from 'motion/react';
 import { PRODUCTS, SPEEL_5KW_REPRESENTATIVE_IMAGE, SPEEL_11KW_REPRESENTATIVE_IMAGE, DEFAULT_RESIDENTIAL_OPTION_GROUPS, ELECTREE_OPTION_GROUPS, LOTTE_EVSIS_OPTION_GROUPS, CHARGEGO_OPTION_GROUPS, COOLCHARGE_OPTION_GROUPS, PUBLIC_CHARGER_OPTION_GROUPS, DEVICE_ONLY_OPTION_GROUPS, REPLACEMENT_OPTION_GROUPS, INSTALLATION_OPTION_GROUPS } from '../data';
 import PdfImageRenderer from './PdfImageRenderer';
+import DetailPageImage from './DetailPageImage';
 import { saveBrandPdf, deleteBrandPdf, loadAllBrandPdfs } from '../lib/indexedDb';
 import { compressImage } from '../lib/imageCompressor';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
@@ -21,6 +22,8 @@ import {
   loadUnifiedBrandCatalogs, 
   saveUnifiedBrandCatalog, 
   deleteUnifiedBrandCatalog,
+  resolveBrandCatalog,
+  resolvePostImgUrl,
   loadUnifiedProductDetails, 
   saveUnifiedProductDetail, 
   deleteUnifiedProductDetail, 
@@ -82,15 +85,6 @@ export const BRAND_METADATA: Record<string, {
     logoBg: 'bg-amber-50 text-amber-700 border-amber-100',
     icon: '🌟',
     benefits: ['24시간 원격 복구 솔루션 무상 제공', '최첨단 슬림형 LED 디스플레이', '입주민 대상 100% 무상 설치 지원']
-  },
-  'NICE인프라': {
-    name: 'NICE인프라 (NICE Infra)',
-    slogan: 'NICE 그룹의 최첨단 인프라 기반 전기차 충전 솔루션',
-    description: 'NICE인프라는 금융 및 IT 인프라 전문 NICE 그룹의 인프라 구축 노하우를 바탕으로 안정적이고 효율적인 아파트 완속/급속 전기차 충전 인프라 및 운영 서비스를 제공합니다.',
-    highlights: ['NICE 그룹 신뢰 인프라', '안정적인 24시간 관제', '아파트 맞춤 무상 설치 지원'],
-    logoBg: 'bg-blue-50 text-blue-700 border-blue-100',
-    icon: '🚙',
-    benefits: ['NICE 간편 결제 및 보안 연동', '100% 무상 설치 지원 (보조금 매칭)', '전국 원격 지원 및 AS 서비스']
   },
   '아이파킹': {
     name: '아이파킹 EV (iParking EV)',
@@ -1199,10 +1193,11 @@ export default function SolutionsSection({
 
     Object.keys(BRAND_METADATA).forEach(k => {
       const isDeleted = deletedBrandKeys.includes(k);
+      const def = DEFAULT_BRAND_CATALOGS[k];
       base[k] = {
         ...BRAND_METADATA[k],
-        pdfUrl: isDeleted ? undefined : DEFAULT_BRAND_CATALOGS[k]?.pdfUrl,
-        pdfName: isDeleted ? undefined : DEFAULT_BRAND_CATALOGS[k]?.pdfName
+        pdfUrl: isDeleted ? undefined : resolvePostImgUrl(def?.pdfUrl),
+        pdfName: isDeleted ? undefined : def?.pdfName
       };
     });
 
@@ -1212,11 +1207,18 @@ export default function SolutionsSection({
         const parsed = JSON.parse(saved);
         const cleaned: Record<string, any> = {};
         Object.keys(parsed).forEach(k => {
-          if (k === 'nice인프라' || k.includes('현대엔지니어링')) return;
-          cleaned[k] = { ...parsed[k] };
+          if (k === 'nice인프라' || k === 'NICE인프라' || k.includes('현대엔지니어링')) return;
+          const rawUrl = resolvePostImgUrl(parsed[k]?.pdfUrl);
+          const isOldPlaceholder = rawUrl === '/스필.png' || rawUrl === '/쿨차지.png' || rawUrl === '/일렉트리.png' || rawUrl === '/차지고.png' || rawUrl === '/50kw-쿨차지.png';
+          cleaned[k] = {
+            ...parsed[k],
+            pdfUrl: (!isOldPlaceholder && rawUrl) ? rawUrl : base[k]?.pdfUrl,
+            pdfName: parsed[k]?.pdfName || base[k]?.pdfName
+          };
         });
         const merged = { ...base, ...cleaned };
         delete merged['nice인프라'];
+        delete merged['NICE인프라'];
         delete merged['현대엔지니어링'];
         delete merged['현대엔지니어링(E-pit)'];
         return merged;
@@ -2706,8 +2708,8 @@ export default function SolutionsSection({
                 isLeftImageDragging ? 'border-emerald-500 bg-emerald-500/10 scale-[1.01]' : 'border-slate-200/80 hover:border-emerald-300'
               }`}
             >
-              <img
-                src={getOptimizedImageUrl(selectedDisplayImage || activeDetailProduct.image, { width: 800, format: 'webp' })}
+              <DetailPageImage
+                src={selectedDisplayImage || activeDetailProduct.image}
                 alt={activeDetailProduct.name}
                 referrerPolicy="no-referrer"
                 loading="lazy"
@@ -2879,7 +2881,7 @@ export default function SolutionsSection({
                     ].map((preset, idx) => (
                       <div key={idx} className="bg-slate-800 border border-slate-700 rounded-xl p-1.5 flex flex-col items-center gap-1 group">
                         <div className="w-full aspect-square rounded-lg overflow-hidden bg-slate-950 flex items-center justify-center p-1">
-                          <img 
+                          <DetailPageImage 
                             src={getOptimizedImageUrl(preset.url, { width: 200, format: 'webp' })} 
                             alt={preset.name} 
                             referrerPolicy="no-referrer"
@@ -2960,7 +2962,7 @@ export default function SolutionsSection({
                           }`}
                           title="클릭하여 크게 보기"
                         >
-                          <img 
+                          <DetailPageImage 
                             src={getOptimizedImageUrl(thumbUrl, { width: 140, format: 'webp' })} 
                             alt={`gallery thumbnail ${tIdx + 1}`} 
                             referrerPolicy="no-referrer"
@@ -3451,7 +3453,7 @@ export default function SolutionsSection({
 
         {/* BOTTOM: Long Catalog Brochure Details */}
         <div className="border-t border-slate-200/80 pt-4 sm:pt-6">
-          <div className="bg-white rounded-xl sm:rounded-3xl border-0 sm:border border-slate-200/80 p-0 sm:p-6 space-y-4 shadow-none sm:shadow-sm overflow-hidden">
+          <div className="bg-white rounded-xl sm:rounded-3xl border-0 sm:border border-slate-200/80 p-0 sm:p-6 space-y-4 shadow-none sm:shadow-sm">
             {(() => {
               const detailUrls: string[] = detailData?.pdfUrls && detailData.pdfUrls.length > 0
                 ? detailData.pdfUrls
@@ -3463,9 +3465,9 @@ export default function SolutionsSection({
               if (detailUrls.length > 0) {
                 if (!isEditMode) {
                   return (
-                    <div className="space-y-2 w-full">
+                    <div className="space-y-4 w-full max-w-[860px] mx-auto">
                       {detailUrls.map((url, idx) => (
-                        <div key={idx} className="w-full">
+                        <div key={idx} className="w-full max-w-[860px] mx-auto">
                           <PdfImageRenderer 
                             fileUrl={url} 
                             fileName={detailNames[idx] || `${activeDetailProduct.name} 상세페이지 이미지 ${idx + 1}`} 

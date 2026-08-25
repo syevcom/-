@@ -10,6 +10,7 @@ import { DEFAULT_RESIDENTIAL_OPTION_GROUPS, PUBLIC_CHARGER_OPTION_GROUPS, DEVICE
 import { resolveDetailData, loadUnifiedProductDetails, DEFAULT_PRODUCT_DETAILS, ProductDetailItem } from '../lib/detailPagesData';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
 import PdfImageRenderer from './PdfImageRenderer';
+import DetailPageImage from './DetailPageImage';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -496,8 +497,8 @@ export default function ProductDetailModal({
             {/* Left: Product Image & Badges */}
             <div className="md:col-span-5 space-y-4">
               <div className="relative aspect-square bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden flex items-center justify-center p-4">
-                <img
-                  src={getOptimizedImageUrl(selectedDisplayImage || product.image, { width: 800, format: 'webp' })}
+                <DetailPageImage
+                  src={selectedDisplayImage || product.image}
                   alt={product.name}
                   referrerPolicy="no-referrer"
                   loading="lazy"
@@ -556,7 +557,7 @@ export default function ProductDetailModal({
                             }`}
                             title="클릭하여 이미지 크게 보기"
                           >
-                            <img 
+                            <DetailPageImage 
                               src={getOptimizedImageUrl(imgUrl, { width: 120, format: 'webp' })} 
                               alt={`gallery thumbnail ${idx + 1}`} 
                               referrerPolicy="no-referrer"
@@ -1042,9 +1043,9 @@ export default function ProductDetailModal({
               }
 
               return (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full max-w-[860px] mx-auto">
                   {detailUrls.map((url, idx) => (
-                    <div key={idx} className="w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+                    <div key={idx} className="w-full max-w-[860px] mx-auto rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 shadow-none sm:shadow-sm bg-white">
                       <PdfImageRenderer
                         fileUrl={url}
                         fileName={detailNames[idx] || `${product.name} 상세페이지 이미지 ${idx + 1}`}

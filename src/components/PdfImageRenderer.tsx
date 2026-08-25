@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, FileText, LayoutGrid, List, Sparkles, RefreshCw, Lock, Unlock, Check } from 'lucide-react';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
+import { resolvePostImgUrl } from '../lib/detailPagesData';
+import DetailPageImage from './DetailPageImage';
 
 interface PdfImageRendererProps {
   fileUrl: string;
@@ -10,20 +12,21 @@ interface PdfImageRendererProps {
 }
 
 export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', brandName = '브랜드', isAdmin = false }: PdfImageRendererProps) {
-  const isDataPdf = fileUrl.startsWith('data:application/pdf');
-  const isDataImage = fileUrl.startsWith('data:image/');
-  const isPdfExt = fileName.toLowerCase().endsWith('.pdf') || fileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
-  const isImageExt = /\.(png|jpe?g|webp|gif|svg)$/i.test(fileName) || /\.(png|jpe?g|webp|gif|svg)$/i.test(fileUrl.split('?')[0]);
+  const resolvedUrl = resolvePostImgUrl(fileUrl);
+  const isDataPdf = resolvedUrl.startsWith('data:application/pdf');
+  const isDataImage = resolvedUrl.startsWith('data:image/');
+  const isPdfExt = fileName.toLowerCase().endsWith('.pdf') || resolvedUrl.toLowerCase().split('?')[0].endsWith('.pdf');
+  const isImageExt = /\.(png|jpe?g|webp|gif|svg)$/i.test(fileName) || /\.(png|jpe?g|webp|gif|svg)$/i.test(resolvedUrl.split('?')[0]) || resolvedUrl.includes('i.postimg.cc');
 
   // If it's explicitly an image data URI or image extension, render with native ImageCatalogViewer
   const isPdf = isDataPdf || (isPdfExt && !isDataImage && !isImageExt);
   
   if (!isPdf) {
     // If it's a standard image file, render it natively with premium frame and zoom
-    return <ImageCatalogViewer imageUrl={fileUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
+    return <ImageCatalogViewer imageUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
   }
 
-  return <PdfCatalogViewer pdfUrl={fileUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
+  return <PdfCatalogViewer pdfUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
 }
 
 const PRESET_ZOOM_LEVELS = [50, 75, 100, 125, 150, 180, 200, 250, 300];
@@ -93,14 +96,14 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
       <>
         <div className="w-full flex justify-center py-0 sm:py-1">
           <div 
-            className="w-full rounded-none sm:rounded-2xl bg-white overflow-hidden relative group cursor-zoom-in"
-            style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '100%' } : { width: '100%' }}
+            className="w-full max-w-[860px] mx-auto rounded-none sm:rounded-2xl bg-white relative group cursor-zoom-in"
+            style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '860px' } : { width: '100%', maxWidth: '860px' }}
             onClick={() => setIsFullscreen(true)}
           >
-            <img
-              src={getOptimizedImageUrl(imageUrl, { width: 1400, format: 'webp' })}
+            <DetailPageImage
+              src={imageUrl}
               alt={`${brandName} 카탈로그`}
-              className="w-full h-auto object-contain block select-none"
+              className="w-full max-w-[860px] h-auto mx-auto block select-none"
               referrerPolicy="no-referrer"
               loading="lazy"
               decoding="async"
@@ -120,7 +123,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
             className="fixed inset-0 z-[9999] bg-black/95 flex flex-col backdrop-blur-sm animate-fade-in"
             onClick={() => setIsFullscreen(false)}
           >
-            <div className="p-3 sm:p-4 bg-slate-950/90 border-b border-slate-800/60 flex justify-between items-center px-4 sm:px-6">
+            <div className="p-3 sm:p-4 bg-slate-950/90 border-b border-slate-800/60 flex justify-between items-center px-4 sm:px-6 shrink-0">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs sm:text-sm font-black text-white truncate max-w-[200px] sm:max-w-md">
@@ -135,15 +138,17 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
                 <span>✕ 닫기</span>
               </button>
             </div>
-            <div className="flex-1 overflow-auto flex items-center justify-center p-2 sm:p-6 cursor-zoom-out">
-              <img
-                src={getOptimizedImageUrl(imageUrl, { width: 1800, format: 'webp' })}
-                alt={`${brandName} Full Catalog`}
-                className="max-w-full h-auto max-h-full object-contain rounded-lg shadow-2xl"
-                referrerPolicy="no-referrer"
-                loading="lazy"
-                decoding="async"
-              />
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-6 cursor-zoom-out flex justify-center items-start">
+              <div className="w-full max-w-[860px] mx-auto h-auto">
+                <DetailPageImage
+                  src={imageUrl}
+                  alt={`${brandName} Full Catalog`}
+                  className="w-full max-w-[860px] h-auto mx-auto block rounded-lg shadow-2xl"
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -152,7 +157,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
   }
 
   return (
-    <div className="relative border border-slate-800 bg-slate-950/60 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+    <div className="relative border border-slate-800 bg-slate-950/60 rounded-xl sm:rounded-2xl overflow-visible shadow-2xl flex flex-col">
       {/* Toast Notification */}
       {toastMsg && (
         <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 bg-emerald-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black shadow-xl border border-emerald-300 flex items-center gap-1.5 animate-fadeIn">
@@ -243,15 +248,15 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
       </div>
 
       {/* Main Image Stage - Unlimited height for natural vertical scrolling */}
-      <div className="bg-slate-900/40 p-2 sm:p-4 overflow-visible flex items-center justify-center min-h-[300px] sm:min-h-[400px] h-auto relative">
+      <div className="bg-slate-900/40 p-2 sm:p-4 overflow-visible flex items-start justify-center h-auto relative">
         <div 
-          className="transition-all duration-200 ease-out shadow-2xl rounded-lg bg-white overflow-hidden"
-          style={!isMobile ? { width: `${zoom}%`, maxWidth: '100%', minWidth: '30%' } : { width: '100%' }}
+          className="w-full max-w-[860px] mx-auto transition-all duration-200 ease-out shadow-2xl rounded-lg bg-white"
+          style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '860px' } : { width: '100%', maxWidth: '860px' }}
         >
-          <img
-            src={getOptimizedImageUrl(imageUrl, { width: 1400, format: 'webp' })}
+          <DetailPageImage
+            src={imageUrl}
             alt={`${brandName} 카탈로그 이미지`}
-            className="w-full h-auto object-contain block pointer-events-none"
+            className="w-full max-w-[860px] h-auto mx-auto block pointer-events-none"
             referrerPolicy="no-referrer"
             loading="lazy"
             decoding="async"
@@ -271,7 +276,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
       {/* Fullscreen Lightbox Modal */}
       {isFullscreen && (
         <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col">
-          <div className="p-4 bg-slate-950/90 border-b border-slate-800/60 flex justify-between items-center px-6">
+          <div className="p-4 bg-slate-950/90 border-b border-slate-800/60 flex justify-between items-center px-6 shrink-0">
             <span className="text-xs font-black text-white">{brandName} 카탈로그 전체화면</span>
             <button
               type="button"
@@ -281,15 +286,17 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
               닫기 (ESC)
             </button>
           </div>
-          <div className="flex-1 overflow-auto flex items-center justify-center p-6">
-            <img
-              src={getOptimizedImageUrl(imageUrl, { width: 1600, format: 'webp' })}
-              alt="Full Catalog"
-              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
-              referrerPolicy="no-referrer"
-              loading="lazy"
-              decoding="async"
-            />
+          <div className="flex-1 overflow-y-auto overflow-x-hidden flex justify-center items-start p-4 sm:p-6">
+            <div className="w-full max-w-[860px] mx-auto h-auto">
+              <DetailPageImage
+                src={imageUrl}
+                alt="Full Catalog"
+                className="w-full max-w-[860px] h-auto mx-auto block rounded-xl shadow-2xl"
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
         </div>
       )}
