@@ -456,7 +456,18 @@ export default function SolutionsSection({
   const [localDetailModes, setLocalDetailModes] = useState<Record<string, 'scroll' | 'unfold'>>({});
   const [sortBy, setSortBy] = useState<'new' | 'priceAsc' | 'priceDesc' | 'popular'>('new');
   const [activeDetailProduct, setActiveDetailProduct] = useState<SolutionProduct | null>(null);
-  const [productDetails, setProductDetails] = useState<Record<string, ProductDetailItem>>({});
+  const [productDetails, setProductDetails] = useState<Record<string, ProductDetailItem>>(() => {
+    // Immediate fallback initialization so incognito/guest modes render instantly without waiting for Firestore
+    const base: Record<string, ProductDetailItem> = { ...DEFAULT_PRODUCT_DETAILS };
+    try {
+      const localStr = typeof window !== 'undefined' ? localStorage.getItem('sy_cms_product_details') : null;
+      if (localStr) {
+        const parsed = JSON.parse(localStr);
+        return { ...base, ...parsed };
+      }
+    } catch (e) {}
+    return base;
+  });
   
   const [selectedConnector, setSelectedConnector] = useState<string>('');
   const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<string, string>>({});

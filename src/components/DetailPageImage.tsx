@@ -45,6 +45,7 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
   };
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // If the image fails or is blocked by strict cross-origin/incognito restrictions, attempt fallback or recover
     setHasError(true);
     if (onError) {
       onError(e);
@@ -58,7 +59,12 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
     }
   };
 
-  const imageSource = (hasError && fallbackSrc) ? fallbackSrc : src;
+  // Ensure src is valid string, if empty or errored with fallback, use fallback
+  const imageSource = (hasError && fallbackSrc) ? fallbackSrc : (src || fallbackSrc || '');
+
+  if (!imageSource) {
+    return null;
+  }
 
   return (
     <img
@@ -67,6 +73,7 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
       loading={loading}
       decoding={decoding}
       referrerPolicy={referrerPolicy}
+      crossOrigin="anonymous"
       className={`w-full max-w-[860px] h-auto mx-auto block high-res-detail-img select-none ${className}`}
       style={defaultHighQualityStyle}
       onError={handleError}

@@ -41,7 +41,17 @@ export default function ProductDetailModal({
   const [addedSuccessMsg, setAddedSuccessMsg] = useState(false);
 
   const [selectedDisplayImage, setSelectedDisplayImage] = useState<string>(product?.image || '');
-  const [unifiedDetailsMap, setUnifiedDetailsMap] = useState<Record<string, ProductDetailItem>>({});
+  const [unifiedDetailsMap, setUnifiedDetailsMap] = useState<Record<string, ProductDetailItem>>(() => {
+    const base: Record<string, ProductDetailItem> = { ...DEFAULT_PRODUCT_DETAILS };
+    try {
+      const localStr = typeof window !== 'undefined' ? localStorage.getItem('sy_cms_product_details') : null;
+      if (localStr) {
+        const parsed = JSON.parse(localStr);
+        return { ...base, ...parsed };
+      }
+    } catch (e) {}
+    return base;
+  });
 
   // Load merged product details
   useEffect(() => {

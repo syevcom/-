@@ -1428,6 +1428,17 @@ export function resolveDetailData(
     return sanitizeItemUrls(DEFAULT_PRODUCT_DETAILS[nameKey]);
   }
 
+  // 6. If still no detail image but the product has an image, provide it as a fallback image
+  if (product.image && !isDeleted) {
+    return {
+      pdfUrl: product.image,
+      pdfUrls: [product.image],
+      pdfName: `${product.name || '제품'} 상세 정보`,
+      pdfNames: [`${product.name || '제품'} 상세 정보`],
+      deleted: false
+    };
+  }
+
   return {};
 }
 
