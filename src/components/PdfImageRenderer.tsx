@@ -4,6 +4,43 @@ import { getOptimizedImageUrl } from '../lib/imageOptimizer';
 import { resolvePostImgUrl } from '../lib/detailPagesData';
 import DetailPageImage from './DetailPageImage';
 
+const IMAGE_FALLBACK_MAP: Record<string, string> = {
+  // Local to Remote
+  '/images/home-detail-speel-5kw.png': 'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png',
+  '/images/home-detail-speel-7kw.png': 'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png',
+  '/images/home-detail-speel-11kw.png': 'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png',
+  '/images/home-detail-coolcharge.png': 'https://i.postimg.cc/C5bmNYPW/kulchaji.png',
+  '/images/home-detail-electree.png': 'https://i.postimg.cc/13nqFM8p/illegteuli.png',
+  '/images/home-detail-chajigo1.png': 'https://i.postimg.cc/d1b5rDBp/chajigo1.png',
+  '/images/home-detail-chajigo2.png': 'https://i.postimg.cc/br13T8CM/chajigo2.png',
+  '/images/home-detail-chajigo3.png': 'https://i.postimg.cc/90yJpV8K/chajigo3.png',
+  '/images/biz-charger-7-11kw.png': 'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png',
+  '/images/biz-charger-35kw.png': 'https://i.postimg.cc/BQsg0rwn/35kw-kulchaji.png',
+  '/images/biz-charger-50kw.png': 'https://i.postimg.cc/X738bRDp/50kw-kulchaji.png',
+  // Remote to Local
+  'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png': '/images/home-detail-speel-5kw.png',
+  'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.png',
+  'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.png',
+  'https://i.postimg.cc/C5bmNYPW/kulchaji.png': '/images/home-detail-coolcharge.png',
+  'https://i.postimg.cc/13nqFM8p/illegteuli.png': '/images/home-detail-electree.png',
+  'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.png',
+  'https://i.postimg.cc/br13T8CM/chajigo2.png': '/images/home-detail-chajigo2.png',
+  'https://i.postimg.cc/90yJpV8K/chajigo3.png': '/images/home-detail-chajigo3.png',
+  'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
+  'https://i.postimg.cc/BQsg0rwn/35kw-kulchaji.png': '/images/biz-charger-35kw.png',
+  'https://i.postimg.cc/X738bRDp/50kw-kulchaji.png': '/images/biz-charger-50kw.png',
+};
+
+function getFallbackForUrl(url: string): string | undefined {
+  if (!url) return undefined;
+  if (IMAGE_FALLBACK_MAP[url]) return IMAGE_FALLBACK_MAP[url];
+  // Check substring
+  for (const [k, v] of Object.entries(IMAGE_FALLBACK_MAP)) {
+    if (url.includes(k) || k.includes(url)) return v;
+  }
+  return undefined;
+}
+
 interface PdfImageRendererProps {
   fileUrl: string;
   fileName?: string;
@@ -102,6 +139,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
           >
             <DetailPageImage
               src={imageUrl}
+              fallbackSrc={getFallbackForUrl(imageUrl)}
               alt={`${brandName} 카탈로그`}
               className="w-full max-w-[860px] h-auto mx-auto block select-none"
               referrerPolicy="no-referrer"
@@ -142,6 +180,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
               <div className="w-full max-w-[860px] mx-auto h-auto">
                 <DetailPageImage
                   src={imageUrl}
+                  fallbackSrc={getFallbackForUrl(imageUrl)}
                   alt={`${brandName} Full Catalog`}
                   className="w-full max-w-[860px] h-auto mx-auto block rounded-lg shadow-2xl"
                   referrerPolicy="no-referrer"
@@ -255,6 +294,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
         >
           <DetailPageImage
             src={imageUrl}
+            fallbackSrc={getFallbackForUrl(imageUrl)}
             alt={`${brandName} 카탈로그 이미지`}
             className="w-full max-w-[860px] h-auto mx-auto block pointer-events-none"
             referrerPolicy="no-referrer"
@@ -290,6 +330,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
             <div className="w-full max-w-[860px] mx-auto h-auto">
               <DetailPageImage
                 src={imageUrl}
+                fallbackSrc={getFallbackForUrl(imageUrl)}
                 alt="Full Catalog"
                 className="w-full max-w-[860px] h-auto mx-auto block rounded-xl shadow-2xl"
                 referrerPolicy="no-referrer"

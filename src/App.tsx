@@ -235,6 +235,9 @@ export default function App() {
     const cleaned = { ...cfg };
     if (cleaned.tab1Label === '포토리뷰이벤트') cleaned.tab1Label = '';
     if (cleaned.tab3Label === '상담시간연장') cleaned.tab3Label = '';
+    if (!cleaned.imageUrl || cleaned.imageUrl.startsWith('data:image/svg') || cleaned.imageUrl.includes('postimg') || cleaned.imageUrl.includes('unsplash')) {
+      cleaned.imageUrl = '/스필.png';
+    }
     return cleaned;
   };
 

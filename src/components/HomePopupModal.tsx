@@ -29,7 +29,7 @@ export const DEFAULT_HOME_POPUP_CONFIG: HomePopupConfig = {
   subText: '무상4년 A/S를 위해 꼭 받아두세요',
   buttonText: '보증서 발급받기',
   naverFormUrl: 'https://form.naver.com/', // 네이버폼 연결 URL (관리자페이지에서 변경 가능)
-  imageUrl: SPEEL_11KW_REPRESENTATIVE_IMAGE,
+  imageUrl: '/스필.png',
   tab1Label: '',
   tab1Url: '',
   tab2Label: '정품등록',
