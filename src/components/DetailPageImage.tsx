@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export interface DetailPageImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   /** Optional fallback image source if primary image fails to load */
@@ -12,73 +12,53 @@ export interface DetailPageImageProps extends React.ImgHTMLAttributes<HTMLImageE
 /**
  * DetailPageImage
  * 
- * 모바일 및 고해상도(Retina) 디스플레이에서 상세페이지/카탈로그 이미지가 
- * 흐릿하게 뭉개지거나 번지는 현상을 방지하기 위한 고선명 래퍼 컴포넌트입니다.
- * 
- * - style={{ imageRendering: 'high-quality' }} 기본 적용
- * - 모바일 하드웨어 가속(GPU transform) 및 앤티 앨리어싱 보정
- * - WebKit/Blink/Firefox 호환 선명도 옵티마이징 스타일 탑재
+ * 표준 HTML <img> 태그 기반의 고화질 상세페이지/카탈로그 렌더러 컴포넌트입니다.
+ * - Next.js <Image /> 컴포넌트 대신 순수 표준 HTML <img> 태그를 직접 렌더링
+ * - 엑박 방지를 위한 자동 대체(fallback) URL 복구 처리
+ * - 모바일 및 PC 100% 반응형 (w-full h-auto block)
  */
 export const DetailPageImage: React.FC<DetailPageImageProps> = ({
   src,
-  alt = '상세페이지 이미지',
-  className = '',
-  style = {},
+  alt = '상세페이지',
+  className = 'w-full h-auto block',
   loading = 'lazy',
-  decoding = 'async',
-  referrerPolicy = 'no-referrer',
   fallbackSrc,
-  showSkeleton = false,
   onError,
   onLoad,
   ...props
 }) => {
-  const [hasError, setHasError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState<string>(src || fallbackSrc || '');
+  const [hasFallbackTried, setHasFallbackTried] = useState(false);
 
-  const defaultHighQualityStyle: React.CSSProperties = {
-    imageRendering: '-webkit-optimize-contrast',
-    WebkitBackfaceVisibility: 'hidden',
-    backfaceVisibility: 'hidden',
-    transform: 'translateZ(0)',
-    contentVisibility: 'visible',
-    ...style,
-  };
+  useEffect(() => {
+    if (src) {
+      setCurrentSrc(src);
+      setHasFallbackTried(false);
+    }
+  }, [src]);
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // If the image fails or is blocked by strict cross-origin/incognito restrictions, attempt fallback or recover
-    setHasError(true);
+    if (!hasFallbackTried && fallbackSrc && currentSrc !== fallbackSrc) {
+      setHasFallbackTried(true);
+      setCurrentSrc(fallbackSrc);
+    }
     if (onError) {
       onError(e);
     }
   };
 
-  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    setIsLoaded(true);
-    if (onLoad) {
-      onLoad(e);
-    }
-  };
-
-  // Ensure src is valid string, if empty or errored with fallback, use fallback
-  const imageSource = (hasError && fallbackSrc) ? fallbackSrc : (src || fallbackSrc || '');
-
-  if (!imageSource) {
+  if (!currentSrc) {
     return null;
   }
 
   return (
     <img
-      src={imageSource}
+      src={currentSrc}
       alt={alt}
+      className={`w-full h-auto block ${className}`}
       loading={loading}
-      decoding={decoding}
-      referrerPolicy={referrerPolicy}
-      crossOrigin="anonymous"
-      className={`w-full max-w-[860px] h-auto mx-auto block high-res-detail-img select-none ${className}`}
-      style={defaultHighQualityStyle}
       onError={handleError}
-      onLoad={handleLoad}
+      onLoad={onLoad}
       {...props}
     />
   );
@@ -86,3 +66,4 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
 
 export const HighQualityImage = DetailPageImage;
 export default DetailPageImage;
+
