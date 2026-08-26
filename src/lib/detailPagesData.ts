@@ -1339,7 +1339,7 @@ export async function deleteUnifiedBrandCatalog(brandKey: string): Promise<void>
 function isOldOrPlaceholderUrl(url?: string | null): boolean {
   if (!url) return true;
   const u = url.trim();
-  return u === '/스필.png' || u === '/쿨차지.png' || u === '/일렉트리.png' || u === '/차지고.png' || u.includes('unsplash.com') || u.startsWith('data:image/svg');
+  return u === '/스필.png' || u === '/쿨차지.png' || u === '/일렉트리.png' || u === '/차지고.png' || u === '/50kw-쿨차지.png' || u.includes('unsplash.com') || u.startsWith('data:image/svg');
 }
 
 function sanitizeItemUrls(item: ProductDetailItem): ProductDetailItem {
