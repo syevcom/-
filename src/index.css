@@ -27,6 +27,7 @@ html, body {
 /* Global Image Rendering Rules: Anti-Aliasing & Maximum Clarity */
 img {
   image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
   image-rendering: auto;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -35,10 +36,13 @@ img {
 
 .high-res-detail-img {
   image-rendering: -webkit-optimize-contrast;
-  image-rendering: auto;
+  image-rendering: high-quality;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   transform: translateZ(0);
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 

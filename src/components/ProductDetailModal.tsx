@@ -92,16 +92,37 @@ export default function ProductDetailModal({
   }, [product?.id, product?.image]);
 
   const getProductOptionGroups = (p: Product) => {
-    const isPublic = (
-      p.detailCategory === '공용완속' ||
-      p.detailCategory === '급속' ||
-      p.type === '급속' ||
-      (p.name.includes('공용') && !p.name.includes('개인용')) ||
-      p.name.includes('수익형') ||
-      p.name.includes('관공서') ||
-      p.name.includes('조달상품') ||
-      p.id.startsWith('park-')
-    ) && !p.name.includes('개인용') && !p.name.includes('가정용');
+    const cat = p.detailCategory || '';
+    const name = p.name || '';
+    const id = p.id || '';
+    const type = p.type || '';
+
+    const isResidential =
+      (cat as string) === '비공용완속' ||
+      (cat as string) === '비공용중속' ||
+      (cat as string) === '가정용' ||
+      id.startsWith('res-') ||
+      id.startsWith('sy-ac') ||
+      id.startsWith('home-') ||
+      name.includes('개인용') ||
+      name.includes('가정용') ||
+      name.includes('홈') ||
+      name.includes('비공용');
+
+    const isPublic = !isResidential && (
+      cat === '공용완속' ||
+      cat === '급속' ||
+      type === '급속' ||
+      type === '초급속' ||
+      (name.includes('공용') && !name.includes('개인용') && !name.includes('가정용')) ||
+      name.includes('수익형') ||
+      name.includes('관공서') ||
+      name.includes('조달상품') ||
+      id.startsWith('park-') ||
+      id.startsWith('comm-') ||
+      id.startsWith('sol-comm') ||
+      id.startsWith('sol-park')
+    );
 
     if (isPublic) {
       if (p.optionGroups && p.optionGroups.length === 1) return p.optionGroups;
@@ -177,29 +198,45 @@ export default function ProductDetailModal({
 
   const isCommercial = useMemo(() => {
     if (!product) return false;
-    const isPublicCat =
-      product.detailCategory === '공용완속' ||
-      product.detailCategory === '급속' ||
-      product.detailCategory === '스탠드';
-    const isQuickType = product.type === '급속' || product.type === '초급속';
+    const cat = product.detailCategory || '';
+    const name = product.name || '';
+    const id = product.id || '';
+    const type = product.type || '';
+
+    // Explicit residential checks
+    if (
+      (cat as string) === '비공용완속' ||
+      (cat as string) === '비공용중속' ||
+      (cat as string) === '가정용' ||
+      id.startsWith('res-') ||
+      id.startsWith('sy-ac') ||
+      id.startsWith('home-') ||
+      name.includes('개인용') ||
+      name.includes('가정용') ||
+      name.includes('홈') ||
+      name.includes('비공용')
+    ) {
+      return false;
+    }
+
+    const isPublicCat = cat === '공용완속' || cat === '급속';
+    const isQuickType = type === '급속' || type === '초급속';
     const isCommName =
-      product.name.includes('공용') ||
-      product.name.includes('상업') ||
-      product.name.includes('수익형') ||
-      product.name.includes('관공서') ||
-      product.name.includes('조달') ||
-      product.name.includes('스탠드') ||
-      product.name.includes('쿨차지');
+      name.includes('수익형') ||
+      name.includes('상업') ||
+      name.includes('관공서') ||
+      name.includes('조달상품') ||
+      (name.includes('공용') && !name.includes('비공용') && !name.includes('개인용') && !name.includes('가정용'));
     const isParkId =
-      product.id.startsWith('park-') ||
-      product.id.startsWith('comm-') ||
-      product.id.startsWith('sol-comm') ||
-      product.id.startsWith('sol-park');
-    return (
-      (isPublicCat || isQuickType || isCommName || isParkId) &&
-      !product.name.includes('개인용') &&
-      !product.name.includes('가정용')
-    );
+      id.startsWith('park-') ||
+      id.startsWith('comm-') ||
+      id.startsWith('sol-comm') ||
+      id.startsWith('sol-park') ||
+      id.startsWith('sy-dc') ||
+      id.startsWith('sy-fc') ||
+      id.startsWith('sy-biz');
+
+    return isPublicCat || isQuickType || isCommName || isParkId;
   }, [product]);
 
   // Default value fallbacks matching user screenshots

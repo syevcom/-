@@ -492,16 +492,37 @@ export default function SolutionsSection({
   const getOptionGroupsForProduct = (prod: SolutionProduct | null, serviceTypeParam?: string): ProductOptionGroup[] => {
     if (!prod) return [];
 
-    const isPublicCharger = (
-      prod.id.startsWith('park-') ||
-      (prod.name.includes('공용') && !prod.name.includes('개인용')) ||
-      prod.name.includes('수익형') ||
-      prod.name.includes('관공서') ||
-      prod.name.includes('조달상품') ||
-      (prod as any).type === '급속' ||
-      (prod as any).detailCategory === '공용완속' ||
-      (prod as any).detailCategory === '급속'
-    ) && !prod.name.includes('개인용') && !prod.name.includes('가정용');
+    const id = prod.id || '';
+    const name = prod.name || '';
+    const cat = (prod as any).detailCategory || '';
+    const type = (prod as any).type || '';
+
+    const isResidential =
+      cat === '비공용완속' ||
+      cat === '비공용중속' ||
+      cat === '가정용' ||
+      id.startsWith('res-') ||
+      id.startsWith('sy-ac') ||
+      id.startsWith('home-') ||
+      name.includes('개인용') ||
+      name.includes('가정용') ||
+      name.includes('홈') ||
+      name.includes('비공용');
+
+    const isPublicCharger = !isResidential && (
+      cat === '공용완속' ||
+      cat === '급속' ||
+      type === '급속' ||
+      type === '초급속' ||
+      id.startsWith('park-') ||
+      id.startsWith('comm-') ||
+      id.startsWith('sol-comm') ||
+      id.startsWith('sol-park') ||
+      (name.includes('공용') && !name.includes('개인용') && !name.includes('가정용')) ||
+      name.includes('수익형') ||
+      name.includes('관공서') ||
+      name.includes('조달상품')
+    );
 
     if (isPublicCharger) {
       return PUBLIC_CHARGER_OPTION_GROUPS;
@@ -1254,11 +1275,13 @@ export default function SolutionsSection({
           setBrands(prev => {
             const updated = { ...prev };
             Object.keys(updated).forEach(brandKey => {
-              const cat = brandCats[brandKey];
+              const cat = brandCats[brandKey] || resolveBrandCatalog(brandKey, brandCats);
+              const def = DEFAULT_BRAND_CATALOGS[brandKey] || DEFAULT_BRAND_CATALOGS[brandKey.toLowerCase()];
+              const isDeleted = (cat as { deleted?: boolean })?.deleted;
               updated[brandKey] = {
                 ...updated[brandKey],
-                pdfUrl: cat ? cat.pdfUrl : undefined,
-                pdfName: cat ? cat.pdfName : undefined
+                pdfUrl: isDeleted ? undefined : (cat?.pdfUrl || def?.pdfUrl || updated[brandKey]?.pdfUrl),
+                pdfName: isDeleted ? undefined : (cat?.pdfName || def?.pdfName || updated[brandKey]?.pdfName)
               };
             });
             return updated;
@@ -3101,23 +3124,35 @@ export default function SolutionsSection({
                 <div className="col-span-3 font-extrabold text-slate-600 self-center">B2B공급가</div>
                 <div className="col-span-9 flex flex-col justify-center">
                   {(() => {
-                    const isPublicCharger = (
+                    const isResidential =
+                      productPurpose === 'Residential' ||
+                      (activeDetailProduct as any).detailCategory === '비공용완속' ||
+                      (activeDetailProduct as any).detailCategory === '비공용중속' ||
+                      (activeDetailProduct as any).detailCategory === '가정용' ||
+                      activeDetailProduct.id.startsWith('res-') ||
+                      activeDetailProduct.id.startsWith('sy-ac') ||
+                      activeDetailProduct.id.startsWith('home-') ||
+                      activeDetailProduct.name.includes('개인용') ||
+                      activeDetailProduct.name.includes('가정용') ||
+                      activeDetailProduct.name.includes('홈') ||
+                      activeDetailProduct.name.includes('비공용');
+
+                    const isPublicCharger = !isResidential && (
                       activeDetailProduct.id.startsWith('park-') ||
                       activeDetailProduct.id.startsWith('comm-') ||
                       activeDetailProduct.id.startsWith('sol-comm') ||
                       activeDetailProduct.id.startsWith('sol-park') ||
-                      (activeDetailProduct.name.includes('공용') && !activeDetailProduct.name.includes('개인용')) ||
+                      (activeDetailProduct.name.includes('공용') && !activeDetailProduct.name.includes('개인용') && !activeDetailProduct.name.includes('가정용')) ||
                       activeDetailProduct.name.includes('상업') ||
                       activeDetailProduct.name.includes('수익형') ||
                       activeDetailProduct.name.includes('관공서') ||
                       activeDetailProduct.name.includes('조달상품') ||
-                      activeDetailProduct.name.includes('스탠드') ||
-                      activeDetailProduct.name.includes('쿨차지') ||
                       (activeDetailProduct as any).type === '급속' ||
+                      (activeDetailProduct as any).type === '초급속' ||
                       (activeDetailProduct as any).detailCategory === '공용완속' ||
                       (activeDetailProduct as any).detailCategory === '급속' ||
                       productPurpose === 'ParkingLot'
-                    ) && !activeDetailProduct.name.includes('개인용') && !activeDetailProduct.name.includes('가정용');
+                    );
 
                     if (isPublicCharger) {
                       return (
@@ -3155,23 +3190,35 @@ export default function SolutionsSection({
                 <div className="col-span-12 border-t border-slate-100 my-1"></div>
 
                 {(() => {
-                  const isPublicCharger = (
+                  const isResidential =
+                    productPurpose === 'Residential' ||
+                    (activeDetailProduct as any).detailCategory === '비공용완속' ||
+                    (activeDetailProduct as any).detailCategory === '비공용중속' ||
+                    (activeDetailProduct as any).detailCategory === '가정용' ||
+                    activeDetailProduct.id.startsWith('res-') ||
+                    activeDetailProduct.id.startsWith('sy-ac') ||
+                    activeDetailProduct.id.startsWith('home-') ||
+                    activeDetailProduct.name.includes('개인용') ||
+                    activeDetailProduct.name.includes('가정용') ||
+                    activeDetailProduct.name.includes('홈') ||
+                    activeDetailProduct.name.includes('비공용');
+
+                  const isPublicCharger = !isResidential && (
                     activeDetailProduct.id.startsWith('park-') ||
                     activeDetailProduct.id.startsWith('comm-') ||
                     activeDetailProduct.id.startsWith('sol-comm') ||
                     activeDetailProduct.id.startsWith('sol-park') ||
-                    (activeDetailProduct.name.includes('공용') && !activeDetailProduct.name.includes('개인용')) ||
+                    (activeDetailProduct.name.includes('공용') && !activeDetailProduct.name.includes('개인용') && !activeDetailProduct.name.includes('가정용')) ||
                     activeDetailProduct.name.includes('상업') ||
                     activeDetailProduct.name.includes('수익형') ||
                     activeDetailProduct.name.includes('관공서') ||
                     activeDetailProduct.name.includes('조달상품') ||
-                    activeDetailProduct.name.includes('스탠드') ||
-                    activeDetailProduct.name.includes('쿨차지') ||
                     (activeDetailProduct as any).type === '급속' ||
+                    (activeDetailProduct as any).type === '초급속' ||
                     (activeDetailProduct as any).detailCategory === '공용완속' ||
                     (activeDetailProduct as any).detailCategory === '급속' ||
                     productPurpose === 'ParkingLot'
-                  ) && !activeDetailProduct.name.includes('개인용') && !activeDetailProduct.name.includes('가정용');
+                  );
 
                   if (isPublicCharger) {
                     return (
@@ -3367,23 +3414,35 @@ export default function SolutionsSection({
 
             {/* Dynamic Total Price Block */}
             {(() => {
-              const isCommercialProduct = (
+              const isResidential =
+                productPurpose === 'Residential' ||
+                (activeDetailProduct as any).detailCategory === '비공용완속' ||
+                (activeDetailProduct as any).detailCategory === '비공용중속' ||
+                (activeDetailProduct as any).detailCategory === '가정용' ||
+                activeDetailProduct.id.startsWith('res-') ||
+                activeDetailProduct.id.startsWith('sy-ac') ||
+                activeDetailProduct.id.startsWith('home-') ||
+                activeDetailProduct.name.includes('개인용') ||
+                activeDetailProduct.name.includes('가정용') ||
+                activeDetailProduct.name.includes('홈') ||
+                activeDetailProduct.name.includes('비공용');
+
+              const isCommercialProduct = !isResidential && (
                 activeDetailProduct.id.startsWith('park-') ||
                 activeDetailProduct.id.startsWith('comm-') ||
                 activeDetailProduct.id.startsWith('sol-comm') ||
                 activeDetailProduct.id.startsWith('sol-park') ||
-                (activeDetailProduct.name.includes('공용') && !activeDetailProduct.name.includes('개인용')) ||
+                (activeDetailProduct.name.includes('공용') && !activeDetailProduct.name.includes('개인용') && !activeDetailProduct.name.includes('가정용')) ||
                 activeDetailProduct.name.includes('상업') ||
                 activeDetailProduct.name.includes('수익형') ||
                 activeDetailProduct.name.includes('관공서') ||
                 activeDetailProduct.name.includes('조달상품') ||
-                activeDetailProduct.name.includes('스탠드') ||
-                activeDetailProduct.name.includes('쿨차지') ||
                 (activeDetailProduct as any).type === '급속' ||
+                (activeDetailProduct as any).type === '초급속' ||
                 (activeDetailProduct as any).detailCategory === '공용완속' ||
                 (activeDetailProduct as any).detailCategory === '급속' ||
                 productPurpose === 'ParkingLot'
-              ) && !activeDetailProduct.name.includes('개인용') && !activeDetailProduct.name.includes('가정용');
+              );
 
               return (
                 <>
@@ -3787,7 +3846,10 @@ export default function SolutionsSection({
                 </div>
 
                 {sol.category === 'Commercial' && (() => {
-                  const brandData = brands[selectedAptBrand] || brands['sk일렉링크'];
+                  const brandData = brands[selectedAptBrand] || brands['sk일렉링크'] || BRAND_METADATA['sk일렉링크'];
+                  const resolvedCatalog = resolveBrandCatalog(selectedAptBrand, brands);
+                  const activePdfUrl = brandData?.pdfUrl || resolvedCatalog.pdfUrl || DEFAULT_BRAND_CATALOGS[selectedAptBrand]?.pdfUrl;
+                  const activePdfName = brandData?.pdfName || resolvedCatalog.pdfName || DEFAULT_BRAND_CATALOGS[selectedAptBrand]?.pdfName || `${brandData?.name || selectedAptBrand} 공식 브로셔`;
                   return (
                     <div id="apt-brand-section" className="p-3 sm:p-6 md:p-8 bg-white text-slate-900 rounded-2xl sm:rounded-3xl border-0 sm:border border-slate-200/90 space-y-4 sm:space-y-6 shadow-none sm:shadow-2xs relative overflow-hidden group/brand">
                       {/* Top Gradient Line Accent */}
@@ -3911,7 +3973,7 @@ export default function SolutionsSection({
 
                       {/* Brand PDF Catalog & Inline Document Viewer */}
                       <div className="border-0 sm:border border-slate-200/80 bg-transparent sm:bg-slate-50/50 rounded-none sm:rounded-2xl p-0 sm:p-4 space-y-4 relative z-10">
-                        {isEditMode && brandData.pdfUrl && (
+                        {isEditMode && activePdfUrl && (
                           <div className="flex justify-end border-b border-slate-200 pb-2">
                             <button
                               type="button"
@@ -3924,11 +3986,11 @@ export default function SolutionsSection({
                           </div>
                         )}
 
-                        {brandData.pdfUrl ? (
+                        {activePdfUrl ? (
                           <div className="space-y-2">
                             <PdfImageRenderer 
-                              fileUrl={brandData.pdfUrl} 
-                              fileName={brandData.pdfName || 'catalog.pdf'} 
+                              fileUrl={activePdfUrl} 
+                              fileName={activePdfName || 'catalog.pdf'} 
                               brandName={brandData.name} 
                               isAdmin={isEditMode}
                             />

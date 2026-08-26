@@ -37,10 +37,11 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
 
   const defaultHighQualityStyle: React.CSSProperties = {
-    imageRendering: 'auto',
+    imageRendering: '-webkit-optimize-contrast',
     WebkitBackfaceVisibility: 'hidden',
     backfaceVisibility: 'hidden',
     transform: 'translateZ(0)',
+    contentVisibility: 'visible',
     ...style,
   };
 

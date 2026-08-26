@@ -105,8 +105,8 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
               alt={`${brandName} 카탈로그`}
               className="w-full max-w-[860px] h-auto mx-auto block select-none"
               referrerPolicy="no-referrer"
-              loading="lazy"
-              decoding="async"
+              loading="eager"
+              decoding="sync"
             />
             
             {/* Subtle mobile tap-to-expand indicator */}
@@ -145,8 +145,8 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
                   alt={`${brandName} Full Catalog`}
                   className="w-full max-w-[860px] h-auto mx-auto block rounded-lg shadow-2xl"
                   referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
+                  loading="eager"
+                  decoding="sync"
                 />
               </div>
             </div>
