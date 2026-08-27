@@ -34,6 +34,7 @@ import { BRAND_METADATA, HOME_PRODUCTS_DATA, PARKING_PRODUCTS_DATA } from './com
 import { setupFirebaseStorageSync, loadFromFirestore } from './lib/firebase';
 import { recordVisitorHit, initExternalAnalytics } from './lib/visitorAnalytics';
 import { secureAuthManager, useSecureAuth } from './lib/secureAuthManager';
+import { RouteState, parseCurrentRoute, buildRouteUrl, pushRoute, replaceRoute, findProductByIdOrSlug } from './lib/routerHelper';
 
 import { PRODUCTS, SOLUTIONS, REVIEWS, FAQS, NOTICES, LOTTE_EVSIS_OPTION_GROUPS, ELECTREE_OPTION_GROUPS, CHARGEGO_OPTION_GROUPS, COOLCHARGE_OPTION_GROUPS, DEFAULT_RESIDENTIAL_OPTION_GROUPS, PUBLIC_CHARGER_OPTION_GROUPS } from './data';
 import { ActivePage, User, Booking, ASRequest, Product, Solution, Review, FAQ, HeaderConfig, CartItem, MobileDesignConfig, DEFAULT_MOBILE_DESIGN_CONFIG, AdminNotification } from './types';
@@ -215,6 +216,10 @@ export default function App() {
     };
   }, []);
 
+  // Detail product states (controlled by URL & History)
+  const [activeDetailProduct, setActiveDetailProduct] = useState<any>(null);
+  const [activeProductsDetailProduct, setActiveProductsDetailProduct] = useState<Product | null>(null);
+
   // Modal Open States
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
@@ -226,9 +231,108 @@ export default function App() {
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState<LegalTabType>('refund');
 
+  // Initial URL parsing and browser history (popstate) listener
+  useEffect(() => {
+    // 1. Initial URL route parsing on page load
+    const initialRoute = parseCurrentRoute();
+    if (initialRoute.page !== 'home' || initialRoute.detail || initialRoute.modal) {
+      setActivePage(initialRoute.page);
+      if (initialRoute.detail) {
+        const found = findProductByIdOrSlug(initialRoute.detail);
+        if (found) {
+          if (initialRoute.page === 'products') {
+            setActiveProductsDetailProduct(found as Product);
+          } else {
+            setActiveDetailProduct(found);
+          }
+        }
+      }
+      if (initialRoute.modal === 'quote') {
+        setIsQuoteOpen(true);
+        if (initialRoute.purpose) setQuoteDefaultPurpose(initialRoute.purpose);
+      } else if (initialRoute.modal === 'auth' || initialRoute.modal === 'login') {
+        setIsAuthOpen(true);
+      } else if (initialRoute.modal === 'cart') {
+        setIsCartOpen(true);
+      } else if (initialRoute.modal === 'payment') {
+        setIsPaymentOpen(true);
+      } else if (initialRoute.modal === 'legal') {
+        setIsLegalModalOpen(true);
+        if (initialRoute.legalTab) setLegalModalTab(initialRoute.legalTab);
+      } else if (initialRoute.modal === 'warranty' || initialRoute.modal === 'popup') {
+        setIsHomePopupOpen(true);
+      } else if (initialRoute.modal === 'mypage') {
+        setIsMyPageOpen(true);
+      }
+      replaceRoute(initialRoute);
+    } else {
+      replaceRoute({ page: 'home' });
+    }
+
+    // 2. Handle popstate (Browser Back / Forward buttons)
+    const handlePopState = () => {
+      const route = parseCurrentRoute();
+      setActivePage(route.page);
+
+      // Detail product handling
+      if (route.detail) {
+        const found = findProductByIdOrSlug(route.detail);
+        if (found) {
+          if (route.page === 'products') {
+            setActiveProductsDetailProduct(found as Product);
+            setActiveDetailProduct(null);
+          } else {
+            setActiveDetailProduct(found);
+            setActiveProductsDetailProduct(null);
+          }
+        }
+      } else {
+        setActiveDetailProduct(null);
+        setActiveProductsDetailProduct(null);
+      }
+
+      // Modals handling
+      setIsQuoteOpen(route.modal === 'quote');
+      if (route.purpose) {
+        setQuoteDefaultPurpose(route.purpose);
+      }
+      setIsAuthOpen(route.modal === 'auth' || route.modal === 'login');
+      setIsCartOpen(route.modal === 'cart');
+      setIsPaymentOpen(route.modal === 'payment');
+      setIsLegalModalOpen(route.modal === 'legal');
+      if (route.legalTab) {
+        setLegalModalTab(route.legalTab);
+      }
+      setIsHomePopupOpen(route.modal === 'warranty' || route.modal === 'popup');
+      setIsMyPageOpen(route.modal === 'mypage');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   const handleOpenLegalModal = (tab: LegalTabType = 'refund') => {
     setLegalModalTab(tab);
     setIsLegalModalOpen(true);
+    pushRoute({ page: activePage, modal: 'legal', legalTab: tab, detail: activeDetailProduct?.id || activeProductsDetailProduct?.id });
+  };
+
+  const handleCloseLegalModal = () => {
+    setIsLegalModalOpen(false);
+    if (window.history.state?.modal === 'legal') {
+      window.history.back();
+    } else {
+      replaceRoute({ page: activePage, detail: activeDetailProduct?.id || activeProductsDetailProduct?.id });
+    }
+  };
+
+  const handleCloseHomePopup = () => {
+    setIsHomePopupOpen(false);
+    if (window.history.state?.modal === 'warranty' || window.history.state?.modal === 'popup') {
+      window.history.back();
+    }
   };
 
   const sanitizePopupConfig = (cfg: HomePopupConfig): HomePopupConfig => {
@@ -2249,15 +2353,154 @@ export default function App() {
   const handleOpenQuoteWithPurpose = (purpose: 'Commercial' | 'Residential' | 'ParkingLot') => {
     setQuoteDefaultPurpose(purpose);
     setIsQuoteOpen(true);
+    pushRoute({
+      page: activePage,
+      modal: 'quote',
+      purpose,
+      detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+    });
+  };
+
+  const handleCloseQuoteModal = () => {
+    setIsQuoteOpen(false);
+    if (window.history.state?.modal === 'quote') {
+      window.history.back();
+    } else {
+      replaceRoute({
+        page: activePage,
+        detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+      });
+    }
+  };
+
+  const handleOpenAuth = () => {
+    setIsAuthOpen(true);
+    pushRoute({
+      page: activePage,
+      modal: 'auth',
+      detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+    });
+  };
+
+  const handleCloseAuthModal = () => {
+    setIsAuthOpen(false);
+    if (window.history.state?.modal === 'auth' || window.history.state?.modal === 'login') {
+      window.history.back();
+    } else {
+      replaceRoute({
+        page: activePage,
+        detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+      });
+    }
+  };
+
+  const handleOpenCartModal = () => {
+    setIsCartOpen(true);
+    pushRoute({ page: activePage, modal: 'cart' });
+  };
+
+  const handleCloseCartModal = () => {
+    setIsCartOpen(false);
+    if (window.history.state?.modal === 'cart') {
+      window.history.back();
+    } else {
+      replaceRoute({
+        page: activePage,
+        detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+      });
+    }
+  };
+
+  const handleOpenPaymentModal = (items: CartItem[]) => {
+    setPaymentItems(items);
+    setIsPaymentOpen(true);
+    pushRoute({
+      page: activePage,
+      modal: 'payment',
+      detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+    });
+  };
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentOpen(false);
+    if (window.history.state?.modal === 'payment') {
+      window.history.back();
+    } else {
+      replaceRoute({
+        page: activePage,
+        detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+      });
+    }
+  };
+
+  const handleOpenMyPageModal = () => {
+    setIsMyPageOpen(true);
+    pushRoute({ page: activePage, modal: 'mypage' });
+  };
+
+  const handleCloseMyPageModal = () => {
+    setIsMyPageOpen(false);
+    if (window.history.state?.modal === 'mypage') {
+      window.history.back();
+    } else {
+      replaceRoute({
+        page: activePage,
+        detail: activeDetailProduct?.id || activeProductsDetailProduct?.id
+      });
+    }
   };
 
   const handleOpenMyPageAS = () => {
     handlePageChange('mypage');
   };
 
-  const handlePageChange = (page: ActivePage) => {
+  const handlePageChange = (page: ActivePage, options?: { replace?: boolean; tab?: string }) => {
     setActivePage(page);
+    setActiveDetailProduct(null);
+    setActiveProductsDetailProduct(null);
+    setIsQuoteOpen(false);
+    setIsAuthOpen(false);
+    setIsCartOpen(false);
+    setIsPaymentOpen(false);
+    setIsLegalModalOpen(false);
+    setIsMyPageOpen(false);
+
+    const targetRoute: RouteState = { page, tab: options?.tab };
+    if (options?.replace) {
+      replaceRoute(targetRoute);
+    } else {
+      pushRoute(targetRoute);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectSolutionDetailProduct = (product: any) => {
+    if (product) {
+      setActiveDetailProduct(product);
+      pushRoute({ page: activePage, detail: product.id });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setActiveDetailProduct(null);
+      if (window.history.state?.detail) {
+        window.history.back();
+      } else {
+        replaceRoute({ page: activePage });
+      }
+    }
+  };
+
+  const handleSelectProductsDetailProduct = (product: Product | null) => {
+    if (product) {
+      setActiveProductsDetailProduct(product);
+      pushRoute({ page: 'products', detail: product.id });
+    } else {
+      setActiveProductsDetailProduct(null);
+      if (window.history.state?.detail) {
+        window.history.back();
+      } else {
+        replaceRoute({ page: 'products' });
+      }
+    }
   };
 
   const handleSelectAptBrand = (brand: string) => {
@@ -2288,7 +2531,7 @@ export default function App() {
               onOpenQuote={() => handleOpenQuoteWithPurpose('Residential')}
               onOpenQuoteWithPurpose={handleOpenQuoteWithPurpose}
               onOpenMyPageAS={handleOpenMyPageAS}
-              onOpenAuth={() => setIsAuthOpen(true)}
+              onOpenAuth={handleOpenAuth}
               isLoggedIn={!!user}
               mobileDesignConfig={mobileDesignConfig}
             />
@@ -2320,7 +2563,9 @@ export default function App() {
             onOpenCms={handleOpenCmsTab}
             onOpenQuoteWithPurpose={handleOpenQuoteWithPurpose}
             onAddToCart={handleAddToCart}
-            onOpenPayment={handleOpenPayment}
+            onOpenPayment={handleOpenPaymentModal}
+            detailProduct={activeProductsDetailProduct}
+            onSelectDetailProduct={handleSelectProductsDetailProduct}
           />
         );
       case 'solutions':
@@ -2341,7 +2586,9 @@ export default function App() {
             onSelectHomeServiceType={setSelectedHomeServiceType}
             onAddToCart={handleAddToCart}
             onOpenCartModal={() => handlePageChange('cart')}
-            onOpenPayment={handleOpenPayment}
+            onOpenPayment={handleOpenPaymentModal}
+            activeDetailProduct={activeDetailProduct}
+            onSelectDetailProduct={handleSelectSolutionDetailProduct}
           />
         );
       case 'sol_commercial':
@@ -2359,7 +2606,9 @@ export default function App() {
             onSelectAptBrand={handleSelectAptBrand}
             onAddToCart={handleAddToCart}
             onOpenCartModal={() => handlePageChange('cart')}
-            onOpenPayment={handleOpenPayment}
+            onOpenPayment={handleOpenPaymentModal}
+            activeDetailProduct={activeDetailProduct}
+            onSelectDetailProduct={handleSelectSolutionDetailProduct}
           />
         );
       case 'sol_parking':
@@ -2377,7 +2626,9 @@ export default function App() {
             onSelectParkingCapacity={setSelectedParkingCapacity}
             onAddToCart={handleAddToCart}
             onOpenCartModal={() => handlePageChange('cart')}
-            onOpenPayment={handleOpenPayment}
+            onOpenPayment={handleOpenPaymentModal}
+            activeDetailProduct={activeDetailProduct}
+            onSelectDetailProduct={handleSelectSolutionDetailProduct}
           />
         );
       case 'review':
@@ -2551,7 +2802,7 @@ export default function App() {
           user={user}
           activePage={activePage}
           onPageChange={handlePageChange}
-          onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenAuth={handleOpenAuth}
           onOpenMyPage={() => handlePageChange('mypage')}
           onOpenQuote={() => handleOpenQuoteWithPurpose('Residential')}
           onOpenQuoteWithPurpose={handleOpenQuoteWithPurpose}
@@ -2847,12 +3098,12 @@ export default function App() {
             <div className="md:col-span-3 space-y-3">
               <h4 className="text-xs font-black text-white uppercase tracking-wider">주요 카테고리</h4>
               <ul className="text-xs space-y-2 text-left">
-                <li><button onClick={() => setActivePage('about')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.about || '회사소개'}</button></li>
-                <li><button onClick={() => setActivePage('sol_commercial')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.sol_commercial || '아파트'} 솔루션</button></li>
-                <li><button onClick={() => setActivePage('sol_residential')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.sol_residential || '가정용 홈'} 솔루션</button></li>
-                <li><button onClick={() => setActivePage('sol_parking')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.sol_parking || '상업시설 수익형'} 솔루션</button></li>
-                <li><button onClick={() => setActivePage('review')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.review || '설치후기'}</button></li>
-                <li><button onClick={() => setActivePage('support')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">고객지원</button></li>
+                <li><button onClick={() => handlePageChange('about')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.about || '회사소개'}</button></li>
+                <li><button onClick={() => handlePageChange('sol_commercial')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.sol_commercial || '아파트'} 솔루션</button></li>
+                <li><button onClick={() => handlePageChange('sol_residential')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.sol_residential || '가정용 홈'} 솔루션</button></li>
+                <li><button onClick={() => handlePageChange('sol_parking')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.sol_parking || '상업시설 수익형'} 솔루션</button></li>
+                <li><button onClick={() => handlePageChange('review')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">{categoryLabels.review || '설치후기'}</button></li>
+                <li><button onClick={() => handlePageChange('support')} className="text-emerald-100 hover:text-white transition-colors cursor-pointer">고객지원</button></li>
               </ul>
             </div>
 
@@ -2937,14 +3188,14 @@ export default function App() {
         {isLegalModalOpen && (
           <LegalTermsModal
             isOpen={isLegalModalOpen}
-            onClose={() => setIsLegalModalOpen(false)}
+            onClose={handleCloseLegalModal}
             initialTab={legalModalTab}
           />
         )}
         {isAuthOpen && (
           <AuthModal
             isOpen={isAuthOpen}
-            onClose={() => setIsAuthOpen(false)}
+            onClose={handleCloseAuthModal}
             onLoginSuccess={handleLogin}
             onOpenAdminLogin={() => setIsAdminLoginOpen(true)}
           />
@@ -2953,7 +3204,7 @@ export default function App() {
         {isQuoteOpen && (
           <QuoteModal
             isOpen={isQuoteOpen}
-            onClose={() => setIsQuoteOpen(false)}
+            onClose={handleCloseQuoteModal}
             onSubmitBooking={handleAddBooking}
             initialPurpose={quoteDefaultPurpose}
             initialBrand={selectedAptBrand}
@@ -2975,16 +3226,16 @@ export default function App() {
         {isCartOpen && (
           <CartModal
             isOpen={isCartOpen}
-            onClose={() => setIsCartOpen(false)}
+            onClose={handleCloseCartModal}
             cartItems={cartItems}
             onUpdateQuantity={handleUpdateCartQuantity}
             onRemoveItem={handleRemoveCartItem}
             onClearCart={handleClearCart}
             onOpenQuoteWithItems={(items) => {
-              setIsCartOpen(false);
+              handleCloseCartModal();
               handleOpenPrintEstimate(items);
             }}
-            onOpenPayment={handleOpenPayment}
+            onOpenPayment={handleOpenPaymentModal}
           />
         )}
 
@@ -2999,11 +3250,11 @@ export default function App() {
         {isPaymentOpen && (
           <PaymentModal
             isOpen={isPaymentOpen}
-            onClose={() => setIsPaymentOpen(false)}
+            onClose={handleClosePaymentModal}
             items={paymentItems}
             user={user}
             onPaymentSuccess={handlePaymentSuccess}
-            onOpenMyPage={() => setIsMyPageOpen(true)}
+            onOpenMyPage={handleOpenMyPageModal}
             onOpenLegalModal={handleOpenLegalModal}
           />
         )}
@@ -3011,17 +3262,17 @@ export default function App() {
         {isMyPageOpen && user && (
           <MyPageModal
             isOpen={isMyPageOpen}
-            onClose={() => setIsMyPageOpen(false)}
+            onClose={handleCloseMyPageModal}
             user={user}
             onLogout={handleLogout}
             cartItems={cartItems}
             bookings={bookings}
             asRequests={asRequests}
             onOpenCartModal={() => {
-              setIsMyPageOpen(false);
+              handleCloseMyPageModal();
               handlePageChange('cart');
             }}
-            onOpenQuoteModal={() => setIsQuoteOpen(true)}
+            onOpenQuoteModal={() => handleOpenQuoteWithPurpose('Residential')}
             isEditMode={isEditMode}
             onUpdateUserProfileImage={(imgUrl) => {
               const updated = { ...user, profileImage: imgUrl };
@@ -3157,9 +3408,9 @@ export default function App() {
         {isHomePopupOpen && (
           <HomePopupModal
             isOpen={isHomePopupOpen}
-            onClose={() => setIsHomePopupOpen(false)}
+            onClose={handleCloseHomePopup}
             config={homePopupConfig}
-            onOpenQuoteModal={() => setIsQuoteOpen(true)}
+            onOpenQuoteModal={() => handleOpenQuoteWithPurpose('Residential')}
           />
         )}
 
@@ -3175,9 +3426,9 @@ export default function App() {
 
         {/* 24/7 AI 1:1 Live Support Chatbot */}
         <AIChatBot
-          onOpenQuote={() => setIsQuoteOpen(true)}
-          onNavigateToSol={(sol) => setActivePage(sol === 'residential' ? 'sol_residential' : sol === 'commercial' ? 'sol_commercial' : 'sol_parking')}
-          onNavigateToProducts={() => setActivePage('products')}
+          onOpenQuote={() => handleOpenQuoteWithPurpose('Residential')}
+          onNavigateToSol={(sol) => handlePageChange(sol === 'residential' ? 'sol_residential' : sol === 'commercial' ? 'sol_commercial' : 'sol_parking')}
+          onNavigateToProducts={() => handlePageChange('products')}
         />
       </AnimatePresence>
     </div>

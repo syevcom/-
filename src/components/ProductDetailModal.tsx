@@ -1098,6 +1098,14 @@ export default function ProductDetailModal({
                         fileName={detailNames[idx] || `${product.name} 상세페이지 이미지 ${idx + 1}`}
                         brandName={product.name}
                         isAdmin={false}
+                        onError={() => {
+                          const targetFileName = url.split('/').pop() || url;
+                          console.error(`❌ [ProductDetailModal 404 Error] 상세페이지 이미지 로드 실패`);
+                          console.error(`- 상품명: ${product.name} (ID: ${product.id})`);
+                          console.error(`- 대상 파일명: ${targetFileName}`);
+                          console.error(`- 전체 요청 URL: ${url}`);
+                          console.error(`- 인덱스: ${idx + 1}번째 페이지`);
+                        }}
                       />
                     </div>
                   ))}

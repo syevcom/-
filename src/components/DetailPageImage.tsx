@@ -38,6 +38,17 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
   }, [src]);
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const failedUrl = currentSrc || src || '';
+    const fileName = failedUrl.split('/').pop() || failedUrl;
+    
+    console.error(`🚨 [상세페이지 이미지 로드 실패 (404 / Network Error)]`);
+    console.error(`- 실패한 URL: ${failedUrl}`);
+    console.error(`- 요청 파일명: ${fileName}`);
+    console.error(`- 컴포넌트 alt: ${alt}`);
+    if (fallbackSrc) {
+      console.warn(`- 대체(Fallback) URL 시도: ${fallbackSrc}`);
+    }
+
     if (!hasFallbackTried && fallbackSrc && currentSrc !== fallbackSrc) {
       setHasFallbackTried(true);
       setCurrentSrc(fallbackSrc);

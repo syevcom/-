@@ -229,7 +229,7 @@ export default function LegalTermsModal({
               <div className="bg-slate-100 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
                 <p className="font-extrabold text-slate-900">📞 취소/반품/환불 접수 및 고객지원센터</p>
                 <div className="flex flex-wrap gap-4 text-slate-600">
-                  <span><strong>전화:</strong> 1588-0000 / 010-8647-7975</span>
+                  <span><strong>전화:</strong> 070-4225-3214</span>
                   <span><strong>이메일:</strong> sy.car.com@gmail.com</span>
                   <span><strong>운영시간:</strong> 평일 09:00 ~ 18:00 (주말/공휴일 휴무)</span>
                 </div>

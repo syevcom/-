@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, ExternalLink, Award, FileText, CheckCircle2 } from 'lucide-react';
-import { SPEEL_11KW_REPRESENTATIVE_IMAGE } from '../data';
+import { PRODUCTS, SPEEL_11KW_REPRESENTATIVE_IMAGE } from '../data';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
 
 export interface HomePopupConfig {
@@ -53,6 +53,32 @@ export const HomePopupModal: React.FC<HomePopupModalProps> = ({
   onOpenQuoteModal
 }) => {
   const [activeTab, setActiveTab] = useState<'tab1' | 'tab2' | 'tab3'>('tab2');
+
+  // 가정용 홈 충전기에 등록된 스필 메인 이미지와 100% 동일하게 동기화
+  const displayImageUrl = useMemo(() => {
+    if (config.imageUrl && config.imageUrl.trim() && config.imageUrl !== '/스필.png') {
+      return config.imageUrl.trim();
+    }
+    try {
+      const saved = localStorage.getItem('sy_cms_products_v12');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const matched = parsed.find((p: any) => 
+          (p.id && (p.id === 'sy-ac07' || p.id === 'sy-ac05' || p.id === 'sy-ac11-bi' || p.id === 'res-7kw-spil' || p.id === 'res-5kw-spil' || p.id === 'res-11kw-spil')) ||
+          (p.name && p.name.includes('스필'))
+        );
+        if (matched?.image && matched.image.trim()) {
+          return matched.image.trim();
+        }
+      }
+    } catch (e) {}
+
+    const defaultSpeel = PRODUCTS.find(p => p.id === 'sy-ac07' || p.id === 'sy-ac05' || p.brand === '스필');
+    if (defaultSpeel?.image && defaultSpeel.image.trim()) {
+      return defaultSpeel.image.trim();
+    }
+    return config.imageUrl || '/스필.png';
+  }, [config.imageUrl]);
 
   if (!isOpen) return null;
 
@@ -127,7 +153,7 @@ export const HomePopupModal: React.FC<HomePopupModalProps> = ({
             <div className="flex justify-center mb-3">
               <div className="relative w-36 h-36 sm:w-44 sm:h-44 bg-slate-950 rounded-xl overflow-hidden border border-amber-500/30 shadow-inner flex items-center justify-center p-2 group">
                 <img
-                  src={getOptimizedImageUrl(config.imageUrl || SPEEL_11KW_REPRESENTATIVE_IMAGE, { width: 350, format: 'webp' })}
+                  src={getOptimizedImageUrl(displayImageUrl || config.imageUrl || SPEEL_11KW_REPRESENTATIVE_IMAGE, { width: 350, format: 'webp' })}
                   alt="품질보증서 대상 충전기"
                   className="w-full h-full object-contain filter drop-shadow-md transition-transform duration-300 group-hover:scale-105"
                   referrerPolicy="no-referrer"

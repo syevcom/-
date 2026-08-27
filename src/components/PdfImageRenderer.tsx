@@ -14,7 +14,7 @@ const IMAGE_FALLBACK_MAP: Record<string, string> = {
   '/images/home-detail-chajigo1.png': 'https://i.postimg.cc/d1b5rDBp/chajigo1.png',
   '/images/home-detail-chajigo2.png': 'https://i.postimg.cc/br13T8CM/chajigo2.png',
   '/images/home-detail-chajigo3.png': 'https://i.postimg.cc/90yJpV8K/chajigo3.png',
-  '/images/biz-charger-7-11kw.png': 'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png',
+  '/images/biz-charger-7-11kw.png': 'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png',
   '/images/biz-charger-35kw.png': 'https://i.postimg.cc/BQsg0rwn/35kw-kulchaji.png',
   '/images/biz-charger-50kw.png': 'https://i.postimg.cc/X738bRDp/50kw-kulchaji.png',
   // Remote to Local
@@ -26,6 +26,8 @@ const IMAGE_FALLBACK_MAP: Record<string, string> = {
   'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.png',
   'https://i.postimg.cc/br13T8CM/chajigo2.png': '/images/home-detail-chajigo2.png',
   'https://i.postimg.cc/90yJpV8K/chajigo3.png': '/images/home-detail-chajigo3.png',
+  'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
+  'https://i.postimg.cc/kg906Y1Y/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
   'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
   'https://i.postimg.cc/BQsg0rwn/35kw-kulchaji.png': '/images/biz-charger-35kw.png',
   'https://i.postimg.cc/X738bRDp/50kw-kulchaji.png': '/images/biz-charger-50kw.png',
@@ -46,9 +48,10 @@ interface PdfImageRendererProps {
   fileName?: string;
   brandName?: string;
   isAdmin?: boolean;
+  onError?: (e?: any) => void;
 }
 
-export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', brandName = '브랜드', isAdmin = false }: PdfImageRendererProps) {
+export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', brandName = '브랜드', isAdmin = false, onError }: PdfImageRendererProps) {
   const resolvedUrl = resolvePostImgUrl(fileUrl);
   const isDataPdf = resolvedUrl.startsWith('data:application/pdf');
   const isDataImage = resolvedUrl.startsWith('data:image/');
@@ -60,7 +63,7 @@ export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', b
   
   if (!isPdf) {
     // If it's a standard image file, render it natively with premium frame and zoom
-    return <ImageCatalogViewer imageUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
+    return <ImageCatalogViewer imageUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} onError={onError} />;
   }
 
   return <PdfCatalogViewer pdfUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
@@ -69,7 +72,7 @@ export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', b
 const PRESET_ZOOM_LEVELS = [50, 75, 100, 125, 150, 180, 200, 250, 300];
 
 // 1. Native Image Viewer (for JPG, PNG uploads)
-function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageUrl: string; fileName: string; brandName: string; isAdmin: boolean }) {
+function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }: { imageUrl: string; fileName: string; brandName: string; isAdmin: boolean; onError?: (e?: any) => void }) {
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 768;
@@ -145,6 +148,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin }: { imageU
               referrerPolicy="no-referrer"
               loading="eager"
               decoding="sync"
+              onError={onError}
             />
             
             {/* Subtle mobile tap-to-expand indicator */}

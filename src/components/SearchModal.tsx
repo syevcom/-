@@ -7,8 +7,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Search, X, Zap, Check, ArrowRight, ShieldCheck, Flame, ExternalLink } from 'lucide-react';
 import { PRODUCTS } from '../data';
 import { HOME_PRODUCTS_DATA, PARKING_PRODUCTS_DATA } from './SolutionsSection';
-import { getOptimizedImageUrl } from '../lib/imageOptimizer';
 import { ActivePage } from '../types';
+import { searchAndRankProducts, SearchableItem } from '../lib/searchEngine';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -47,6 +47,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       regularPrice?: number;
       discount?: number;
       image: string;
+      fallbackImage: string;
       description: string;
       features?: string[];
       tags?: string[];
@@ -63,6 +64,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         category: p.detailCategory || p.type || '충전기',
         price: p.price,
         image: p.image,
+        fallbackImage: '/스필.png',
         description: p.description,
         features: p.features,
         targetPage: 'products'
@@ -83,6 +85,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             regularPrice: hp.regularPrice,
             discount: hp.discount,
             image: hp.image,
+            fallbackImage: '/스필.png',
             description: hp.description,
             features: hp.features,
             tags: hp.tags,
@@ -106,6 +109,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             regularPrice: pp.regularPrice,
             discount: pp.discount,
             image: pp.image,
+            fallbackImage: '/50kw-쿨차지.png',
             description: pp.description,
             features: pp.features,
             tags: pp.tags,
@@ -119,34 +123,24 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     return list;
   }, []);
 
-  // Filter products based on search term
+  // Filter and rank products based on search term with synonym and weighted matching
   const filteredProducts = useMemo(() => {
-    if (!searchTerm.trim()) return allSearchableProducts;
-    const term = searchTerm.toLowerCase().replace(/\s+/g, '');
-
-    return allSearchableProducts.filter((p) => {
-      const nameMatch = p.name.toLowerCase().replace(/\s+/g, '').includes(term);
-      const powerMatch = p.power.toLowerCase().includes(term);
-      const descMatch = p.description.toLowerCase().includes(term);
-      const catMatch = p.category.toLowerCase().includes(term);
-      const featMatch = p.features?.some(f => f.toLowerCase().includes(term));
-      const tagMatch = p.tags?.some(t => t.toLowerCase().includes(term));
-
-      return nameMatch || powerMatch || descMatch || catMatch || featMatch || tagMatch;
-    });
+    return searchAndRankProducts(allSearchableProducts, searchTerm);
   }, [allSearchableProducts, searchTerm]);
 
   if (!isOpen) return null;
 
   const popularKeywords = [
-    { label: '⚡ 7kW 완속', query: '7kW' },
-    { label: '⚡ 11kW 고성능', query: '11kW' },
-    { label: '🔥 PLC 화재예방', query: '화재' },
-    { label: '🏠 가정용 홈충전기', query: '가정용' },
-    { label: '🏢 아파트 충전기', query: '아파트' },
-    { label: '⚡ 50kW 급속', query: '50kW' },
-    { label: '🛡️ 무상 A/S 4년', query: '무상' },
-    { label: '스필', query: '스필' },
+    { label: '스필 7kW', query: '스필 7kw' },
+    { label: '스필 11kW', query: '스필 11kw' },
+    { label: '쿨차지', query: '쿨차지' },
+    { label: '차지고', query: '차지고' },
+    { label: '일렉트리', query: '일렉트리' },
+    { label: '가정용 홈충전기', query: '가정용' },
+    { label: '상업용 급속', query: '상업용 급속' },
+    { label: '50kW 급속', query: '50kW' },
+    { label: '화재예방 PLC', query: '화재' },
+    { label: '무상 A/S 4년', query: '4년무상' },
   ];
 
   const handleSelectProduct = (product: typeof allSearchableProducts[0]) => {
@@ -263,17 +257,10 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 <div
                   key={p.id}
                   onClick={() => handleSelectProduct(p)}
-                  className="group bg-slate-50 hover:bg-emerald-50/50 p-3.5 rounded-2xl border border-slate-200 hover:border-emerald-300 transition-all duration-200 cursor-pointer flex gap-3.5 items-center"
+                  className="group bg-slate-50 hover:bg-emerald-50/70 p-3.5 rounded-2xl border border-slate-200/80 hover:border-emerald-400 transition-all duration-200 cursor-pointer flex gap-3.5 items-center shadow-2xs hover:shadow-xs"
                 >
-                  <div className="w-20 h-20 rounded-xl bg-white p-1.5 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
-                    <img
-                      src={getOptimizedImageUrl(p.image, { width: 160, format: 'webp' })}
-                      alt={p.name}
-                      referrerPolicy="no-referrer"
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                    />
+                  <div className="w-12 h-12 rounded-xl bg-emerald-100/80 text-emerald-700 border border-emerald-200/60 shrink-0 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <Zap className="w-6 h-6" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center gap-1.5">

@@ -17,6 +17,8 @@ interface ProductsSectionProps {
   onAddToCart?: (product: Product, selectedOptions?: { groupTitle: string; optionName: string; optionPrice: number }[], totalPrice?: number) => void;
   onPageChange?: (page: any) => void;
   onOpenPayment?: (items: CartItem[]) => void;
+  detailProduct?: Product | null;
+  onSelectDetailProduct?: (product: Product | null) => void;
 }
 
 export const isResidentialProduct = (p: Product) => {
@@ -44,13 +46,25 @@ export default function ProductsSection({
   onOpenCms,
   onAddToCart,
   onPageChange,
-  onOpenPayment
+  onOpenPayment,
+  detailProduct: detailProductProp,
+  onSelectDetailProduct
 }: ProductsSectionProps) {
   // Main Category Tab: 'residential' (아파트/가정용) vs 'commercial' (상업시설/공용) vs 'all' (전체)
   const [mainTab, setMainTab] = useState<'all' | 'residential' | 'commercial'>('all');
   const [subFilter, setSubFilter] = useState<string>('전체');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [detailModalProduct, setDetailModalProduct] = useState<Product | null>(null);
+  const [internalDetailModalProduct, setInternalDetailModalProduct] = useState<Product | null>(null);
+
+  const detailModalProduct = detailProductProp !== undefined ? detailProductProp : internalDetailModalProduct;
+
+  const setDetailModalProduct = (prod: Product | null) => {
+    if (onSelectDetailProduct) {
+      onSelectDetailProduct(prod);
+    } else {
+      setInternalDetailModalProduct(prod);
+    }
+  };
 
   const safeProducts = Array.isArray(products) ? products.filter(Boolean) : [];
   const currentSelected = safeProducts.length > 0 

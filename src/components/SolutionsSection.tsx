@@ -392,6 +392,8 @@ interface SolutionsSectionProps {
   onOpenCartModal?: () => void;
   onOpenPayment?: (items: any[]) => void;
   user?: any;
+  activeDetailProduct?: SolutionProduct | null;
+  onSelectDetailProduct?: (product: SolutionProduct | null) => void;
 }
 
 export default function SolutionsSection({ 
@@ -412,7 +414,9 @@ export default function SolutionsSection({
   onSelectParkingCapacity,
   onAddToCart,
   onOpenCartModal,
-  onOpenPayment
+  onOpenPayment,
+  activeDetailProduct: activeDetailProductProp,
+  onSelectDetailProduct
  }: SolutionsSectionProps) {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
     try {
@@ -449,13 +453,36 @@ export default function SolutionsSection({
   const canEdit = isEditMode || isAdminLoggedIn || Boolean(user?.isAdmin || user?.email === 'sy.car.com@gmail.com' || user?.role === 'admin');
 
   const [activeTab, setActiveTab] = useState<'ALL' | 'Commercial' | 'Residential' | 'ParkingLot'>(defaultActiveTab);
+  
+  useEffect(() => {
+    if (defaultActiveTab) {
+      setActiveTab(defaultActiveTab);
+    }
+  }, [defaultActiveTab]);
+
   const [selectedProductIds, setSelectedProductIds] = useState<Record<string, string>>({});
   const [visualViewerMode, setVisualViewerMode] = useState<Record<string, 'product' | 'catalog'>>({});
   const [solutionTabs, setSolutionTabs] = useState<Record<string, 'specs' | 'infographic'>>({});
   const [localBannerModes, setLocalBannerModes] = useState<Record<string, 'cover' | 'unfold'>>({});
   const [localDetailModes, setLocalDetailModes] = useState<Record<string, 'scroll' | 'unfold'>>({});
   const [sortBy, setSortBy] = useState<'new' | 'priceAsc' | 'priceDesc' | 'popular'>('new');
-  const [activeDetailProduct, setActiveDetailProduct] = useState<SolutionProduct | null>(null);
+  const [internalActiveDetailProduct, setInternalActiveDetailProduct] = useState<SolutionProduct | null>(null);
+
+  const activeDetailProduct = activeDetailProductProp !== undefined ? activeDetailProductProp : internalActiveDetailProduct;
+
+  const setActiveDetailProduct = (prodOrUpdater: SolutionProduct | null | ((prev: SolutionProduct | null) => SolutionProduct | null)) => {
+    let nextVal: SolutionProduct | null;
+    if (typeof prodOrUpdater === 'function') {
+      nextVal = prodOrUpdater(activeDetailProduct);
+    } else {
+      nextVal = prodOrUpdater;
+    }
+    if (onSelectDetailProduct) {
+      onSelectDetailProduct(nextVal);
+    } else {
+      setInternalActiveDetailProduct(nextVal);
+    }
+  };
   const [productDetails, setProductDetails] = useState<Record<string, ProductDetailItem>>(() => {
     // Immediate fallback initialization so incognito/guest modes render instantly without waiting for Firestore
     const base: Record<string, ProductDetailItem> = { ...DEFAULT_PRODUCT_DETAILS };
@@ -3788,7 +3815,10 @@ export default function SolutionsSection({
           <div className="pt-4 flex justify-center">
             <div className="inline-flex flex-wrap sm:flex-nowrap justify-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl max-w-full overflow-x-auto scrollbar-none shadow-inner border border-slate-200/50">
               <button
-                onClick={() => setActiveTab('ALL')}
+                onClick={() => {
+                  setActiveTab('ALL');
+                  onPageChange?.('solutions');
+                }}
                 className={`px-5 py-3 rounded-xl text-sm font-black transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer min-h-[44px] ${
                   activeTab === 'ALL'
                     ? 'bg-slate-900 text-white shadow-md'
@@ -3801,7 +3831,12 @@ export default function SolutionsSection({
               {solutions.map((sol) => (
                 <button
                   key={sol.id}
-                  onClick={() => setActiveTab(sol.category)}
+                  onClick={() => {
+                    setActiveTab(sol.category);
+                    if (sol.category === 'Commercial') onPageChange?.('sol_commercial');
+                    else if (sol.category === 'Residential') onPageChange?.('sol_residential');
+                    else if (sol.category === 'ParkingLot') onPageChange?.('sol_parking');
+                  }}
                   className={`px-5 py-3 rounded-xl text-sm font-black transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer min-h-[44px] ${
                     activeTab === sol.category
                       ? 'bg-blue-600 text-white shadow-md'
