@@ -3562,9 +3562,9 @@ export default function SolutionsSection({
               if (detailUrls.length > 0) {
                 if (!isEditMode) {
                   return (
-                    <div className="space-y-4 w-full max-w-[860px] mx-auto">
+                    <div className="space-y-4 w-full max-w-[960px] mx-auto">
                       {detailUrls.map((url, idx) => (
-                        <div key={idx} className="w-full max-w-[860px] mx-auto">
+                        <div key={idx} className="w-full max-w-[960px] mx-auto">
                           <PdfImageRenderer 
                             fileUrl={url} 
                             fileName={detailNames[idx] || `${activeDetailProduct.name} 상세페이지 이미지 ${idx + 1}`} 

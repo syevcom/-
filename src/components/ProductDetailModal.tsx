@@ -1090,9 +1090,9 @@ export default function ProductDetailModal({
               }
 
               return (
-                <div className="space-y-4 w-full max-w-[860px] mx-auto">
+                <div className="space-y-4 w-full max-w-[960px] mx-auto">
                   {detailUrls.map((url, idx) => (
-                    <div key={idx} className="w-full max-w-[860px] mx-auto rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 shadow-none sm:shadow-sm bg-white">
+                    <div key={idx} className="w-full max-w-[960px] mx-auto rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 shadow-none sm:shadow-sm bg-white">
                       <PdfImageRenderer
                         fileUrl={url}
                         fileName={detailNames[idx] || `${product.name} 상세페이지 이미지 ${idx + 1}`}

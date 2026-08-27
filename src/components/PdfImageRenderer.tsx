@@ -136,18 +136,20 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
       <>
         <div className="w-full flex justify-center py-0 sm:py-1">
           <div 
-            className="w-full max-w-[860px] mx-auto rounded-none sm:rounded-2xl bg-white relative group cursor-zoom-in"
-            style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '860px' } : { width: '100%', maxWidth: '860px' }}
+            className="w-full max-w-[960px] mx-auto rounded-none sm:rounded-2xl bg-white relative group cursor-zoom-in"
+            style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '960px' } : { width: '100%', maxWidth: '960px' }}
             onClick={() => setIsFullscreen(true)}
           >
             <DetailPageImage
               src={imageUrl}
+              unoptimized={true}
               fallbackSrc={getFallbackForUrl(imageUrl)}
               alt={`${brandName} 카탈로그`}
-              className="w-full max-w-[860px] h-auto mx-auto block select-none"
+              className="w-full h-auto mx-auto block select-none high-res-detail-img"
               referrerPolicy="no-referrer"
               loading="eager"
               decoding="sync"
+              style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
               onError={onError}
             />
             
@@ -181,15 +183,17 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
               </button>
             </div>
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-6 cursor-zoom-out flex justify-center items-start">
-              <div className="w-full max-w-[860px] mx-auto h-auto">
+              <div className="w-full max-w-5xl mx-auto h-auto">
                 <DetailPageImage
                   src={imageUrl}
+                  unoptimized={true}
                   fallbackSrc={getFallbackForUrl(imageUrl)}
                   alt={`${brandName} Full Catalog`}
-                  className="w-full max-w-[860px] h-auto mx-auto block rounded-lg shadow-2xl"
+                  className="w-full h-auto mx-auto block rounded-lg shadow-2xl high-res-detail-img"
                   referrerPolicy="no-referrer"
                   loading="eager"
                   decoding="sync"
+                  style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
                 />
               </div>
             </div>
@@ -293,17 +297,19 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
       {/* Main Image Stage - Unlimited height for natural vertical scrolling */}
       <div className="bg-slate-900/40 p-2 sm:p-4 overflow-visible flex items-start justify-center h-auto relative">
         <div 
-          className="w-full max-w-[860px] mx-auto transition-all duration-200 ease-out shadow-2xl rounded-lg bg-white"
-          style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '860px' } : { width: '100%', maxWidth: '860px' }}
+          className="w-full max-w-[960px] mx-auto transition-all duration-200 ease-out shadow-2xl rounded-lg bg-white"
+          style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '960px' } : { width: '100%', maxWidth: '960px' }}
         >
           <DetailPageImage
             src={imageUrl}
+            unoptimized={true}
             fallbackSrc={getFallbackForUrl(imageUrl)}
             alt={`${brandName} 카탈로그 이미지`}
-            className="w-full max-w-[860px] h-auto mx-auto block pointer-events-none"
+            className="w-full h-auto mx-auto block pointer-events-none high-res-detail-img"
             referrerPolicy="no-referrer"
-            loading="lazy"
-            decoding="async"
+            loading="eager"
+            decoding="sync"
+            style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
           />
         </div>
       </div>
@@ -331,15 +337,17 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
             </button>
           </div>
           <div className="flex-1 overflow-y-auto overflow-x-hidden flex justify-center items-start p-4 sm:p-6">
-            <div className="w-full max-w-[860px] mx-auto h-auto">
+            <div className="w-full max-w-5xl mx-auto h-auto">
               <DetailPageImage
                 src={imageUrl}
+                unoptimized={true}
                 fallbackSrc={getFallbackForUrl(imageUrl)}
                 alt="Full Catalog"
-                className="w-full max-w-[860px] h-auto mx-auto block rounded-xl shadow-2xl"
+                className="w-full h-auto mx-auto block rounded-xl shadow-2xl high-res-detail-img"
                 referrerPolicy="no-referrer"
-                loading="lazy"
-                decoding="async"
+                loading="eager"
+                decoding="sync"
+                style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
               />
             </div>
           </div>
