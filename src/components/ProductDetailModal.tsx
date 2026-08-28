@@ -544,14 +544,15 @@ export default function ProductDetailModal({
             {/* Left: Product Image & Badges */}
             <div className="md:col-span-5 space-y-4">
               <div className="relative aspect-square bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden flex items-center justify-center p-4">
-                <DetailPageImage
-                  src={selectedDisplayImage || product.image}
-                  alt={product.name}
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-contain"
-                />
+<DetailPageImage
+  src={selectedDisplayImage || (product as any).detailImage || product.image}
+  fallbackSrc={product.image}
+  alt={product.name}
+  referrerPolicy="no-referrer"
+  loading="eager"
+  decoding="async"
+  className="w-full h-auto object-contain block"
+/>
                 
                 {product.plcSupported && (
                   <span className="absolute top-3 left-3 bg-red-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-md flex items-center gap-1 shadow-sm">
