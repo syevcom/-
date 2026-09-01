@@ -1,0 +1,437 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 5200" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;">
+  <defs>
+    <style>
+      .bold { font-weight: 800; }
+      .extrabold { font-weight: 900; }
+      .medium { font-weight: 500; }
+      .center { text-anchor: middle; }
+      .start { text-anchor: start; }
+      .end { text-anchor: end; }
+      .title { font-size: 46px; fill: #0f172a; }
+      .subtitle { font-size: 20px; fill: #64748b; }
+      .sectitle { font-size: 34px; fill: #0f172a; font-weight: 900; }
+      .secsub { font-size: 18px; fill: #64748b; font-weight: 600; }
+      .bodytext { font-size: 19px; fill: #334155; line-height: 1.6; }
+      .badge { font-size: 18px; fill: #ffffff; font-weight: 800; }
+      .table-header { font-size: 19px; font-weight: 900; fill: #0f172a; }
+      .table-cell { font-size: 17px; fill: #334155; }
+    </style>
+    
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.08" />
+    </filter>
+  </defs>
+
+  <!-- 1. HEADER (SY.com 에스와이차저) -->
+  <g transform="translate(500, 70)">
+    <g transform="translate(0, 0)">
+      <!-- SY Logo -->
+      <rect x="-140" y="0" width="130" height="75" rx="8" fill="#1e3a8a"/>
+      <text x="-75" y="52" class="extrabold center" font-size="44" fill="#ffffff" letter-spacing="-1">SY</text>
+      <circle cx="-18" cy="18" r="8" fill="#22c55e"/>
+      <path d="M -15,10 L 0,22 L 15,22 L 20,38 L -25,38 Z" fill="#1e3a8a"/>
+      <circle cx="-12" cy="40" r="6" fill="#0f172a"/>
+      <circle cx="12" cy="40" r="6" fill="#0f172a"/>
+      <text x="35" y="62" class="extrabold start" font-size="28" fill="#0f172a">.com</text>
+      <text x="0" y="115" class="bold center" font-size="28" fill="#1e293b" letter-spacing="4">에스와이차저</text>
+    </g>
+  </g>
+
+  <!-- 2. INSTALLATION GALLERY (6-GRID) -->
+  <g transform="translate(50, 230)">
+    <!-- Photo Cards with 7kW Badges -->
+    <g transform="translate(0, 0)">
+      <!-- Row 1 -->
+      <rect x="0" y="0" width="280" height="210" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+      <rect x="15" y="15" width="250" height="180" rx="6" fill="#1e293b"/>
+      <text x="140" y="110" class="bold center" font-size="16" fill="#94a3b8">벽부형 설치 1</text>
+      <g transform="translate(10, 150)">
+        <polygon points="10,0 22,0 14,24 26,24 8,50 14,28 4,28" fill="#eab308"/>
+        <text x="32" y="36" class="extrabold start" font-size="22" fill="#eab308">7<tspan font-size="15">kW</tspan></text>
+      </g>
+
+      <rect x="310" y="0" width="280" height="210" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+      <rect x="325" y="15" width="250" height="180" rx="6" fill="#334155"/>
+      <text x="450" y="110" class="bold center" font-size="16" fill="#94a3b8">지하주차장 스탠드 2</text>
+      <g transform="translate(320, 150)">
+        <polygon points="10,0 22,0 14,24 26,24 8,50 14,28 4,28" fill="#eab308"/>
+        <text x="32" y="36" class="extrabold start" font-size="22" fill="#eab308">7<tspan font-size="15">kW</tspan></text>
+      </g>
+
+      <rect x="620" y="0" width="280" height="210" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+      <rect x="635" y="15" width="250" height="180" rx="6" fill="#1e293b"/>
+      <text x="760" y="110" class="bold center" font-size="16" fill="#94a3b8">상업빌딩 연속 충전존 3</text>
+      <g transform="translate(630, 150)">
+        <polygon points="10,0 22,0 14,24 26,24 8,50 14,28 4,28" fill="#eab308"/>
+        <text x="32" y="36" class="extrabold start" font-size="22" fill="#eab308">7<tspan font-size="15">kW</tspan></text>
+      </g>
+
+      <!-- Row 2 -->
+      <rect x="0" y="225" width="280" height="210" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+      <rect x="15" y="240" width="250" height="180" rx="6" fill="#1e293b"/>
+      <text x="140" y="335" class="bold center" font-size="16" fill="#94a3b8">실외 볼라드 4</text>
+      <g transform="translate(10, 375)">
+        <polygon points="10,0 22,0 14,24 26,24 8,50 14,28 4,28" fill="#eab308"/>
+        <text x="32" y="36" class="extrabold start" font-size="22" fill="#eab308">7<tspan font-size="15">kW</tspan></text>
+      </g>
+
+      <rect x="310" y="225" width="280" height="210" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+      <rect x="325" y="240" width="250" height="180" rx="6" fill="#334155"/>
+      <text x="450" y="335" class="bold center" font-size="16" fill="#94a3b8">실외 벽부형 5</text>
+      <g transform="translate(320, 375)">
+        <polygon points="10,0 22,0 14,24 26,24 8,50 14,28 4,28" fill="#eab308"/>
+        <text x="32" y="36" class="extrabold start" font-size="22" fill="#eab308">7<tspan font-size="15">kW</tspan></text>
+      </g>
+
+      <rect x="620" y="225" width="280" height="210" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+      <rect x="635" y="240" width="250" height="180" rx="6" fill="#1e293b"/>
+      <text x="760" y="335" class="bold center" font-size="16" fill="#94a3b8">주차타워 시설 6</text>
+      <g transform="translate(630, 375)">
+        <polygon points="10,0 22,0 14,24 26,24 8,50 14,28 4,28" fill="#eab308"/>
+        <text x="32" y="36" class="extrabold start" font-size="22" fill="#eab308">7<tspan font-size="15">kW</tspan></text>
+      </g>
+    </g>
+  </g>
+
+  <!-- 3. HERO BANNER -->
+  <g transform="translate(50, 700)">
+    <rect width="900" height="340" rx="16" fill="#0f172a"/>
+    <rect width="900" height="340" rx="16" fill="url(#cardGrad)" opacity="0.9"/>
+    <!-- Modern Garage EV Charging Illustration -->
+    <g transform="translate(100, 170)">
+      <circle cx="350" cy="0" r="130" fill="#0284c7" opacity="0.1"/>
+      <path d="M 120,-30 L 320,-30 L 380,40 L 40,40 Z" fill="#38bdf8" opacity="0.8"/>
+      <circle cx="100" cy="50" r="28" fill="#020617" stroke="#64748b" stroke-width="6"/>
+      <circle cx="320" cy="50" r="28" fill="#020617" stroke="#64748b" stroke-width="6"/>
+      <rect x="520" y="-90" width="70" height="160" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
+      <text x="555" y="-30" class="extrabold center" font-size="15" fill="#38bdf8">7kW</text>
+      <text x="555" y="-10" class="bold center" font-size="11" fill="#22c55e">PLC BIZ</text>
+      <path d="M 520,-20 Q 450,80 340,30" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <text x="450" y="300" class="bold center" font-size="18" fill="#94a3b8">고품격 공간에 어울리는 프리미엄 상업용·수익형 전기차 충전기</text>
+  </g>
+
+  <!-- 4. PRODUCT TITLE & SUMMARY -->
+  <g transform="translate(500, 1100)">
+    <rect x="-120" y="0" width="240" height="38" rx="19" fill="#fee2e2"/>
+    <text x="0" y="25" class="extrabold center" font-size="19" fill="#dc2626">화재 예방 충전기</text>
+    
+    <text x="0" y="80" class="extrabold center" font-size="44" fill="#0f172a" letter-spacing="-1">쿨차지 Biz 충전기 <tspan fill="#0284c7">(PLC)</tspan></text>
+    
+    <text x="0" y="125" class="medium center" font-size="18" fill="#475569">NFC리더 자체 개발 · 삼성페이 / 애플페이 / 후불교통카드 지원, 국내 최고 IP65/68 등급</text>
+    <text x="0" y="155" class="medium center" font-size="18" fill="#475569">산업용 규격 AP 적용 및 고내구성 설계</text>
+    <text x="0" y="185" class="bold center" font-size="18" fill="#0369a1">KC안전인증, 형식승인, 환경부 ISO15118 / OCPP 통신프로토콜 시험 완료</text>
+    
+    <line x1="-400" y1="230" x2="400" y2="230" stroke="#e2e8f0" stroke-width="2"/>
+  </g>
+
+  <!-- 5. SECTION 1: 산업용 규격 (ARM Cortex A55) -->
+  <g transform="translate(50, 1370)">
+    <text x="450" y="40" class="extrabold center" font-size="34" fill="#0f172a">산업용 규격</text>
+    <line x1="390" y1="55" x2="510" y2="55" stroke="#0f172a" stroke-width="4"/>
+    <text x="450" y="85" class="bold center" font-size="17" fill="#64748b">Industrial 등급 AP 탑재</text>
+    
+    <text x="450" y="130" class="extrabold center" font-size="24" fill="#1e293b">ARM Cortex A55 Quad-core</text>
+
+    <!-- Mainboard Visual Box -->
+    <rect x="50" y="155" width="800" height="240" rx="14" fill="#1e293b" filter="url(#cardShadow)"/>
+    <g transform="translate(80, 175)">
+      <!-- Board Details -->
+      <rect x="0" y="0" width="300" height="200" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+      <rect x="80" y="50" width="140" height="100" rx="6" fill="#18181b" stroke="#94a3b8" stroke-width="2"/>
+      <text x="150" y="95" class="bold center" font-size="15" fill="#f8fafc">ARM Cortex</text>
+      <text x="150" y="115" class="bold center" font-size="14" fill="#38bdf8">A55 Quad-Core</text>
+      <text x="150" y="135" class="medium center" font-size="11" fill="#94a3b8">2.0GHz / 16GB</text>
+
+      <!-- Port Matrix UI -->
+      <g transform="translate(330, 10)">
+        <rect x="0" y="0" width="390" height="180" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+        <rect x="0" y="0" width="390" height="30" fill="#1e3a8a"/>
+        <text x="15" y="21" class="bold start" font-size="13" fill="#ffffff">SYSTEM INTERFACE STATUS</text>
+        <text x="375" y="21" class="bold end" font-size="13" fill="#38bdf8">ONLINE</text>
+        
+        <text x="20" y="60" class="medium start" font-size="14" fill="#94a3b8">LAN / RJ45 Gigabit Ethernet</text>
+        <text x="370" y="60" class="bold end" font-size="14" fill="#22c55e">ACTIVE</text>
+        
+        <text x="20" y="90" class="medium start" font-size="14" fill="#94a3b8">PLC ISO 15118 Modem (QCA7005)</text>
+        <text x="370" y="90" class="bold end" font-size="14" fill="#22c55e">CONNECTED</text>
+
+        <text x="20" y="120" class="medium start" font-size="14" fill="#94a3b8">Non-Contact CT Current Sensor</text>
+        <text x="370" y="120" class="bold end" font-size="14" fill="#38bdf8">READY</text>
+
+        <text x="20" y="150" class="medium start" font-size="14" fill="#94a3b8">Operating Temperature</text>
+        <text x="370" y="150" class="bold end" font-size="14" fill="#f59e0b">-40 ℃ ~ +80 ℃</text>
+      </g>
+    </g>
+
+    <!-- Key Bullet Points -->
+    <g transform="translate(450, 440)">
+      <text x="0" y="0" class="extrabold center" font-size="22" fill="#0f172a">산업용 등급 AP 탑재로 내구성 대폭 강화</text>
+      <text x="0" y="32" class="bold center" font-size="20" fill="#dc2626">칩셋 동작온도 -40 ℃ ~ 80 ℃</text>
+      
+      <g transform="translate(0, 75)">
+        <text x="0" y="0" class="medium center" font-size="18" fill="#475569">규격대비 고용량 부품 적용 설계</text>
+        <text x="0" y="30" class="medium center" font-size="18" fill="#475569">철저한 과전류 · 누전 고장방지 설계</text>
+        <text x="0" y="60" class="medium center" font-size="18" fill="#475569">정밀 비접촉식 CT 센서 적용</text>
+        <text x="0" y="90" class="medium center" font-size="18" fill="#475569">염해 및 부식 방지 팩토리 모드 지원</text>
+      </g>
+    </g>
+    <line x1="50" y1="670" x2="850" y2="670" stroke="#e2e8f0" stroke-width="2"/>
+  </g>
+
+  <!-- 6. SECTION 2: 삼성/애플페이 교통카드 (NFC) -->
+  <g transform="translate(50, 2100)">
+    <text x="450" y="40" class="extrabold center" font-size="34" fill="#0f172a">삼성 / 애플페이 교통카드</text>
+    <line x1="360" y1="55" x2="540" y2="55" stroke="#0f172a" stroke-width="4"/>
+    <text x="450" y="85" class="bold center" font-size="17" fill="#64748b">NFC 리더 자체 개발</text>
+    <text x="450" y="115" class="bold center" font-size="18" fill="#0284c7">삼성페이 · 애플페이 · 페이온 후불교통카드 완벽 지원</text>
+
+    <!-- NFC Module Visual Card -->
+    <rect x="220" y="145" width="460" height="230" rx="14" fill="#0f172a" filter="url(#cardShadow)"/>
+    <g transform="translate(250, 175)">
+      <rect x="0" y="0" width="400" height="170" rx="10" fill="#047857" stroke="#10b981" stroke-width="2"/>
+      <rect x="130" y="30" width="140" height="100" rx="6" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+      <text x="200" y="70" class="bold center" font-size="15" fill="#0f172a">KOOLSIGN</text>
+      <text x="200" y="90" class="extrabold center" font-size="12" fill="#0369a1">NFC MODULE</text>
+      <text x="200" y="110" class="medium center" font-size="10" fill="#475569">PN7160 / RISC</text>
+      
+      <!-- Contactless waves -->
+      <path d="M 40,65 Q 25,85 40,105" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 50,55 Q 30,85 50,115" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 60,45 Q 35,85 60,125" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- NFC Specs -->
+    <g transform="translate(450, 415)">
+      <text x="0" y="0" class="bold center" font-size="19" fill="#1e293b">8bit RISC MCU &amp; NXP PN7160 Chipset</text>
+      <text x="0" y="30" class="medium center" font-size="18" fill="#475569">ISO 14443A/B, NFC716, Mifare 표준 준수</text>
+      <text x="0" y="60" class="extrabold center" font-size="19" fill="#0369a1">모바일 터치 결제 (삼성페이, 애플페이, 신용카드)</text>
+    </g>
+    <line x1="50" y1="530" x2="850" y2="530" stroke="#e2e8f0" stroke-width="2"/>
+  </g>
+
+  <!-- 7. SECTION 3: 국내 최고 IP65 등급 이상 & 공인 성적서 -->
+  <g transform="translate(50, 2690)">
+    <text x="450" y="40" class="extrabold center" font-size="34" fill="#0f172a">국내 최고 IP65등급 이상</text>
+    <line x1="370" y1="55" x2="530" y2="55" stroke="#0f172a" stroke-width="4"/>
+    <text x="450" y="85" class="bold center" font-size="18" fill="#0369a1">본체 IP65 및 난연 코팅 / 커플러 IP68 등급</text>
+
+    <!-- Product Render & Coupler -->
+    <g transform="translate(100, 120)">
+      <!-- Main Charger Unit Box -->
+      <rect x="30" y="0" width="300" height="260" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
+      <rect x="70" y="25" width="220" height="210" rx="20" fill="#18181b" stroke="#38bdf8" stroke-width="3"/>
+      <circle cx="180" cy="100" r="36" fill="none" stroke="#38bdf8" stroke-width="6"/>
+      <text x="180" y="108" class="extrabold center" font-size="20" fill="#38bdf8">IP65</text>
+      <text x="180" y="180" class="bold center" font-size="14" fill="#ffffff">본체 방수/방진/난연</text>
+
+      <!-- Coupler Unit Box -->
+      <rect x="370" y="0" width="300" height="260" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" filter="url(#cardShadow)"/>
+      <g transform="translate(420, 40)">
+        <rect x="30" y="40" width="140" height="70" rx="10" fill="#334155"/>
+        <rect x="140" y="25" width="45" height="100" rx="14" fill="#0f172a" stroke="#64748b" stroke-width="3"/>
+        <text x="100" y="150" class="extrabold center" font-size="20" fill="#0ea5e9">IP68</text>
+        <text x="100" y="175" class="bold center" font-size="14" fill="#0f172a">커플러(충전건) 최고등급</text>
+      </g>
+    </g>
+
+    <!-- Certifications Badges (KTL & KERI 성적서) -->
+    <g transform="translate(120, 420)">
+      <rect x="0" y="0" width="340" height="120" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" filter="url(#cardShadow)"/>
+      <text x="170" y="38" class="extrabold center" font-size="17" fill="#0f172a">한국산업기술시험원 (KTL)</text>
+      <text x="170" y="68" class="bold center" font-size="15" fill="#0369a1">공인 시험성적서 적합 인증</text>
+      <text x="170" y="94" class="medium center" font-size="13" fill="#64748b">IP65 본체 방수·방진 성능 입증</text>
+
+      <rect x="380" y="0" width="340" height="120" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" filter="url(#cardShadow)"/>
+      <text x="550" y="38" class="extrabold center" font-size="17" fill="#0f172a">송암인증센터 (KTL/KERI)</text>
+      <text x="550" y="68" class="bold center" font-size="15" fill="#0369a1">전기차 충전장치 형식승인 완료</text>
+      <text x="550" y="94" class="medium center" font-size="13" fill="#64748b">KC안전인증 및 계량법 적합</text>
+    </g>
+    <line x1="50" y1="580" x2="850" y2="580" stroke="#e2e8f0" stroke-width="2"/>
+  </g>
+
+  <!-- 8. SECTION 4: 2024년 환경부 화재예방형 충전기 기준 발표 -->
+  <g transform="translate(50, 3330)">
+    <text x="450" y="40" class="extrabold center" font-size="32" fill="#0f172a">2024년 환경부 화재예방형 충전기 기준 발표</text>
+    <line x1="280" y1="55" x2="620" y2="55" stroke="#0f172a" stroke-width="4"/>
+    <text x="450" y="85" class="medium center" font-size="16" fill="#475569">충전 중 배터리 상태정보(전압, 전류, 온도, SoC 등)를 수집하여 CSMS에 전송하고,</text>
+    <text x="450" y="110" class="bold center" font-size="16" fill="#0369a1">충전 제어 정보를 수신하여 실시간 안전 충전을 수행합니다.</text>
+
+    <!-- 4 Features Grid -->
+    <g transform="translate(60, 140)">
+      <!-- 1. 오토 스위칭 -->
+      <rect x="0" y="0" width="370" height="110" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <circle cx="45" cy="55" r="24" fill="#e0f2fe"/>
+      <text x="45" y="63" class="bold center" font-size="20" fill="#0284c7">🔄</text>
+      <text x="85" y="45" class="extrabold start" font-size="18" fill="#0f172a">오토 스위칭</text>
+      <text x="85" y="75" class="medium start" font-size="13" fill="#475569">ISO 15118 충전 실패 시</text>
+      <text x="85" y="93" class="medium start" font-size="13" fill="#475569">IEC 61851-1 PWM 자동 전환</text>
+
+      <!-- 2. 오토 스탑 -->
+      <rect x="410" y="0" width="370" height="110" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <circle cx="455" cy="55" r="24" fill="#fee2e2"/>
+      <text x="455" y="63" class="bold center" font-size="20" fill="#dc2626">🛑</text>
+      <text x="495" y="45" class="extrabold start" font-size="18" fill="#0f172a">오토 스탑</text>
+      <text x="495" y="75" class="medium start" font-size="13" fill="#475569">SOC 85% 도달 시 충전 중단</text>
+      <text x="495" y="93" class="medium start" font-size="13" fill="#475569">재충전 금지 (최대 충전량 설정 가능)</text>
+
+      <!-- 3. OTA 업데이트 -->
+      <rect x="0" y="125" width="370" height="110" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <circle cx="45" cy="180" r="24" fill="#dcfce7"/>
+      <text x="45" y="188" class="bold center" font-size="20" fill="#16a34a">☁️</text>
+      <text x="85" y="170" class="extrabold start" font-size="18" fill="#0f172a">OTA 원격 업데이트</text>
+      <text x="85" y="200" class="medium start" font-size="13" fill="#475569">SECC 및 EVSE F/W 무선 업데이트</text>
+      <text x="85" y="218" class="medium start" font-size="13" fill="#475569">최신 보안 및 프로토콜 자동 유지</text>
+
+      <!-- 4. OBD2 지원 -->
+      <rect x="410" y="125" width="370" height="110" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <circle cx="455" cy="180" r="24" fill="#fef3c7"/>
+      <text x="455" y="188" class="bold center" font-size="20" fill="#d97706">🚗</text>
+      <text x="495" y="170" class="extrabold start" font-size="18" fill="#0f172a">OBD2 인터페이스 지원</text>
+      <text x="495" y="200" class="medium start" font-size="13" fill="#475569">OBD2 기반 실시간 BMS 정보 수집</text>
+      <text x="495" y="218" class="medium start" font-size="13" fill="#475569">BT / Wi-Fi 데이터 안전 전송</text>
+    </g>
+    <line x1="50" y1="410" x2="850" y2="410" stroke="#e2e8f0" stroke-width="2"/>
+  </g>
+
+  <!-- 9. SECTION 5: SPEC. 제원표 -->
+  <g transform="translate(50, 3810)">
+    <text x="450" y="40" class="extrabold center" font-size="34" fill="#0f172a">SPEC.</text>
+    <line x1="420" y1="55" x2="480" y2="55" stroke="#0f172a" stroke-width="4"/>
+
+    <!-- SPEC Table -->
+    <g transform="translate(50, 80)">
+      <!-- Header Row -->
+      <rect x="0" y="0" width="800" height="42" fill="#0f172a"/>
+      <text x="120" y="27" class="bold center" font-size="16" fill="#ffffff">항목 (Item)</text>
+      <text x="480" y="27" class="bold center" font-size="16" fill="#ffffff">상세 사양 (Specification)</text>
+
+      <!-- Row 1: CPU -->
+      <rect x="0" y="42" width="800" height="38" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="67" class="bold center" font-size="15" fill="#0f172a">CPU</text>
+      <text x="260" y="67" class="medium start" font-size="15" fill="#334155">ARM Cortex-A55, Industrial-grade, Quadcore 2.0GHz</text>
+
+      <!-- Row 2: RAM -->
+      <rect x="0" y="80" width="800" height="38" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="105" class="bold center" font-size="15" fill="#0f172a">RAM</text>
+      <text x="260" y="105" class="medium start" font-size="15" fill="#334155">LPDDR4 16GB</text>
+
+      <!-- Row 3: PLC/RLC -->
+      <rect x="0" y="118" width="800" height="38" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="143" class="bold center" font-size="15" fill="#0f172a">PLC / RLC</text>
+      <text x="260" y="143" class="medium start" font-size="15" fill="#334155">QCA7005, Qualcomm HPGP, 9.8Mbps PHY rate</text>
+
+      <!-- Row 4: NETWORK -->
+      <rect x="0" y="156" width="800" height="42" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="182" class="bold center" font-size="15" fill="#0f172a">NETWORK</text>
+      <text x="260" y="174" class="medium start" font-size="14" fill="#334155"><tspan font-weight="700">Internal:</tspan> RJ45 Gigabit, BLE5.0, Wi-Fi combo</text>
+      <text x="260" y="191" class="medium start" font-size="14" fill="#64748b"><tspan font-weight="700">External:</tspan> LTE Modem (Optional)</text>
+
+      <!-- Row 5: NFC -->
+      <rect x="0" y="198" width="800" height="38" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="223" class="bold center" font-size="15" fill="#0f172a">NFC</text>
+      <text x="260" y="223" class="medium start" font-size="15" fill="#334155">In-house 개발 13.56MHz RFID R/W, Smart Card</text>
+
+      <!-- Row 6: Input -->
+      <rect x="0" y="236" width="800" height="38" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="261" class="bold center" font-size="15" fill="#0f172a">Input V(AC)</text>
+      <text x="260" y="261" class="medium start" font-size="15" fill="#334155">AC 220V ± 10%, 50/60Hz</text>
+
+      <!-- Row 7: Output -->
+      <rect x="0" y="274" width="800" height="38" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="299" class="bold center" font-size="15" fill="#0f172a">Output Rating</text>
+      <text x="260" y="299" class="bold start" font-size="15" fill="#0369a1">220V, 32A (7kW) | 50A (11kW 고속완속)</text>
+
+      <!-- Row 8: SAFETY -->
+      <rect x="0" y="312" width="800" height="50" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="342" class="bold center" font-size="15" fill="#0f172a">SAFETY</text>
+      <text x="260" y="333" class="medium start" font-size="14" fill="#334155">Over Current, AC Input V Check, Surge / Leakage Protection</text>
+      <text x="260" y="352" class="medium start" font-size="14" fill="#334155">Short circuit protection, Over Temperature shutdown</text>
+
+      <!-- Row 9: IP -->
+      <rect x="0" y="362" width="800" height="38" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="387" class="bold center" font-size="15" fill="#0f172a">IP 등급</text>
+      <text x="260" y="387" class="bold start" font-size="15" fill="#16a34a">Body : IP65 (방우/난연) / Coupler : IP68 (최고등급)</text>
+
+      <!-- Row 10: OS -->
+      <rect x="0" y="400" width="800" height="38" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="120" y="425" class="bold center" font-size="15" fill="#0f172a">OS</text>
+      <text x="260" y="425" class="medium start" font-size="15" fill="#334155">EVSE Firmware + Android 11 OS</text>
+    </g>
+    <line x1="50" y1="560" x2="850" y2="560" stroke="#e2e8f0" stroke-width="2"/>
+  </g>
+
+  <!-- 10. SECTION 6: KCAP7PG-CL5G Vision AI & 특허 현황 -->
+  <g transform="translate(50, 4430)">
+    <text x="450" y="40" class="extrabold center" font-size="34" fill="#0f172a">KCAP7PG-CL5G</text>
+    <line x1="350" y1="55" x2="550" y2="55" stroke="#0f172a" stroke-width="4"/>
+    <text x="450" y="85" class="bold center" font-size="18" fill="#0369a1">PLC 모뎀 일체형 AC충전기 · Vision AI 기반 화재감시 / CCTV 연동</text>
+
+    <!-- 4 Vision Features Box -->
+    <g transform="translate(60, 115)">
+      <rect x="0" y="0" width="780" height="200" rx="12" fill="#0f172a"/>
+      <g transform="translate(30, 30)">
+        <text x="0" y="20" class="bold start" font-size="17" fill="#38bdf8">✓ AI 바우처 공급업체</text>
+        <text x="20" y="45" class="medium start" font-size="14" fill="#cbd5e1">K-NBTC 인증 (KISA 바이오인식시스템 성능 인증 획득)</text>
+
+        <text x="0" y="85" class="bold start" font-size="17" fill="#38bdf8">✓ Vision AI 화재감시</text>
+        <text x="20" y="110" class="medium start" font-size="14" fill="#cbd5e1">객체 탐지 · 식별 기술 기반의 열화 및 화재 조기 탐지 기능</text>
+
+        <text x="400" y="20" class="bold start" font-size="17" fill="#38bdf8">✓ 차량번호 자동 식별</text>
+        <text x="420" y="45" class="medium start" font-size="14" fill="#cbd5e1">영상 기반 차량 번호판 인식 및 주차 관제 연동 지원</text>
+
+        <text x="400" y="85" class="bold start" font-size="17" fill="#38bdf8">✓ 지능형 CCTV 연계</text>
+        <text x="420" y="110" class="medium start" font-size="14" fill="#cbd5e1">24시간 관제 VMS 시스템 및 실시간 이상 감지 연동</text>
+      </g>
+    </g>
+
+    <!-- SECTION 7: 특허 현황 -->
+    <g transform="translate(60, 360)">
+      <text x="390" y="30" class="extrabold center" font-size="26" fill="#0f172a">충전기술 특허 현황</text>
+      <line x1="330" y1="42" x2="450" y2="42" stroke="#0f172a" stroke-width="3"/>
+      
+      <g transform="translate(40, 70)">
+        <circle cx="10" cy="10" r="5" fill="#0284c7"/>
+        <text x="30" y="15" class="bold start" font-size="16" fill="#1e293b">고효율 분산 전력 공급 충전시스템 <tspan font-weight="500" fill="#64748b">(특허 제 10-2691919호)</tspan></text>
+
+        <circle cx="10" cy="45" r="5" fill="#0284c7"/>
+        <text x="30" y="50" class="bold start" font-size="16" fill="#1e293b">차량 정보 인식 기반의 플러그 앤 차지를 수행하기 위한 시스템 및 방법 <tspan font-weight="500" fill="#64748b">(특허 제 10-2686980호)</tspan></text>
+
+        <circle cx="10" cy="80" r="5" fill="#0284c7"/>
+        <text x="30" y="85" class="bold start" font-size="16" fill="#1e293b">위험 감지 기반 자동 전력차단시스템 <tspan font-weight="500" fill="#64748b">(특허 제 10-2684494호)</tspan></text>
+
+        <circle cx="10" cy="115" r="5" fill="#0284c7"/>
+        <text x="30" y="120" class="bold start" font-size="16" fill="#1e293b">가변형 충전 전력공급시스템 <tspan font-weight="500" fill="#64748b">(출원 제 10-2024-0087771호)</tspan></text>
+
+        <circle cx="10" cy="150" r="5" fill="#0284c7"/>
+        <text x="30" y="155" class="bold start" font-size="16" fill="#1e293b">화재 예방 교류충전기 <tspan font-weight="500" fill="#64748b">(출원 제 10-2024-0071919호)</tspan></text>
+      </g>
+    </g>
+
+    <!-- Footer Copyright -->
+    <g transform="translate(450, 640)">
+      <text x="0" y="0" class="medium center" font-size="14" fill="#94a3b8">© (주)에스와이닷컴 | SY.com All Rights Reserved.</text>
+      <text x="0" y="24" class="medium center" font-size="13" fill="#cbd5e1">본 카탈로그의 사양 및 내용은 품질 향상을 위해 예고 없이 변경될 수 있습니다.</text>
+    </g>
+  </g>
+</svg>

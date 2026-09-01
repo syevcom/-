@@ -9,15 +9,15 @@ import { ActivePage } from '../types';
 
 // Exact local image paths in /public/images/ (Case-sensitive verified)
 export const SEARCH_IMAGE_PATHS = {
-  speel5kw: '/images/home-detail-speel-5kw.png',
-  speel7kw: '/images/home-detail-speel-7kw.png',
-  speel11kw: '/images/home-detail-speel-11kw.png',
-  coolcharge: '/images/home-detail-coolcharge.png',
+  speel5kw: '/images/home-detail-speel-5kw.jpg',
+  speel7kw: '/images/home-detail-speel-7kw.jpg',
+  speel11kw: '/images/home-detail-speel-11kw.jpg',
+  coolcharge: '/images/home-detail-coolcharge.jpg',
   electree: '/images/home-detail-electree.png',
-  chargego1: '/images/home-detail-chajigo1.png',
-  chargego2: '/images/home-detail-chajigo2.png',
-  chargego3: '/images/home-detail-chajigo3.png',
-  biz7_11kw: '/images/biz-charger-7-11kw.png',
+  chargego1: '/images/home-detail-chajigo1.jpg',
+  chargego2: '/images/home-detail-chajigo2.jpg',
+  chargego3: '/images/home-detail-chajigo3.jpg',
+  biz7_11kw: '/images/biz-charger-7-11kw.jpg',
   biz35kw: '/images/biz-charger-35kw.png',
   biz50kw: '/images/biz-charger-50kw.png',
 } as const;
