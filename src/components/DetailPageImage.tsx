@@ -1,5 +1,32 @@
 import React, { useState, useEffect } from 'react';
 
+// Known native pixel dimensions for our long detail-page images.
+// Reserving the correct aspect ratio *before* the image finishes loading
+// prevents the page height from suddenly jumping once a very tall (up to
+// 8000px) image finishes decoding — which is what causes the browser to
+// visually "snap" the scroll position while the user is mid-scroll.
+const KNOWN_IMAGE_DIMENSIONS: Record<string, { w: number; h: number }> = {
+  'biz-charger-35kw.png': { w: 960, h: 1795 },
+  'biz-charger-50kw.png': { w: 960, h: 2008 },
+  'biz-charger-7-11kw.jpg': { w: 793, h: 8000 },
+  'home-detail-chajigo1.jpg': { w: 597, h: 8000 },
+  'home-detail-chajigo2.jpg': { w: 522, h: 8000 },
+  'home-detail-chajigo3.jpg': { w: 753, h: 8000 },
+  'home-detail-coolcharge.jpg': { w: 792, h: 8000 },
+  'home-detail-electree.jpg': { w: 960, h: 7912 },
+  'home-detail-speel-11kw.jpg': { w: 564, h: 8000 },
+  'home-detail-speel-5kw.jpg': { w: 564, h: 8000 },
+  'home-detail-speel-7kw.jpg': { w: 564, h: 8000 },
+};
+
+function getKnownAspectRatio(src: string): number | undefined {
+  if (!src) return undefined;
+  const fileName = src.split('/').pop()?.split('?')[0];
+  if (!fileName) return undefined;
+  const dims = KNOWN_IMAGE_DIMENSIONS[fileName];
+  return dims ? dims.w / dims.h : undefined;
+}
+
 export interface DetailPageImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   /** Optional fallback image source if primary image fails to load */
   fallbackSrc?: string;
@@ -70,6 +97,8 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
     return null;
   }
 
+  const knownRatio = getKnownAspectRatio(currentSrc);
+
   // Combined high-clarity style: strictly prevents blurry subpixel rendering and preserves sharp text
   const highQualityStyle: React.CSSProperties = {
     width: '100%',
@@ -79,8 +108,16 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
     WebkitBackfaceVisibility: 'hidden',
     backfaceVisibility: 'hidden',
     transform: 'translateZ(0)',
+    // Reserve the correct box size immediately (before the image data
+    // arrives) so the page doesn't jump/shift once a very tall image loads.
+    ...(knownRatio ? { aspectRatio: `${knownRatio}` } : {}),
     ...style,
   };
+
+  const dims = (() => {
+    const fileName = currentSrc.split('/').pop()?.split('?')[0];
+    return fileName ? KNOWN_IMAGE_DIMENSIONS[fileName] : undefined;
+  })();
 
   return (
     <img
@@ -93,6 +130,7 @@ export const DetailPageImage: React.FC<DetailPageImageProps> = ({
       style={highQualityStyle}
       onError={handleError}
       onLoad={onLoad}
+      {...(dims ? { width: dims.w, height: dims.h } : {})}
       {...props}
     />
   );
