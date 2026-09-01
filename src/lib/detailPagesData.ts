@@ -32,10 +32,10 @@ export interface ProductDetailItem {
 export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
   // === HOME 5kW (Slim Economy) ===
   'product-sy-ac05': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
     pdfName: 'SY-AC05 5kW 슬림 스마트 홈 충전기 상세 사양서',
     pdfUrls: [
-      '/images/home-detail-speel-5kw.png'
+      '/images/home-detail-speel-5kw.jpg'
     ],
     pdfNames: ['스필 5kW 홈충전기 상세 스펙'],
     specs: {
@@ -47,14 +47,14 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     }
   },
   'product-res-5kw-spil': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
-    pdfUrls: ['/images/home-detail-speel-5kw.png'],
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-5kw.jpg'],
     pdfName: '스필 5kW 슬림형 상세페이지',
     pdfNames: ['스필 5kW 홈충전기 상세 스펙']
   },
   'product-res-5kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 5kW 슬림형 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
@@ -65,11 +65,11 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['일렉트리 상세페이지']
   },
   'product-res-5kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 5kW 개인용 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
@@ -77,10 +77,10 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
 
   // === HOME 7kW (Standard Bestseller) ===
   'product-sy-ac07': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
     pdfName: 'SY-AC07 7kW 스마트 홈 충전기 공식 사양서 및 상세페이지',
     pdfUrls: [
-      '/images/home-detail-speel-7kw.png'
+      '/images/home-detail-speel-7kw.jpg'
     ],
     pdfNames: [
       '스필 7kW 홈충전기 상세 스펙'
@@ -101,19 +101,19 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     ]
   },
   'product-res-7kw-spil': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
     pdfName: '스필 7kW 완속 스마트홈 상세페이지',
     pdfUrls: [
-      '/images/home-detail-speel-7kw.png'
+      '/images/home-detail-speel-7kw.jpg'
     ],
     pdfNames: ['스필 7kW 홈충전기 상세 스펙']
   },
   'product-res-7kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 7kW 가정용 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
@@ -125,18 +125,18 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['일렉트리 상세페이지']
   },
   'product-res-7kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 7kW 개인용 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
 
   // === HOME 11kW (3-Phase High-Power) ===
   'product-sy-ac11-bi': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
     pdfName: 'SY-AC11 11kW 3상 고속 스마트 완속 충전기 상세페이지',
     pdfUrls: [
-      '/images/home-detail-speel-11kw.png'
+      '/images/home-detail-speel-11kw.jpg'
     ],
     pdfNames: ['스필 11kW 고속형 상세 사양서'],
     specs: {
@@ -147,14 +147,14 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     }
   },
   'product-res-11kw-spil': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
-    pdfUrls: ['/images/home-detail-speel-11kw.png'],
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-11kw.jpg'],
     pdfName: '스필 11kW 고속형 상세페이지',
     pdfNames: ['스필 11kW 고속형 상세 사양서']
   },
   'product-res-11kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 11kW 개인용 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
@@ -167,18 +167,18 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
 
   // === COMMERCIAL / PARKING BIZ ===
   'product-park-7kw-plc-biz': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
     pdfName: '스마트제어 PLC 7kW BIZ 공용 충전기 사양서 및 수익형 모델 브로셔',
     pdfUrls: [
-      '/images/biz-charger-7-11kw.png'
+      '/images/biz-charger-7-11kw.jpg'
     ],
     pdfNames: ['PLC 7kW BIZ 공용 충전기 상세 사양서']
   },
   'product-park-11kw-stormshield': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
     pdfName: '11kW BIZ 공용 전기차 충전기 쿨차지 스톰쉴드 상세페이지',
     pdfUrls: [
-      '/images/biz-charger-7-11kw.png'
+      '/images/biz-charger-7-11kw.jpg'
     ],
     pdfNames: ['11kW BIZ 공용 쿨차지 스톰쉴드 사양서']
   },
@@ -246,20 +246,20 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfUrls: ['/50kw-쿨차지.png']
   },
   'sy-ac05': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
-    pdfUrls: ['/images/home-detail-speel-5kw.png'],
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-5kw.jpg'],
     pdfName: '스필 5kW 슬림 스마트 홈 충전기 상세페이지',
     pdfNames: ['스필 5kW 홈충전기 상세 스펙']
   },
   'res-5kw-spil': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
-    pdfUrls: ['/images/home-detail-speel-5kw.png'],
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-5kw.jpg'],
     pdfName: '스필 5kW 슬림형 상세페이지',
     pdfNames: ['스필 5kW 홈충전기 상세 스펙']
   },
   'res-5kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 5kW 슬림형 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
@@ -270,33 +270,33 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['일렉트리 상세페이지']
   },
   'res-5kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 5kW 개인용 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
   },
   'sy-ac07': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
-    pdfUrls: ['/images/home-detail-speel-7kw.png'],
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-7kw.jpg'],
     pdfName: '스필 7kW 완속 스마트홈 상세페이지',
     pdfNames: ['스필 7kW 홈충전기 상세 스펙']
   },
   'res-7kw-spil': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
-    pdfUrls: ['/images/home-detail-speel-7kw.png'],
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-7kw.jpg'],
     pdfName: '스필 7kW 홈충전기 상세 스펙',
     pdfNames: ['스필 7kW 홈충전기 상세 스펙']
   },
   'res-7kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 7kW 가정용 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
@@ -308,26 +308,26 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['일렉트리 상세페이지']
   },
   'res-7kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 7kW 개인용 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
   'sy-ac11-bi': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
-    pdfUrls: ['/images/home-detail-speel-11kw.png'],
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-11kw.jpg'],
     pdfName: '스필 11kW 고속형 상세페이지',
     pdfNames: ['스필 11kW 고속형 상세 사양서']
   },
   'res-11kw-spil': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
-    pdfUrls: ['/images/home-detail-speel-11kw.png'],
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-11kw.jpg'],
     pdfName: '스필 11kW 고속형 상세페이지',
     pdfNames: ['스필 11kW 고속형 상세 사양서']
   },
   'res-11kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 11kW 개인용 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
@@ -338,14 +338,14 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['일렉트리 상세페이지']
   },
   'park-7kw-plc-biz': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '스마트제어 PLC 7kW BIZ 공용 충전기 상세 사양서 및 수익형 모델 브로셔',
     pdfNames: ['PLC 7kW BIZ 공용 충전기 상세 사양서']
   },
   'park-11kw-stormshield': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '11kW BIZ 공용 전기차 충전기 쿨차지 스톰쉴드 상세페이지',
     pdfNames: ['11kW BIZ 공용 쿨차지 스톰쉴드 사양서']
   },
@@ -368,13 +368,13 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
   },
   // Commercial product name aliases for direct fallback matching
   'product-스마트제어 완속 충전기 PLC 7kW BIZ 전기차 공용': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '스마트제어 완속 충전기 7kW 상세 사양서'
   },
   'product-11kW BIZ 공용 전기차 충전기 쿨차지 스톰쉴드': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '11kw 공용 전기차 충전기 쿨차지 상세페이지'
   },
   'product-35kW BIZ 공용 전기차 충전기 쿨차지 스톰쉴드': {
@@ -395,76 +395,76 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
 export const DEFAULT_HOME_DETAILS: Record<string, ProductDetailItem> = {
   // Spil 5kW
   'sy-ac05': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
-    pdfUrls: ['/images/home-detail-speel-5kw.png'],
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-5kw.jpg'],
     pdfName: '스필 5kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 5kW 홈충전기 상세 스펙']
   },
   'res-5kw-spil': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
-    pdfUrls: ['/images/home-detail-speel-5kw.png'],
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-5kw.jpg'],
     pdfName: '스필 5kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 5kW 홈충전기 상세 스펙']
   },
   'product-sy-ac05': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
-    pdfUrls: ['/images/home-detail-speel-5kw.png'],
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-5kw.jpg'],
     pdfName: '스필 5kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 5kW 홈충전기 상세 스펙']
   },
   'product-res-5kw-spil': {
-    pdfUrl: '/images/home-detail-speel-5kw.png',
-    pdfUrls: ['/images/home-detail-speel-5kw.png'],
+    pdfUrl: '/images/home-detail-speel-5kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-5kw.jpg'],
     pdfName: '스필 5kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 5kW 홈충전기 상세 스펙']
   },
   // Spil 7kW
   'sy-ac07': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
-    pdfUrls: ['/images/home-detail-speel-7kw.png'],
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-7kw.jpg'],
     pdfName: '스필 7kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 7kW 홈충전기 상세 스펙']
   },
   'res-7kw-spil': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
-    pdfUrls: ['/images/home-detail-speel-7kw.png'],
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-7kw.jpg'],
     pdfName: '스필 7kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 7kW 홈충전기 상세 스펙']
   },
   'product-sy-ac07': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
-    pdfUrls: ['/images/home-detail-speel-7kw.png'],
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-7kw.jpg'],
     pdfName: '스필 7kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 7kW 홈충전기 상세 스펙']
   },
   'product-res-7kw-spil': {
-    pdfUrl: '/images/home-detail-speel-7kw.png',
-    pdfUrls: ['/images/home-detail-speel-7kw.png'],
+    pdfUrl: '/images/home-detail-speel-7kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-7kw.jpg'],
     pdfName: '스필 7kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 7kW 홈충전기 상세 스펙']
   },
   // Spil 11kW
   'sy-ac11-bi': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
-    pdfUrls: ['/images/home-detail-speel-11kw.png'],
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-11kw.jpg'],
     pdfName: '스필 11kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 11kW 고속형 상세 사양서']
   },
   'res-11kw-spil': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
-    pdfUrls: ['/images/home-detail-speel-11kw.png'],
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-11kw.jpg'],
     pdfName: '스필 11kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 11kW 고속형 상세 사양서']
   },
   'product-sy-ac11-bi': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
-    pdfUrls: ['/images/home-detail-speel-11kw.png'],
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-11kw.jpg'],
     pdfName: '스필 11kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 11kW 고속형 상세 사양서']
   },
   'product-res-11kw-spil': {
-    pdfUrl: '/images/home-detail-speel-11kw.png',
-    pdfUrls: ['/images/home-detail-speel-11kw.png'],
+    pdfUrl: '/images/home-detail-speel-11kw.jpg',
+    pdfUrls: ['/images/home-detail-speel-11kw.jpg'],
     pdfName: '스필 11kW 개인용 전기차 충전기 상세페이지',
     pdfNames: ['스필 11kW 고속형 상세 사양서']
   },
@@ -507,78 +507,78 @@ export const DEFAULT_HOME_DETAILS: Record<string, ProductDetailItem> = {
   },
   // Koolcharge (5kW, 7kW, 11kW)
   'res-5kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 개인용 전기차 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
   'product-res-5kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 개인용 전기차 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
   'res-7kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 개인용 전기차 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
   'product-res-7kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 개인용 전기차 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
   'res-11kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 개인용 전기차 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
   'product-res-11kw-coolcharge': {
-    pdfUrl: '/images/home-detail-coolcharge.png',
-    pdfUrls: ['/images/home-detail-coolcharge.png'],
+    pdfUrl: '/images/home-detail-coolcharge.jpg',
+    pdfUrls: ['/images/home-detail-coolcharge.jpg'],
     pdfName: '쿨차지 개인용 전기차 충전기 상세페이지',
     pdfNames: ['쿨차지 상세페이지']
   },
   // Chargego (5kW, 7kW - 3 pages in order)
   'res-5kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 개인용 전기차 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
   },
   'product-res-5kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 개인용 전기차 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
   },
   'res-7kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 개인용 전기차 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
   },
   'product-res-7kw-chargego': {
-    pdfUrl: '/images/home-detail-chajigo1.png',
+    pdfUrl: '/images/home-detail-chajigo1.jpg',
     pdfUrls: [
-      '/images/home-detail-chajigo1.png',
-      '/images/home-detail-chajigo2.png',
-      '/images/home-detail-chajigo3.png'
+      '/images/home-detail-chajigo1.jpg',
+      '/images/home-detail-chajigo2.jpg',
+      '/images/home-detail-chajigo3.jpg'
     ],
     pdfName: '차지고 개인용 전기차 충전기 상세페이지 (총 3부)',
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
@@ -590,26 +590,26 @@ export const DEFAULT_HOME_DETAILS: Record<string, ProductDetailItem> = {
  */
 export const DEFAULT_COMMERCIAL_DETAILS: Record<string, ProductDetailItem> = {
   'park-7kw-plc-biz': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '스마트제어 완속 충전기 PLC 7kW BIZ 전기차 공용 상세 사양서 및 수익형 모델 브로셔',
     pdfNames: ['스마트제어 PLC 7kW BIZ 공용 충전기 상세 사양서']
   },
   'product-park-7kw-plc-biz': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '스마트제어 완속 충전기 PLC 7kW BIZ 전기차 공용 상세 사양서 및 수익형 모델 브로셔',
     pdfNames: ['스마트제어 PLC 7kW BIZ 공용 충전기 상세 사양서']
   },
   'park-11kw-stormshield': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '11kW BIZ 공용 전기차 충전기 쿨차지 스톰쉴드 상세페이지',
     pdfNames: ['11kW BIZ 공용 쿨차지 스톰쉴드 사양서']
   },
   'product-park-11kw-stormshield': {
-    pdfUrl: '/images/biz-charger-7-11kw.png',
-    pdfUrls: ['/images/biz-charger-7-11kw.png'],
+    pdfUrl: '/images/biz-charger-7-11kw.jpg',
+    pdfUrls: ['/images/biz-charger-7-11kw.jpg'],
     pdfName: '11kW BIZ 공용 전기차 충전기 쿨차지 스톰쉴드 상세페이지',
     pdfNames: ['11kW BIZ 공용 쿨차지 스톰쉴드 사양서']
   },
@@ -666,39 +666,39 @@ export const POSTIMG_URL_MAP: Record<string, string> = {
   'https://postimg.cc/nsLvxGFw': 'https://i.postimg.cc/s2YKpTty/LGyupeulleoseubolteueob-jeanseo-260701.png',
   
   // Commercial Facility Chargers
-  'https://postimg.cc/N5JJZDwR': '/images/biz-charger-7-11kw.png',
+  'https://postimg.cc/N5JJZDwR': '/images/biz-charger-7-11kw.jpg',
   'https://postimg.cc/D4zQgVmk': '/images/biz-charger-35kw.png',
   'https://postimg.cc/N2084hLv': '/images/biz-charger-50kw.png',
 
   // Home / Residential Chargers
-  'https://postimg.cc/zyNvZCSg': '/images/home-detail-speel-7kw.png',
-  'https://postimg.cc/FYvz5ygk': '/images/home-detail-speel-5kw.png',
-  'https://postimg.cc/fVsyncjX': '/images/home-detail-speel-11kw.png',
+  'https://postimg.cc/zyNvZCSg': '/images/home-detail-speel-7kw.jpg',
+  'https://postimg.cc/FYvz5ygk': '/images/home-detail-speel-5kw.jpg',
+  'https://postimg.cc/fVsyncjX': '/images/home-detail-speel-11kw.jpg',
   'https://postimg.cc/PCHJsWzx': '/images/home-detail-electree.png',
-  'https://postimg.cc/CR41FRm2': '/images/home-detail-coolcharge.png',
-  'https://postimg.cc/4YGyk6b6': '/images/home-detail-chajigo1.png',
-  'https://postimg.cc/LJVXHJNY': '/images/home-detail-chajigo2.png',
-  'https://postimg.cc/G4j2c4qs': '/images/home-detail-chajigo3.png',
+  'https://postimg.cc/CR41FRm2': '/images/home-detail-coolcharge.jpg',
+  'https://postimg.cc/4YGyk6b6': '/images/home-detail-chajigo1.jpg',
+  'https://postimg.cc/LJVXHJNY': '/images/home-detail-chajigo2.jpg',
+  'https://postimg.cc/G4j2c4qs': '/images/home-detail-chajigo3.jpg',
 
   // Direct PostImages Legacy Mappings (Auto-upgrade prior URLs in caches to local high-res files)
-  'https://i.postimg.cc/Nj9HXbKp/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.png',
-  'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.png',
-  'https://i.postimg.cc/t4Zx6Dsk/seupil5sangsepeiji.png': '/images/home-detail-speel-5kw.png',
-  'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png': '/images/home-detail-speel-5kw.png',
-  'https://i.postimg.cc/9QR791Dx/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.png',
-  'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.png',
-  'https://i.postimg.cc/qvPCxnnp/kulchaji.png': '/images/home-detail-coolcharge.png',
-  'https://i.postimg.cc/C5bmNYPW/kulchaji.png': '/images/home-detail-coolcharge.png',
+  'https://i.postimg.cc/Nj9HXbKp/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.jpg',
+  'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.jpg',
+  'https://i.postimg.cc/t4Zx6Dsk/seupil5sangsepeiji.png': '/images/home-detail-speel-5kw.jpg',
+  'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png': '/images/home-detail-speel-5kw.jpg',
+  'https://i.postimg.cc/9QR791Dx/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.jpg',
+  'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.jpg',
+  'https://i.postimg.cc/qvPCxnnp/kulchaji.png': '/images/home-detail-coolcharge.jpg',
+  'https://i.postimg.cc/C5bmNYPW/kulchaji.png': '/images/home-detail-coolcharge.jpg',
   'https://i.postimg.cc/13nqFM8p/illegteuli.png': '/images/home-detail-electree.png',
-  'https://i.postimg.cc/bwDtnLZB/chajigo1.png': '/images/home-detail-chajigo1.png',
-  'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.png',
-  'https://i.postimg.cc/T3zWJmb9/chajigo2.png': '/images/home-detail-chajigo2.png',
-  'https://i.postimg.cc/br13T8CM/chajigo2.png': '/images/home-detail-chajigo2.png',
-  'https://i.postimg.cc/sgkZ4SWK/chajigo3.png': '/images/home-detail-chajigo3.png',
-  'https://i.postimg.cc/90yJpV8K/chajigo3.png': '/images/home-detail-chajigo3.png',
-  'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
-  'https://i.postimg.cc/kg906Y1Y/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
-  'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
+  'https://i.postimg.cc/bwDtnLZB/chajigo1.png': '/images/home-detail-chajigo1.jpg',
+  'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.jpg',
+  'https://i.postimg.cc/T3zWJmb9/chajigo2.png': '/images/home-detail-chajigo2.jpg',
+  'https://i.postimg.cc/br13T8CM/chajigo2.png': '/images/home-detail-chajigo2.jpg',
+  'https://i.postimg.cc/sgkZ4SWK/chajigo3.png': '/images/home-detail-chajigo3.jpg',
+  'https://i.postimg.cc/90yJpV8K/chajigo3.png': '/images/home-detail-chajigo3.jpg',
+  'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.jpg',
+  'https://i.postimg.cc/kg906Y1Y/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.jpg',
+  'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.jpg',
   'https://i.postimg.cc/yxmf7sHd/35kw-kulchaji.png': '/images/biz-charger-35kw.png',
   'https://i.postimg.cc/BQsg0rwn/35kw-kulchaji.png': '/images/biz-charger-35kw.png',
   'https://i.postimg.cc/qqsmp4Tq/50kw-kulchaji.png': '/images/biz-charger-50kw.png',
