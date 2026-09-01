@@ -6,29 +6,29 @@ import DetailPageImage from './DetailPageImage';
 
 const IMAGE_FALLBACK_MAP: Record<string, string> = {
   // Local to Remote
-  '/images/home-detail-speel-5kw.png': 'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png',
-  '/images/home-detail-speel-7kw.png': 'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png',
-  '/images/home-detail-speel-11kw.png': 'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png',
-  '/images/home-detail-coolcharge.png': 'https://i.postimg.cc/C5bmNYPW/kulchaji.png',
+  '/images/home-detail-speel-5kw.jpg': 'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png',
+  '/images/home-detail-speel-7kw.jpg': 'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png',
+  '/images/home-detail-speel-11kw.jpg': 'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png',
+  '/images/home-detail-coolcharge.jpg': 'https://i.postimg.cc/C5bmNYPW/kulchaji.png',
   '/images/home-detail-electree.png': 'https://i.postimg.cc/13nqFM8p/illegteuli.png',
-  '/images/home-detail-chajigo1.png': 'https://i.postimg.cc/d1b5rDBp/chajigo1.png',
-  '/images/home-detail-chajigo2.png': 'https://i.postimg.cc/br13T8CM/chajigo2.png',
-  '/images/home-detail-chajigo3.png': 'https://i.postimg.cc/90yJpV8K/chajigo3.png',
-  '/images/biz-charger-7-11kw.png': 'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png',
+  '/images/home-detail-chajigo1.jpg': 'https://i.postimg.cc/d1b5rDBp/chajigo1.png',
+  '/images/home-detail-chajigo2.jpg': 'https://i.postimg.cc/br13T8CM/chajigo2.png',
+  '/images/home-detail-chajigo3.jpg': 'https://i.postimg.cc/90yJpV8K/chajigo3.png',
+  '/images/biz-charger-7-11kw.jpg': 'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png',
   '/images/biz-charger-35kw.png': 'https://i.postimg.cc/BQsg0rwn/35kw-kulchaji.png',
   '/images/biz-charger-50kw.png': 'https://i.postimg.cc/X738bRDp/50kw-kulchaji.png',
   // Remote to Local
-  'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png': '/images/home-detail-speel-5kw.png',
-  'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.png',
-  'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.png',
-  'https://i.postimg.cc/C5bmNYPW/kulchaji.png': '/images/home-detail-coolcharge.png',
+  'https://i.postimg.cc/prKqZxGq/seupil5sangsepeiji.png': '/images/home-detail-speel-5kw.jpg',
+  'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.jpg',
+  'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.jpg',
+  'https://i.postimg.cc/C5bmNYPW/kulchaji.png': '/images/home-detail-coolcharge.jpg',
   'https://i.postimg.cc/13nqFM8p/illegteuli.png': '/images/home-detail-electree.png',
-  'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.png',
-  'https://i.postimg.cc/br13T8CM/chajigo2.png': '/images/home-detail-chajigo2.png',
-  'https://i.postimg.cc/90yJpV8K/chajigo3.png': '/images/home-detail-chajigo3.png',
-  'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
-  'https://i.postimg.cc/kg906Y1Y/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
-  'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.png',
+  'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.jpg',
+  'https://i.postimg.cc/br13T8CM/chajigo2.png': '/images/home-detail-chajigo2.jpg',
+  'https://i.postimg.cc/90yJpV8K/chajigo3.png': '/images/home-detail-chajigo3.jpg',
+  'https://i.postimg.cc/02xfsTH0/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.jpg',
+  'https://i.postimg.cc/kg906Y1Y/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.jpg',
+  'https://i.postimg.cc/nZ9WvZ4g/plc-klchaji-7kw.png': '/images/biz-charger-7-11kw.jpg',
   'https://i.postimg.cc/BQsg0rwn/35kw-kulchaji.png': '/images/biz-charger-35kw.png',
   'https://i.postimg.cc/X738bRDp/50kw-kulchaji.png': '/images/biz-charger-50kw.png',
 };
@@ -100,6 +100,19 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  // Track the image's real pixel width so we never stretch it beyond its native resolution
+  // (stretching a narrow source image to fill a wide container is what causes blur).
+  const [naturalWidth, setNaturalWidth] = useState<number | null>(null);
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const w = e.currentTarget?.naturalWidth;
+    if (w && w > 0) setNaturalWidth(w);
+  };
+  // Standard container is capped at 960px; if the image itself is narrower than that,
+  // cap the container to the image's real width instead of upscaling it.
+  const displayMaxWidth = naturalWidth ? Math.min(960, naturalWidth) : 960;
+  // Fullscreen lightbox is capped at 1024px (max-w-5xl); apply the same rule there.
+  const fullscreenMaxWidth = naturalWidth ? Math.min(1024, naturalWidth) : 1024;
+
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3000);
@@ -136,8 +149,8 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
       <>
         <div className="w-full flex justify-center py-0 sm:py-1">
           <div 
-            className="w-full max-w-[960px] mx-auto rounded-none sm:rounded-2xl bg-white relative group cursor-zoom-in"
-            style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '960px' } : { width: '100%', maxWidth: '960px' }}
+            className="w-full mx-auto rounded-none sm:rounded-2xl bg-white relative group cursor-zoom-in"
+            style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: `${displayMaxWidth}px` } : { width: '100%', maxWidth: `${displayMaxWidth}px` }}
             onClick={() => setIsFullscreen(true)}
           >
             <DetailPageImage
@@ -151,6 +164,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
               decoding="sync"
               style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
               onError={onError}
+              onLoad={handleImageLoad}
             />
             
             {/* Subtle mobile tap-to-expand indicator */}
@@ -183,7 +197,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
               </button>
             </div>
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-6 cursor-zoom-out flex justify-center items-start">
-              <div className="w-full max-w-5xl mx-auto h-auto">
+              <div className="w-full mx-auto h-auto" style={{ maxWidth: `${fullscreenMaxWidth}px` }}>
                 <DetailPageImage
                   src={imageUrl}
                   unoptimized={true}
@@ -194,6 +208,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
                   loading="eager"
                   decoding="sync"
                   style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
+                  onLoad={handleImageLoad}
                 />
               </div>
             </div>
@@ -297,8 +312,8 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
       {/* Main Image Stage - Unlimited height for natural vertical scrolling */}
       <div className="bg-slate-900/40 p-2 sm:p-4 overflow-visible flex items-start justify-center h-auto relative">
         <div 
-          className="w-full max-w-[960px] mx-auto transition-all duration-200 ease-out shadow-2xl rounded-lg bg-white"
-          style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: '960px' } : { width: '100%', maxWidth: '960px' }}
+          className="w-full mx-auto transition-all duration-200 ease-out shadow-2xl rounded-lg bg-white"
+          style={!isMobile && isLocked ? { width: `${zoom}%`, maxWidth: `${displayMaxWidth}px` } : { width: '100%', maxWidth: `${displayMaxWidth}px` }}
         >
           <DetailPageImage
             src={imageUrl}
@@ -310,6 +325,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
             loading="eager"
             decoding="sync"
             style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
+            onLoad={handleImageLoad}
           />
         </div>
       </div>
@@ -337,7 +353,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
             </button>
           </div>
           <div className="flex-1 overflow-y-auto overflow-x-hidden flex justify-center items-start p-4 sm:p-6">
-            <div className="w-full max-w-5xl mx-auto h-auto">
+            <div className="w-full mx-auto h-auto" style={{ maxWidth: `${fullscreenMaxWidth}px` }}>
               <DetailPageImage
                 src={imageUrl}
                 unoptimized={true}
@@ -348,6 +364,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
                 loading="eager"
                 decoding="sync"
                 style={{ width: '100%', height: 'auto', imageRendering: '-webkit-optimize-contrast' }}
+                onLoad={handleImageLoad}
               />
             </div>
           </div>
