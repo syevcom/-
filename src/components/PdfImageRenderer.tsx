@@ -765,9 +765,37 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
 // Subcomponent to render individual page inside scroll view mode safely
 function ScrollPageItem({ pdfDoc, pageNum, zoom, brandName, isAdmin }: { pdfDoc: any; pageNum: number; zoom: number; brandName: string; isAdmin?: boolean; key?: React.Key }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const renderTaskRef = useRef<any>(null);
   const [rendered, setRendered] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+
+  // Only render this page's canvas once it scrolls near the viewport.
+  // Rendering every page at full resolution the instant the PDF loads
+  // overwhelms mobile browsers' canvas memory limits, which silently
+  // leaves later pages blank/missing (commonly after ~4 high-res pages).
+  const [shouldRender, setShouldRender] = useState(false);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    // Always eagerly render the first couple of pages so the catalog
+    // doesn't look empty on initial load.
+    if (pageNum <= 2) {
+      setShouldRender(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '1200px 0px 1200px 0px' } // start rendering well before it's on screen
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [pageNum]);
 
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -788,7 +816,7 @@ function ScrollPageItem({ pdfDoc, pageNum, zoom, brandName, isAdmin }: { pdfDoc:
     let isMounted = true;
 
     const render = async () => {
-      if (!pdfDoc || !canvasRef.current) return;
+      if (!shouldRender || !pdfDoc || !canvasRef.current) return;
 
       // Cancel previous render task if active and wait for it to settle
       if (renderTaskRef.current) {
@@ -807,13 +835,16 @@ function ScrollPageItem({ pdfDoc, pageNum, zoom, brandName, isAdmin }: { pdfDoc:
         const page = await pdfDoc.getPage(pageNum);
         if (!isMounted || !canvasRef.current) return;
 
-        // Render at high resolution (2.0x scale) so text stays crystal clear
+        // Render at high resolution so text stays crystal clear, but use a
+        // lighter scale on mobile to keep total canvas memory manageable
+        // across many pages.
         const baseViewport = page.getViewport({ scale: 1.0 });
         const pageRatio = baseViewport.width / baseViewport.height;
         setAspectRatio(pageRatio);
 
         const effectiveZoom = isMobile ? 100 : zoom;
-        const renderScale = 2.0 * (effectiveZoom / 100);
+        const baseScale = isMobile ? 1.5 : 2.0;
+        const renderScale = baseScale * (effectiveZoom / 100);
         const viewport = page.getViewport({ scale: renderScale });
 
         const canvas = canvasRef.current;
@@ -860,14 +891,14 @@ function ScrollPageItem({ pdfDoc, pageNum, zoom, brandName, isAdmin }: { pdfDoc:
         }
       }
     };
-  }, [pdfDoc, pageNum, zoom, isMobile]);
+  }, [pdfDoc, pageNum, zoom, isMobile, shouldRender]);
 
   if (!isAdmin) {
     return (
-      <div className="flex flex-col items-center w-full">
+      <div ref={wrapperRef} className="flex flex-col items-center w-full">
         <div 
           className="w-full rounded-none sm:rounded-xl bg-white overflow-hidden select-none relative shadow-sm"
-          style={aspectRatio ? { aspectRatio: `${aspectRatio}` } : undefined}
+          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : '0.707', minHeight: aspectRatio ? undefined : '400px' }}
         >
           <canvas ref={canvasRef} className="block w-full h-auto object-contain" />
           {!rendered && (
@@ -881,7 +912,7 @@ function ScrollPageItem({ pdfDoc, pageNum, zoom, brandName, isAdmin }: { pdfDoc:
   }
 
   return (
-    <div className="flex flex-col items-center space-y-2 w-full">
+    <div ref={wrapperRef} className="flex flex-col items-center space-y-2 w-full">
       <div 
         className="w-full shadow-2xl rounded-xl bg-white overflow-hidden border border-slate-800/80 select-none relative"
         style={aspectRatio ? { aspectRatio: `${aspectRatio}` } : undefined}
