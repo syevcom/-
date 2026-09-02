@@ -1094,6 +1094,10 @@ export default function SolutionsSection({
   const [prodFormTags, setProdFormTags] = useState('');
   const [prodFormHasASBadge, setProdFormHasASBadge] = useState(false);
   const [prodFormHasPromoRibbon, setProdFormHasPromoRibbon] = useState(false);
+  // Lets the admin move a product between kW categories (e.g. 5kW -> 7kW)
+  // by picking a different category in the edit form, instead of the
+  // category being permanently fixed to whichever list it was created in.
+  const [prodFormCategory, setProdFormCategory] = useState<string>('7kW');
   const [isDraggingProdImage, setIsDraggingProdImage] = useState(false);
 
   // Sync to activeDetailProduct if it changed or was updated in real-time
@@ -1596,6 +1600,7 @@ export default function SolutionsSection({
     setEditingProduct(null);
     setEditingProductType(type);
     setEditingCategory(category);
+    setProdFormCategory(category);
     
     setProdFormName('');
     setProdFormRegularPrice(500000);
@@ -1622,6 +1627,7 @@ export default function SolutionsSection({
     setEditingProduct(product);
     setEditingProductType(type);
     setEditingCategory(category);
+    setProdFormCategory(category);
 
     setProdFormName(product.name || '');
     const baseP = product.price || 0;
@@ -1729,32 +1735,50 @@ export default function SolutionsSection({
       // Edit mode
       if (editingProductType === 'home') {
         const updated = { ...homeProducts };
-        if (updated[editingCategory]) {
+        const targetCategory = prodFormCategory || editingCategory;
+        const movingCategory = targetCategory !== editingCategory;
+
+        const updatedProductFields = {
+          name: prodFormName,
+          regularPrice: Number(prodFormRegularPrice),
+          price: Number(prodFormPrice),
+          discount: calculatedDiscount,
+          replacementPrice: Number(prodFormReplacementPrice),
+          replacementRegularPrice: Number(prodFormReplacementRegularPrice),
+          replacementDiscount: repDiscount,
+          installIncludedPrice: Number(prodFormInstallIncludedPrice),
+          installIncludedRegularPrice: Number(prodFormInstallIncludedRegularPrice),
+          installIncludedDiscount: instDiscount,
+          serviceType: 'all',
+          image: prodFormImage,
+          tags: tagsArray,
+          hasASBadge: prodFormHasASBadge,
+          hasPromoRibbon: prodFormHasPromoRibbon
+        };
+
+        if (movingCategory) {
+          // Remove from the old kW bucket
+          if (updated[editingCategory]) {
+            updated[editingCategory] = updated[editingCategory].filter(p => p.id !== editingProduct.id);
+          }
+          // Add (with updated fields) into the new kW bucket
+          const movedProduct: SolutionProduct = {
+            ...editingProduct,
+            ...updatedProductFields
+          };
+          updated[targetCategory] = [...(updated[targetCategory] || []), movedProduct];
+        } else if (updated[editingCategory]) {
           updated[editingCategory] = updated[editingCategory].map(p => {
             if (p.id === editingProduct.id) {
               return {
                 ...p,
-                name: prodFormName,
-                regularPrice: Number(prodFormRegularPrice),
-                price: Number(prodFormPrice),
-                discount: calculatedDiscount,
-                replacementPrice: Number(prodFormReplacementPrice),
-                replacementRegularPrice: Number(prodFormReplacementRegularPrice),
-                replacementDiscount: repDiscount,
-                installIncludedPrice: Number(prodFormInstallIncludedPrice),
-                installIncludedRegularPrice: Number(prodFormInstallIncludedRegularPrice),
-                installIncludedDiscount: instDiscount,
-                serviceType: 'all',
-                image: prodFormImage,
-                tags: tagsArray,
-                hasASBadge: prodFormHasASBadge,
-                hasPromoRibbon: prodFormHasPromoRibbon
+                ...updatedProductFields
               };
             }
             return p;
           });
-          saveHomeProducts(updated);
         }
+        saveHomeProducts(updated);
       } else {
         const updated = { ...parkingProducts };
         let found = false;
@@ -1816,8 +1840,9 @@ export default function SolutionsSection({
 
       if (editingProductType === 'home') {
         const updated = { ...homeProducts };
-        if (!updated[editingCategory]) updated[editingCategory] = [];
-        updated[editingCategory] = [...updated[editingCategory], newProduct];
+        const targetCategory = prodFormCategory || editingCategory;
+        if (!updated[targetCategory]) updated[targetCategory] = [];
+        updated[targetCategory] = [...updated[targetCategory], newProduct];
         saveHomeProducts(updated);
       } else {
         const updated = { ...parkingProducts };
@@ -4733,6 +4758,24 @@ export default function SolutionsSection({
                     className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-extrabold text-xs"
                   />
                 </div>
+
+                {/* kW Category (which list this product appears under) */}
+                {editingProductType === 'home' && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-black text-slate-700">
+                      용량(kW) 카테고리 <span className="font-normal text-slate-400">— 여기서 바꾸면 해당 kW 목록으로 이동해요</span>
+                    </label>
+                    <select
+                      value={prodFormCategory}
+                      onChange={(e) => setProdFormCategory(e.target.value)}
+                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-extrabold text-xs bg-white"
+                    >
+                      {Object.keys(HOME_POWER_METADATA).map((kw) => (
+                        <option key={kw} value={kw}>{kw}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 {/* Pricing Fields according to Service Type */}
                 <div className="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
