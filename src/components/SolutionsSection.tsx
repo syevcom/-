@@ -1630,16 +1630,24 @@ export default function SolutionsSection({
     setProdFormCategory(category);
 
     setProdFormName(product.name || '');
-    const baseP = product.price || 0;
-    const baseReg = product.regularPrice || baseP;
+    const baseP = product.price !== undefined ? Number(product.price) : 0;
+    const baseReg = product.regularPrice !== undefined ? Number(product.regularPrice) : baseP;
 
     setProdFormRegularPrice(baseReg);
     setProdFormPrice(baseP);
 
-    const repP = (product as any).replacementPrice !== undefined ? (product as any).replacementPrice : (baseP ? baseP + 150000 : 0);
-    const repRegP = (product as any).replacementRegularPrice !== undefined ? (product as any).replacementRegularPrice : (baseReg ? baseReg + 180000 : 0);
-    const instP = (product as any).installIncludedPrice !== undefined ? (product as any).installIncludedPrice : (baseP ? baseP + 350000 : 0);
-    const instRegP = (product as any).installIncludedRegularPrice !== undefined ? (product as any).installIncludedRegularPrice : (baseReg ? baseReg + 400000 : 0);
+    const repP = (product as any).replacementPrice !== undefined && (product as any).replacementPrice !== null && (product as any).replacementPrice !== ''
+      ? Number((product as any).replacementPrice)
+      : (baseP > 0 ? baseP + 150000 : 0);
+    const repRegP = (product as any).replacementRegularPrice !== undefined && (product as any).replacementRegularPrice !== null && (product as any).replacementRegularPrice !== ''
+      ? Number((product as any).replacementRegularPrice)
+      : (baseReg > 0 ? baseReg + 180000 : 0);
+    const instP = (product as any).installIncludedPrice !== undefined && (product as any).installIncludedPrice !== null && (product as any).installIncludedPrice !== ''
+      ? Number((product as any).installIncludedPrice)
+      : (baseP > 0 ? baseP + 350000 : 0);
+    const instRegP = (product as any).installIncludedRegularPrice !== undefined && (product as any).installIncludedRegularPrice !== null && (product as any).installIncludedRegularPrice !== ''
+      ? Number((product as any).installIncludedRegularPrice)
+      : (baseReg > 0 ? baseReg + 400000 : 0);
 
     setProdFormReplacementPrice(repP);
     setProdFormReplacementRegularPrice(repRegP);
@@ -4138,17 +4146,21 @@ export default function SolutionsSection({
                   const productsList = rawProductsList.filter(p => {
                     const st = (p.serviceType as string) || 'all';
                     if (selectedHomeServiceType === '단말기 단품') {
-                      if (st === 'replace' || st === 'no_device') return false;
-                      if (st === 'install' && !p.price) return false;
-                      if (p.price === 0 && !p.price) return false;
+                      if (st === 'replace' || st === 'no_device' || st === 'no_단품') return false;
+                      const devPrice = Number(p.price);
+                      if (isNaN(devPrice) || devPrice <= 0) return false;
                     } else if (selectedHomeServiceType === '교체 시공') {
                       if (st === 'no_replace') return false;
-                      const repPrice = (p as any).replacementPrice !== undefined ? (p as any).replacementPrice : (p.price ? p.price + 150000 : 0);
-                      if (repPrice === 0) return false;
+                      const repPrice = (p as any).replacementPrice !== undefined && (p as any).replacementPrice !== null && (p as any).replacementPrice !== ''
+                        ? Number((p as any).replacementPrice)
+                        : (Number(p.price) > 0 ? Number(p.price) + 150000 : 0);
+                      if (isNaN(repPrice) || repPrice <= 0) return false;
                     } else if (selectedHomeServiceType === '신규 설치 포함') {
                       if (st === 'no_install') return false;
-                      const instPrice = (p as any).installIncludedPrice !== undefined ? (p as any).installIncludedPrice : (p.price ? p.price + 350000 : 0);
-                      if (instPrice === 0) return false;
+                      const instPrice = (p as any).installIncludedPrice !== undefined && (p as any).installIncludedPrice !== null && (p as any).installIncludedPrice !== ''
+                        ? Number((p as any).installIncludedPrice)
+                        : (Number(p.price) > 0 ? Number(p.price) + 350000 : 0);
+                      if (isNaN(instPrice) || instPrice <= 0) return false;
                     }
                     return true;
                   });
@@ -4156,22 +4168,41 @@ export default function SolutionsSection({
                   // Helper function to calculate price and badge for the active service type
                   const getProductPricing = (p: SolutionProduct) => {
                     if (selectedHomeServiceType === '교체 시공') {
-                      const price = (p as any).replacementPrice || p.price + 150000;
-                      const regularPrice = (p as any).replacementRegularPrice || p.regularPrice + 180000;
-                      const discount = (p as any).replacementDiscount !== undefined ? (p as any).replacementDiscount : Math.round((1 - price / regularPrice) * 100);
+                      const rawRep = (p as any).replacementPrice;
+                      const price = (rawRep !== undefined && rawRep !== null && rawRep !== '')
+                        ? Number(rawRep)
+                        : (Number(p.price) > 0 ? Number(p.price) + 150000 : 0);
+                      const rawRepReg = (p as any).replacementRegularPrice;
+                      const regularPrice = (rawRepReg !== undefined && rawRepReg !== null && rawRepReg !== '')
+                        ? Number(rawRepReg)
+                        : (Number(p.regularPrice) > 0 ? Number(p.regularPrice) + 180000 : price);
+                      const discount = (p as any).replacementDiscount !== undefined && (p as any).replacementDiscount !== null
+                        ? Number((p as any).replacementDiscount)
+                        : (regularPrice > 0 ? Math.round((1 - price / regularPrice) * 100) : 0);
                       return { price, regularPrice, discount, label: '교체 시공 포함' };
                     }
                     if (selectedHomeServiceType === '신규 설치 포함') {
-                      const price = (p as any).installIncludedPrice || p.price + 350000;
-                      const regularPrice = (p as any).installIncludedRegularPrice || p.regularPrice + 400000;
-                      const discount = (p as any).installIncludedDiscount !== undefined ? (p as any).installIncludedDiscount : Math.round((1 - price / regularPrice) * 100);
+                      const rawInst = (p as any).installIncludedPrice;
+                      const price = (rawInst !== undefined && rawInst !== null && rawInst !== '')
+                        ? Number(rawInst)
+                        : (Number(p.price) > 0 ? Number(p.price) + 350000 : 0);
+                      const rawInstReg = (p as any).installIncludedRegularPrice;
+                      const regularPrice = (rawInstReg !== undefined && rawInstReg !== null && rawInstReg !== '')
+                        ? Number(rawInstReg)
+                        : (Number(p.regularPrice) > 0 ? Number(p.regularPrice) + 400000 : price);
+                      const discount = (p as any).installIncludedDiscount !== undefined && (p as any).installIncludedDiscount !== null
+                        ? Number((p as any).installIncludedDiscount)
+                        : (regularPrice > 0 ? Math.round((1 - price / regularPrice) * 100) : 0);
                       return { price, regularPrice, discount, label: '신규 설치 포함' };
                     }
                     // Default: '단말기 단품'
+                    const price = Number(p.price) || 0;
+                    const regularPrice = Number(p.regularPrice) || price;
+                    const discount = p.discount !== undefined ? Number(p.discount) : (regularPrice > 0 ? Math.round((1 - price / regularPrice) * 100) : 0);
                     return {
-                      price: p.price,
-                      regularPrice: p.regularPrice,
-                      discount: p.discount,
+                      price,
+                      regularPrice,
+                      discount,
                       label: '단말기 단품'
                     };
                   };
