@@ -742,6 +742,10 @@ export const DEFAULT_BRAND_CATALOGS: Record<string, { pdfUrl?: string; pdfName?:
     pdfUrl: 'https://i.postimg.cc/yNmnFLwW/2-NICEinpeula(ju)-naiseuchajeo-jeongicha-wansogchungjeongi-jeanseo.png',
     pdfName: '나이스차져 금융 인프라 기반 전기차 완속충전기 제안서'
   },
+  '나이스차저': {
+    pdfUrl: 'https://i.postimg.cc/yNmnFLwW/2-NICEinpeula(ju)-naiseuchajeo-jeongicha-wansogchungjeongi-jeanseo.png',
+    pdfName: '나이스차져 금융 인프라 기반 전기차 완속충전기 제안서'
+  },
   '에버온': {
     pdfUrl: 'https://i.postimg.cc/hvkCBvwp/(KOR)-2026-ebeoon-Company-Brochure-(1).png',
     pdfName: '에버온 전국 1위 완속 충전 인프라 공식 회사소개서 및 카탈로그'

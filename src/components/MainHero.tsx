@@ -288,10 +288,10 @@ export default function MainHero({
             {/* Column 1: 가정용 홈 */}
             <div 
               onClick={() => onPageChange?.('sol_residential')}
-              className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3 md:space-y-4 group cursor-pointer p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-slate-50/80 transition-all"
+              className="w-full h-full flex flex-col items-center text-center group cursor-pointer p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-slate-50/80 transition-all"
             >
               {/* Custom Image or Vector Illustration */}
-              <div className="w-full h-[75px] sm:h-[130px] md:h-[260px] lg:h-[340px] xl:h-[420px] 2xl:h-[480px] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-50/50">
+              <div className="w-full h-[75px] sm:h-[130px] md:h-[260px] lg:h-[340px] xl:h-[420px] 2xl:h-[480px] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-50/50 shrink-0">
                 {heroConfig.residentialImage ? (
                   <img
                     src={getOptimizedImageUrl(heroConfig.residentialImage, { width: 800, format: 'webp' })}
@@ -356,14 +356,16 @@ export default function MainHero({
                 )}
               </div>
               
-              <div className="space-y-1 sm:space-y-1.5">
-                <h4 className="text-xs sm:text-base md:text-xl font-black text-emerald-950 tracking-tight break-keep">가정용 홈</h4>
+              <div className="w-full flex-1 flex flex-col justify-start items-center space-y-1 sm:space-y-1.5 mt-2 sm:mt-3 md:mt-4">
+                <h4 className="text-xs sm:text-base md:text-xl font-black text-emerald-950 tracking-tight break-keep min-h-[1.25rem] sm:min-h-[1.5rem] md:min-h-[1.75rem] flex items-center justify-center">
+                  가정용 홈
+                </h4>
                 <p className="text-[9.5px] sm:text-xs md:text-sm font-semibold text-slate-500 leading-tight sm:leading-relaxed break-keep">
                   단독주택 · 빌라 · 개인용{"\n"}7kW 개인 완속 충전기
                 </p>
               </div>
               
-              <div className="pt-0.5 sm:pt-1">
+              <div className="w-full pt-2 sm:pt-3 mt-auto flex items-center justify-center">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -380,10 +382,10 @@ export default function MainHero({
             {/* Column 2: 아파트 */}
             <div 
               onClick={() => onPageChange?.('sol_commercial')}
-              className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3 md:space-y-4 group cursor-pointer p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-slate-50/80 transition-all"
+              className="w-full h-full flex flex-col items-center text-center group cursor-pointer p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-slate-50/80 transition-all"
             >
               {/* Custom Image or Vector Illustration */}
-              <div className="w-full h-[75px] sm:h-[130px] md:h-[260px] lg:h-[340px] xl:h-[420px] 2xl:h-[480px] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-50/50">
+              <div className="w-full h-[75px] sm:h-[130px] md:h-[260px] lg:h-[340px] xl:h-[420px] 2xl:h-[480px] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-50/50 shrink-0">
                 {heroConfig.commercialImage ? (
                   <img
                     src={getOptimizedImageUrl(heroConfig.commercialImage, { width: 800, format: 'webp' })}
@@ -463,14 +465,16 @@ export default function MainHero({
                 )}
               </div>
               
-              <div className="space-y-1 sm:space-y-1.5">
-                <h4 className="text-xs sm:text-base md:text-xl font-black text-emerald-950 tracking-tight break-keep">아파트</h4>
+              <div className="w-full flex-1 flex flex-col justify-start items-center space-y-1 sm:space-y-1.5 mt-2 sm:mt-3 md:mt-4">
+                <h4 className="text-xs sm:text-base md:text-xl font-black text-emerald-950 tracking-tight break-keep min-h-[1.25rem] sm:min-h-[1.5rem] md:min-h-[1.75rem] flex items-center justify-center">
+                  아파트
+                </h4>
                 <p className="text-[9.5px] sm:text-xs md:text-sm font-semibold text-slate-500 leading-tight sm:leading-relaxed break-keep">
                   아파트 단지 · 입주민 공용{"\n"}환경부 무상 보조금 최적화
                 </p>
               </div>
               
-              <div className="pt-0.5 sm:pt-1">
+              <div className="w-full pt-2 sm:pt-3 mt-auto flex items-center justify-center">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -487,10 +491,10 @@ export default function MainHero({
             {/* Column 3: 상업시설 수익형 */}
             <div 
               onClick={() => onPageChange?.('sol_parking')}
-              className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3 md:space-y-4 group cursor-pointer p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-slate-50/80 transition-all"
+              className="w-full h-full flex flex-col items-center text-center group cursor-pointer p-1 sm:p-2 md:p-3 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-slate-50/80 transition-all"
             >
               {/* Custom Image or Vector Illustration */}
-              <div className="w-full h-[75px] sm:h-[130px] md:h-[260px] lg:h-[340px] xl:h-[420px] 2xl:h-[480px] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-50/50">
+              <div className="w-full h-[75px] sm:h-[130px] md:h-[260px] lg:h-[340px] xl:h-[420px] 2xl:h-[480px] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-50/50 shrink-0">
                 {heroConfig.parkingImage ? (
                   <img
                     src={getOptimizedImageUrl(heroConfig.parkingImage, { width: 800, format: 'webp' })}
@@ -557,14 +561,16 @@ export default function MainHero({
                 )}
               </div>
               
-              <div className="space-y-1 sm:space-y-1.5">
-                <h4 className="text-xs sm:text-base md:text-xl font-black text-emerald-950 tracking-tight break-keep">상업시설 수익형</h4>
+              <div className="w-full flex-1 flex flex-col justify-start items-center space-y-1 sm:space-y-1.5 mt-2 sm:mt-3 md:mt-4">
+                <h4 className="text-xs sm:text-base md:text-xl font-black text-emerald-950 tracking-tight break-keep min-h-[1.25rem] sm:min-h-[1.5rem] md:min-h-[1.75rem] flex items-center justify-center">
+                  상업시설 수익형
+                </h4>
                 <p className="text-[9.5px] sm:text-xs md:text-sm font-semibold text-slate-500 leading-tight sm:leading-relaxed break-keep">
                   호텔 · 마트 · 대형 상가{"\n"}수익형 완속/급속 충전소
                 </p>
               </div>
               
-              <div className="pt-0.5 sm:pt-1">
+              <div className="w-full pt-2 sm:pt-3 mt-auto flex items-center justify-center">
                 <button
                   type="button"
                   onClick={(e) => {
