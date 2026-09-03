@@ -233,6 +233,12 @@ export const HOME_PRODUCTS_DATA: Record<string, SolutionProduct[]> = {
       regularPrice: 550000,
       price: 490000,
       discount: 11,
+      replacementPrice: 640000,
+      replacementRegularPrice: 730000,
+      replacementDiscount: 12,
+      installIncludedPrice: 840000,
+      installIncludedRegularPrice: 950000,
+      installIncludedDiscount: 12,
       serviceType: 'all',
       image: '/차지고.png',
       tags: ['MD CHOICE', 'HIT']
@@ -1860,6 +1866,18 @@ export default function SolutionsSection({
       }
     }
 
+    // Clean targetId from deleted IDs if present so newly saved product is never blocked
+    try {
+      const savedDeleted = localStorage.getItem('sy_cms_deleted_product_ids');
+      if (savedDeleted) {
+        const deletedArr: string[] = JSON.parse(savedDeleted);
+        const nextDeleted = deletedArr.filter(id => id !== targetId && id !== `res-7kw-chargego` || targetId !== 'res-7kw-chargego');
+        if (deletedArr.includes(targetId)) {
+          localStorage.setItem('sy_cms_deleted_product_ids', JSON.stringify(deletedArr.filter(id => id !== targetId)));
+        }
+      }
+    } catch (e) {}
+
     // Also update main products in sy_cms_products_v12
     try {
       const savedMain = localStorage.getItem('sy_cms_products_v12');
@@ -1873,6 +1891,7 @@ export default function SolutionsSection({
           ((targetId === 'sy-ac11-bi' || targetId === 'res-11kw-spil') && (mp.id === 'sy-ac11-bi' || mp.id === 'res-11kw-spil')) ||
           ((targetId === 'park-50kw-1ch-coolcharge' || targetId === 'sy-dc50' || (prodFormName && prodFormName.toLowerCase().includes('50kw'))) && (mp.id === 'park-50kw-1ch-coolcharge' || mp.id === 'sy-dc50' || (mp.name && mp.name.toLowerCase().includes('50kw'))))
         );
+        const finalCategory = prodFormCategory || editingCategory || '7kW';
         if (matchIdx !== -1) {
           mainArr[matchIdx] = {
             ...mainArr[matchIdx],
@@ -1884,6 +1903,7 @@ export default function SolutionsSection({
             replacementRegularPrice: Number(prodFormReplacementRegularPrice),
             installIncludedPrice: Number(prodFormInstallIncludedPrice),
             installIncludedRegularPrice: Number(prodFormInstallIncludedRegularPrice),
+            power: finalCategory,
             serviceType: 'all',
             image: prodFormImage || mainArr[matchIdx].image,
           };
@@ -1892,7 +1912,7 @@ export default function SolutionsSection({
             id: targetId,
             name: prodFormName,
             type: editingProductType === 'parking' ? '급속' : '완속',
-            power: editingCategory || '7kW',
+            power: finalCategory,
             features: prodFormTags ? prodFormTags.split(',').map(t => t.trim()).filter(Boolean) : ['MD CHOICE'],
             image: prodFormImage || '/스필.png',
             description: '',

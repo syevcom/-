@@ -892,7 +892,7 @@ export default function App() {
           });
 
           Object.keys(parsedHome).forEach((powerKey) => {
-            const seenNames = new Set<string>();
+            const seenIds = new Set<string>();
             parsedHome[powerKey] = (parsedHome[powerKey] || []).filter((sp: any) => {
               if (!sp || REMOVED_PRODUCT_IDS.has(sp.id) || deletedSet.has(sp.id)) return false;
               if (sp.id === 'res-7kw-spil') sp.id = 'sy-ac07';
@@ -901,9 +901,9 @@ export default function App() {
               if (sp.id === 'sy-ac11-bi' && sp.name && (sp.name.includes('공용') || sp.name.includes('수익형'))) {
                 sp.name = '스필 11kW 개인용 전기차 충전기 무상AS 4년';
               }
-              const nameKey = (sp.name || '').trim();
-              if (seenNames.has(nameKey)) return false;
-              seenNames.add(nameKey);
+              const idKey = sp.id || (sp.name || '').trim();
+              if (seenIds.has(idKey)) return false;
+              seenIds.add(idKey);
               return true;
             });
 
@@ -1341,7 +1341,7 @@ export default function App() {
           });
 
           Object.keys(parsedHome).forEach((powerKey) => {
-            const seenNames = new Set<string>();
+            const seenIds = new Set<string>();
             parsedHome[powerKey] = (parsedHome[powerKey] || []).filter((sp: any) => {
               if (!sp || REMOVED_PRODUCT_IDS.has(sp.id) || deletedSet.has(sp.id)) return false;
               if (sp.id === 'res-7kw-spil') sp.id = 'sy-ac07';
@@ -1350,9 +1350,9 @@ export default function App() {
               if (sp.id === 'sy-ac11-bi' && sp.name && (sp.name.includes('공용') || sp.name.includes('수익형'))) {
                 sp.name = '스필 11kW 개인용 전기차 충전기 무상AS 4년';
               }
-              const nameKey = (sp.name || '').trim();
-              if (seenNames.has(nameKey)) return false;
-              seenNames.add(nameKey);
+              const idKey = sp.id || (sp.name || '').trim();
+              if (seenIds.has(idKey)) return false;
+              seenIds.add(idKey);
               return true;
             });
 
@@ -2033,27 +2033,27 @@ export default function App() {
 
       // Prune deleted items & legacy aliases
       Object.keys(parsedHome).forEach((powerKey) => {
-        const seenNames = new Set<string>();
+        const seenIds = new Set<string>();
         parsedHome[powerKey] = (parsedHome[powerKey] || []).filter((item: any) => {
           if (!item || REMOVED_SET.has(item.id) || deletedSet.has(item.id)) return false;
           if (item.id === 'res-7kw-spil') item.id = 'sy-ac07';
           if (item.id === 'res-5kw-spil') item.id = 'sy-ac05';
           if (item.id === 'res-11kw-spil') item.id = 'sy-ac11-bi';
-          const nameKey = (item.name || '').trim();
-          if (seenNames.has(nameKey)) return false;
-          seenNames.add(nameKey);
+          const idKey = item.id || (item.name || '').trim();
+          if (seenIds.has(idKey)) return false;
+          seenIds.add(idKey);
           return true;
         });
       });
 
       Object.keys(parsedParking).forEach((catKey) => {
-        const seenNames = new Set<string>();
+        const seenIds = new Set<string>();
         parsedParking[catKey] = (parsedParking[catKey] || []).filter((item: any) => {
           if (!item || REMOVED_SET.has(item.id) || deletedSet.has(item.id)) return false;
           if (item.id === 'sy-dc50') item.id = 'park-50kw-1ch-coolcharge';
-          const nameKey = (item.name || '').trim();
-          if (seenNames.has(nameKey)) return false;
-          seenNames.add(nameKey);
+          const idKey = item.id || (item.name || '').trim();
+          if (seenIds.has(idKey)) return false;
+          seenIds.add(idKey);
           return true;
         });
       });

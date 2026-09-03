@@ -764,6 +764,20 @@ export const DEFAULT_BRAND_CATALOGS: Record<string, { pdfUrl?: string; pdfName?:
   }
 };
 
+export const CANONICAL_DETAIL_KEYS = new Set([
+  'sy-ac07', 'product-sy-ac07', 'res-7kw-spil', 'product-res-7kw-spil',
+  'sy-ac05', 'product-sy-ac05', 'res-5kw-spil', 'product-res-5kw-spil',
+  'sy-ac11-bi', 'product-sy-ac11-bi', 'res-11kw-spil', 'product-res-11kw-spil',
+  'res-7kw-chargego', 'product-res-7kw-chargego',
+  'res-7kw-electree', 'product-res-7kw-electree',
+  'res-7kw-coolcharge', 'product-res-7kw-coolcharge',
+  'park-7kw-plc-biz', 'product-park-7kw-plc-biz',
+  'park-11kw-stormshield', 'product-park-11kw-stormshield',
+  'park-35kw-stormshield', 'product-park-35kw-stormshield',
+  'park-50kw-1ch-coolcharge', 'product-park-50kw-1ch-coolcharge',
+  'sy-dc50', 'product-sy-dc50'
+]);
+
 /**
  * Helper to get set of deleted detail keys from persistent storage
  */
@@ -778,6 +792,22 @@ function getDeletedDetailKeys(): Set<string> {
       }
     }
   } catch (e) {}
+
+  // Strict Rule 1 Protection: Canonical built-in products with official detail pages MUST NEVER be deleted
+  let hasCanonicalDeleted = false;
+  CANONICAL_DETAIL_KEYS.forEach((ck) => {
+    if (set.has(ck)) {
+      set.delete(ck);
+      hasCanonicalDeleted = true;
+    }
+  });
+
+  if (hasCanonicalDeleted && typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('sy_cms_deleted_product_details', JSON.stringify(Array.from(set)));
+    } catch (e) {}
+  }
+
   return set;
 }
 
@@ -1387,30 +1417,6 @@ export function resolveDetailData(
 
   const deletedKeys = getDeletedDetailKeys();
 
-  // If explicitly deleted by user (in local deletedKeys or marked deleted in detailsMap)
-  const isDeleted = (
-    deletedKeys.has(directKey) ||
-    deletedKeys.has(rawId) ||
-    deletedKeys.has(id) ||
-    (nameKey && deletedKeys.has(nameKey)) ||
-    detailsMap[directKey]?.deleted === true ||
-    detailsMap[rawId]?.deleted === true ||
-    detailsMap[id]?.deleted === true ||
-    (nameKey && detailsMap[nameKey]?.deleted === true)
-  );
-
-  if (isDeleted) {
-    return {
-      deleted: true,
-      pdfUrls: [],
-      pdfNames: [],
-      pdfUrl: '',
-      pdfName: '',
-      specs: {},
-      features: []
-    };
-  }
-
   // Check if this product corresponds to any canonical commercial charger
   const isCommercial7kw = id === 'park-7kw-plc-biz' || (name.includes('스마트제어') && (name.includes('7kW') || name.includes('7kw') || name.includes('완속')));
   const isCommercial11kw = id === 'park-11kw-stormshield' || ((name.includes('11kW') || name.includes('11kw')) && (name.includes('쿨차지') || name.includes('스톰쉴드') || name.includes('공용')));
@@ -1446,7 +1452,7 @@ export function resolveDetailData(
     homeFallback = DEFAULT_HOME_DETAILS['res-7kw-chargego'];
   }
 
-  // 1. Direct ID match in loaded detailsMap (if valid and not old placeholder)
+  // 1. Direct ID match in loaded detailsMap (if valid user uploaded content)
   if (detailsMap[directKey] && !detailsMap[directKey].deleted) {
     const item = sanitizeItemUrls(detailsMap[directKey]);
     const hasValidFiles = (item.pdfUrls && item.pdfUrls.length > 0 && !item.pdfUrls.some(u => isOldOrPlaceholderUrl(u))) || (!!item.pdfUrl && !isOldOrPlaceholderUrl(item.pdfUrl));
@@ -1472,14 +1478,36 @@ export function resolveDetailData(
     }
   }
 
-  // 3. If it is one of the commercial solutions, guarantee the fixed official detail page
+  // 3. For all canonical home/commercial products, guarantee the official detail page
+  if (homeFallback) {
+    return sanitizeItemUrls(homeFallback);
+  }
   if (commercialFallback) {
     return sanitizeItemUrls(commercialFallback);
   }
 
-  // 4. If it is one of the home solutions, guarantee the fixed official detail page
-  if (homeFallback) {
-    return sanitizeItemUrls(homeFallback);
+  // 4. For non-canonical custom products: check if explicitly deleted by user
+  const isDeleted = (
+    deletedKeys.has(directKey) ||
+    deletedKeys.has(rawId) ||
+    deletedKeys.has(id) ||
+    (nameKey && deletedKeys.has(nameKey)) ||
+    detailsMap[directKey]?.deleted === true ||
+    detailsMap[rawId]?.deleted === true ||
+    detailsMap[id]?.deleted === true ||
+    (nameKey && detailsMap[nameKey]?.deleted === true)
+  );
+
+  if (isDeleted) {
+    return {
+      deleted: true,
+      pdfUrls: [],
+      pdfNames: [],
+      pdfUrl: '',
+      pdfName: '',
+      specs: {},
+      features: []
+    };
   }
 
   // 5. Fallback to DEFAULT_PRODUCT_DETAILS (Only if NOT deleted)
