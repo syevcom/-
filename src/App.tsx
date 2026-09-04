@@ -559,7 +559,6 @@ export default function App() {
   });
 
   const [isMobileDesignCenterOpen, setIsMobileDesignCenterOpen] = useState(false);
-  const [isQuickPanelCollapsed, setIsQuickPanelCollapsed] = useState<boolean>(true);
 
   const handleSaveMobileDesignConfig = (newConfig: MobileDesignConfig) => {
     setMobileDesignConfig(newConfig);
@@ -2893,131 +2892,100 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Floating SNS & Quick Navigation Bar on the Right side (Collapsible & Mobile Optimized) */}
+      {/* Floating SNS & Quick Navigation Bar on the Right side (Always Visible & Mobile Optimized) */}
       {snsConfig.showFloatingSns && (
-        <div className="fixed right-3 bottom-30 sm:right-6 sm:bottom-28 z-40 flex flex-col gap-2 items-end">
-          {/* Collapsed Compact State */}
-          {isQuickPanelCollapsed ? (
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-1.5"
-            >
-              {/* Quick Design Center shortcut (Only for Admin / Edit Mode) */}
-              {(user?.isAdmin || isEditMode) && (
-                <button
-                  onClick={() => setIsMobileDesignCenterOpen(true)}
-                  title="모바일 디자인 설정 열기"
-                  className="bg-slate-900/90 hover:bg-slate-900 text-emerald-300 p-2.5 rounded-full shadow-lg border border-slate-700 backdrop-blur-md flex items-center justify-center cursor-pointer transition-all hover:scale-105"
-                >
-                  <Sliders className="w-4 h-4" />
-                </button>
-              )}
+        <div className="fixed right-2.5 bottom-28 sm:right-6 sm:bottom-28 z-40 flex flex-col gap-2 items-center">
+          {/* Always-visible Quick Channel (퀵채널) Panel */}
+          <div className="bg-white/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col gap-2 sm:gap-2.5 items-center relative">
+            {/* Quick Channel Label */}
+            <span className="text-[9px] sm:text-[10px] font-black text-slate-500 tracking-wider select-none">
+              퀵채널
+            </span>
 
-              {/* Expand Quick Panel Button */}
-              <button
-                onClick={() => setIsQuickPanelCollapsed(false)}
-                title="빠른 상담 & SNS 패널 펼치기"
-                className="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2 rounded-full shadow-xl flex items-center gap-1.5 transition-all border border-emerald-400 cursor-pointer animate-pulse hover:animate-none"
+            {/* KakaoTalk URL */}
+            {snsConfig.kakaoUrl && (
+              <a
+                href={snsConfig.kakaoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="카카오톡 채널 상담"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FEE500] hover:scale-110 active:scale-95 flex items-center justify-center text-[#371D1E] shadow-md transition-all cursor-pointer"
               >
-                <MessageSquare className="w-4 h-4" />
-                <span>빠른상담</span>
-                <ChevronUp className="w-3.5 h-3.5" />
-              </button>
-            </motion.div>
-          ) : (
-            /* Expanded Panel with Full Options */
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="flex flex-col gap-2.5 items-center"
+                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 fill-[#371D1E] text-[#371D1E]" />
+              </a>
+            )}
+
+            {/* Instagram URL - Always Visible */}
+            <a
+              href={snsConfig.instagramUrl || 'https://www.instagram.com/'}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="인스타그램 공식 채널 바로가기"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
             >
-              {/* Box Wrapper with elegant glassmorphism and shadow */}
-              <div className="bg-white/95 backdrop-blur-md p-2 rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col gap-2.5 items-center relative">
-                {/* Fold button */}
-                <button
-                  onClick={() => setIsQuickPanelCollapsed(true)}
-                  title="패널 접기"
-                  className="w-full py-1 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-black flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>접기</span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
+              <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
+            </a>
 
-                {/* Instagram URL */}
-                <a
-                  href={snsConfig.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="인스타그램 방문"
-                  className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
-                >
-                  <Instagram className="w-5 h-5" />
-                </a>
+            {/* YouTube URL - Always Visible */}
+            <a
+              href={snsConfig.youtubeUrl || 'https://www.youtube.com/'}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="유튜브 공식 채널 바로가기"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FF0000] hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
+            >
+              <Youtube className="w-4 h-4 sm:w-5 sm:h-5" />
+            </a>
 
-                {/* YouTube URL */}
-                <a
-                  href={snsConfig.youtubeUrl || 'https://www.youtube.com/'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="유튜브 채널 방문"
-                  className="w-10 h-10 rounded-full bg-[#FF0000] hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
-                >
-                  <Youtube className="w-5 h-5" />
-                </a>
+            {/* Naver Blog URL - Always Visible */}
+            <a
+              href={snsConfig.blogUrl || 'https://section.blog.naver.com/'}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="공식 네이버 블로그 바로가기"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#03C75A] hover:scale-110 active:scale-95 flex items-center justify-center text-white text-[10px] sm:text-[11px] font-black shadow-md transition-all cursor-pointer font-mono"
+            >
+              blog
+            </a>
 
-                {/* Naver Blog URL */}
-                <a
-                  href={snsConfig.blogUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="공식 블로그 방문"
-                  className="w-10 h-10 rounded-full bg-[#03C75A] hover:scale-110 active:scale-95 flex items-center justify-center text-white text-[10px] font-black shadow-md transition-all cursor-pointer font-mono"
-                >
-                  blog
-                </a>
+            {/* Re-open Warranty / Popup Button */}
+            <button
+              onClick={() => setIsHomePopupOpen(true)}
+              title="품질보증서 / 정품등록 팝업 열기"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-800 hover:bg-purple-900 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-purple-400/40"
+            >
+              <span className="text-xs sm:text-sm">📜</span>
+            </button>
 
-                {/* Re-open Warranty / Popup Button */}
-                <button
-                  onClick={() => setIsHomePopupOpen(true)}
-                  title="품질보증서 / 정품등록 팝업 열기"
-                  className="w-10 h-10 rounded-full bg-purple-800 hover:bg-purple-900 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-purple-400/40"
-                >
-                  <span className="text-sm">📜</span>
-                </button>
+            {/* Design Center shortcut (Only for Admin / Edit Mode) */}
+            {(user?.isAdmin || isEditMode) && (
+              <button
+                onClick={() => setIsMobileDesignCenterOpen(true)}
+                title="모바일 화면 디자인 센터"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-600 hover:bg-emerald-700 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-emerald-400/40"
+              >
+                <Sliders className="w-4 h-4" />
+              </button>
+            )}
+          </div>
 
-                {/* Design Center shortcut (Only for Admin / Edit Mode) */}
-                {(user?.isAdmin || isEditMode) && (
-                  <button
-                    onClick={() => setIsMobileDesignCenterOpen(true)}
-                    title="모바일 화면 디자인 센터"
-                    className="w-10 h-10 rounded-full bg-emerald-600 hover:bg-emerald-700 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-emerald-400/40"
-                  >
-                    <Sliders className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Quick Scroll Top / Bottom buttons */}
-              <div className="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-slate-800 shadow-xl flex flex-col gap-1.5 items-center">
-                <button
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  title="맨 위로 가기"
-                  className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors cursor-pointer"
-                >
-                  <ChevronUp className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-                  title="맨 아래로 가기"
-                  className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors cursor-pointer"
-                >
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-              </div>
-            </motion.div>
-          )}
+          {/* Quick Scroll Top / Bottom buttons */}
+          <div className="bg-slate-900/90 backdrop-blur-md p-1 sm:p-1.5 rounded-2xl border border-slate-800 shadow-xl flex flex-col gap-1 sm:gap-1.5 items-center">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              title="맨 위로 가기"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors cursor-pointer"
+            >
+              <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+            <button
+              onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+              title="맨 아래로 가기"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white transition-colors cursor-pointer"
+            >
+              <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+          </div>
         </div>
       )}
 
