@@ -38,7 +38,7 @@ import { RouteState, parseCurrentRoute, buildRouteUrl, pushRoute, replaceRoute, 
 
 import { PRODUCTS, SOLUTIONS, REVIEWS, FAQS, NOTICES, LOTTE_EVSIS_OPTION_GROUPS, ELECTREE_OPTION_GROUPS, CHARGEGO_OPTION_GROUPS, COOLCHARGE_OPTION_GROUPS, DEFAULT_RESIDENTIAL_OPTION_GROUPS, PUBLIC_CHARGER_OPTION_GROUPS } from './data';
 import { ActivePage, User, Booking, ASRequest, Product, Solution, Review, FAQ, HeaderConfig, CartItem, MobileDesignConfig, DEFAULT_MOBILE_DESIGN_CONFIG, AdminNotification } from './types';
-import { CalendarDays, ShieldCheck, Heart, Sparkles, Phone, HelpCircle, Landmark, Instagram, Youtube, ChevronUp, ChevronDown, MessageSquare, ChevronRight, Sliders, Smartphone, Check } from 'lucide-react';
+import { CalendarDays, ShieldCheck, Heart, Sparkles, Phone, HelpCircle, Landmark, Instagram, Youtube, ChevronUp, ChevronDown, MessageSquare, ChevronRight, Sliders, Smartphone, Check, ClipboardList, Settings } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 const DEFAULT_FIELDS = {
@@ -433,6 +433,31 @@ export default function App() {
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const [isNotificationBannerDismissed, setIsNotificationBannerDismissed] = useState(false);
   const [showLoginAlertToast, setShowLoginAlertToast] = useState(false);
+
+  // Admin active tab state for direct routing
+  const [adminInitialTab, setAdminInitialTab] = useState<'products' | 'residential' | 'brands' | 'commercial' | 'inquiries' | 'analytics' | 'settings' | 'popup' | 'backup'>('products');
+
+  // Pending inquiry counts
+  const pendingInquiryCount = (bookings || []).filter(b => b.status === '접수대기').length + (asRequests || []).filter(a => a.status === '접수완료').length;
+  const totalInquiryCount = (bookings || []).length + (asRequests || []).length;
+
+  const handleNavigateToInquiries = () => {
+    setAdminInitialTab('inquiries');
+    handlePageChange('admin');
+    setIsNotificationCenterOpen(false);
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('sy_admin_switch_tab', { detail: { tab: 'inquiries' } }));
+    }, 50);
+  };
+
+  const handleNavigateToAdminWithTab = (tab: any = 'inquiries') => {
+    setAdminInitialTab(tab);
+    handlePageChange('admin');
+    setIsNotificationCenterOpen(false);
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('sy_admin_switch_tab', { detail: { tab } }));
+    }, 50);
+  };
 
   // CMS Live Editor states
   const [isEditMode, setIsEditMode] = useState(false);
@@ -1234,6 +1259,114 @@ export default function App() {
     }
   }, [isSyncing]);
 
+  // Synchronize admin notifications with real bookings and A/S records
+  useEffect(() => {
+    if (!bookings) return;
+
+    let readIds = new Set<string>();
+    let deletedIds = new Set<string>();
+    try {
+      const savedRead = localStorage.getItem('sy_read_notif_ids');
+      if (savedRead) {
+        const parsed = JSON.parse(savedRead);
+        if (Array.isArray(parsed)) readIds = new Set(parsed);
+      }
+      const savedDeleted = localStorage.getItem('sy_deleted_notif_ids');
+      if (savedDeleted) {
+        const parsed = JSON.parse(savedDeleted);
+        if (Array.isArray(parsed)) deletedIds = new Set(parsed);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    const generated: AdminNotification[] = [];
+
+    // 1. Process bookings
+    bookings.forEach((b, idx) => {
+      const notifId = `notif-bk-${b.id}`;
+      if (deletedIds.has(notifId)) return;
+
+      const purposeName =
+        b.purpose === 'Commercial'
+          ? '아파트·공동주택'
+          : b.purpose === 'ParkingLot'
+          ? '상업시설·수익형'
+          : '가정용·개인홈';
+
+      // Completed or previously read notifications
+      const isCompleted = b.status === '시공완료';
+      const isRead = readIds.has(notifId) || isCompleted;
+
+      let ts = Date.now() - idx * 60000;
+      if (b.id && b.id.startsWith('booking-')) {
+        const parsed = parseInt(b.id.replace('booking-', ''), 10);
+        if (!isNaN(parsed)) ts = parsed;
+      }
+
+      generated.push({
+        id: notifId,
+        type: b.purpose === 'Commercial' ? 'consultation' : 'booking',
+        title: `[${purposeName}] 실시간 설치견적·실측 예약 접수`,
+        customerName: b.name || '신청 고객',
+        customerPhone: b.phone || '',
+        location: b.location || b.address || '',
+        memo: b.memo || b.notes || (b.selectedProduct ? `신청 상품: ${b.selectedProduct}` : ''),
+        purpose: b.purpose,
+        estimateCost: b.estimateCost,
+        status: b.status || '접수대기',
+        createdAt: b.createdAt || '최근 접수',
+        timestamp: ts,
+        isRead,
+        targetId: b.id
+      });
+    });
+
+    // 2. Process A/S requests
+    (asRequests || []).forEach((a, idx) => {
+      const notifId = `notif-as-${a.id}`;
+      if (deletedIds.has(notifId)) return;
+
+      const isCompleted = a.status === '처리완료';
+      const isRead = readIds.has(notifId) || isCompleted;
+
+      let ts = Date.now() - (idx + 10) * 60000;
+      if (a.id && a.id.startsWith('as-')) {
+        const parsed = parseInt(a.id.replace('as-', ''), 10);
+        if (!isNaN(parsed)) ts = parsed;
+      }
+
+      generated.push({
+        id: notifId,
+        type: 'as',
+        title: `[긴급 A/S] ${a.productName || '충전기'} 점검 및 수리 신청`,
+        customerName: a.userId || '고객',
+        customerPhone: a.phone || '',
+        location: '',
+        memo: `${a.symptom || ''} (S/N: ${a.serialNumber || '미기재'})`,
+        status: a.status || '접수대기',
+        createdAt: a.createdAt || '최근 접수',
+        timestamp: ts,
+        isRead,
+        targetId: a.id
+      });
+    });
+
+    // Sort: unread first, then newest timestamp
+    generated.sort((a, b) => {
+      if (!a.isRead && b.isRead) return -1;
+      if (a.isRead && !b.isRead) return 1;
+      return b.timestamp - a.timestamp;
+    });
+
+    setNotifications(generated);
+    try {
+      localStorage.setItem('sy_admin_notifications', JSON.stringify(generated));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [bookings, asRequests]);
+
   // Initialize external analytics (GA4 & Naver) if configured
   useEffect(() => {
     initExternalAnalytics();
@@ -1687,6 +1820,14 @@ export default function App() {
 
   // Notification helpers
   const handleMarkNotificationAsRead = (id: string) => {
+    try {
+      const savedRead = localStorage.getItem('sy_read_notif_ids');
+      const readSet = new Set<string>(savedRead ? JSON.parse(savedRead) : []);
+      readSet.add(id);
+      localStorage.setItem('sy_read_notif_ids', JSON.stringify(Array.from(readSet)));
+    } catch (e) {
+      console.error(e);
+    }
     setNotifications((prev) => {
       const updated = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
       localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
@@ -1695,6 +1836,12 @@ export default function App() {
   };
 
   const handleMarkAllNotificationsAsRead = () => {
+    try {
+      const allIds = notifications.map((n) => n.id);
+      localStorage.setItem('sy_read_notif_ids', JSON.stringify(allIds));
+    } catch (e) {
+      console.error(e);
+    }
     setNotifications((prev) => {
       const updated = prev.map((n) => ({ ...n, isRead: true }));
       localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
@@ -1705,6 +1852,14 @@ export default function App() {
   };
 
   const handleDeleteNotification = (id: string) => {
+    try {
+      const savedDel = localStorage.getItem('sy_deleted_notif_ids');
+      const delSet = new Set<string>(savedDel ? JSON.parse(savedDel) : []);
+      delSet.add(id);
+      localStorage.setItem('sy_deleted_notif_ids', JSON.stringify(Array.from(delSet)));
+    } catch (e) {
+      console.error(e);
+    }
     setNotifications((prev) => {
       const updated = prev.filter((n) => n.id !== id);
       localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
@@ -2665,6 +2820,7 @@ export default function App() {
       case 'admin':
         return (
           <AdminPage
+            initialTab={adminInitialTab}
             products={products}
             onSaveProducts={handleSaveProducts}
             brands={brands}
@@ -2833,6 +2989,9 @@ export default function App() {
           onOpenMobileDesignCenter={(user?.isAdmin || isEditMode) ? () => setIsMobileDesignCenterOpen(true) : undefined}
           unreadNotificationCount={(notifications || []).filter((n) => !n.isRead).length}
           onOpenNotificationCenter={(user?.isAdmin || isEditMode) ? () => setIsNotificationCenterOpen(true) : undefined}
+          pendingInquiryCount={pendingInquiryCount}
+          totalInquiryCount={totalInquiryCount}
+          onOpenInquiries={(user?.isAdmin || isEditMode) ? handleNavigateToInquiries : undefined}
         />
 
         {/* Real-time Admin Notification Center & Top Floating Alert Toast */}
@@ -2843,10 +3002,7 @@ export default function App() {
               onMarkAsRead={handleMarkNotificationAsRead}
               onMarkAllAsRead={handleMarkAllNotificationsAsRead}
               onDeleteNotification={handleDeleteNotification}
-              onNavigateToAdmin={(tab) => {
-                handlePageChange('admin');
-                window.dispatchEvent(new CustomEvent('sy_admin_switch_tab', { detail: { tab: tab || 'inquiries' } }));
-              }}
+              onNavigateToAdmin={(tab) => handleNavigateToAdminWithTab(tab || 'inquiries')}
               isBannerDismissed={isNotificationBannerDismissed}
               onDismissBanner={() => setIsNotificationBannerDismissed(true)}
               isOpen={isNotificationCenterOpen}
@@ -2855,10 +3011,7 @@ export default function App() {
             {showLoginAlertToast && (notifications || []).filter((n) => !n.isRead).length > 0 && (
               <AdminLoginAlertToast
                 notifications={notifications}
-                onNavigateToAdmin={(tab) => {
-                  handlePageChange('admin');
-                  window.dispatchEvent(new CustomEvent('sy_admin_switch_tab', { detail: { tab: tab || 'inquiries' } }));
-                }}
+                onNavigateToAdmin={(tab) => handleNavigateToAdminWithTab(tab || 'inquiries')}
                 onOpenNotificationCenter={() => setIsNotificationCenterOpen(true)}
                 onMarkAsRead={handleMarkNotificationAsRead}
                 onClose={() => setShowLoginAlertToast(false)}
@@ -3134,21 +3287,45 @@ export default function App() {
       </footer>
 
       {/* Mobile Floating Bottom Action Bar (Sticky Quick Action for Mobile Conversion) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 py-2 shadow-2xl flex items-center gap-2">
-        <a
-          href={`tel:${footerConfig.phone.split(' ')[0] || '010-8647-7975'}`}
-          className="flex-1 py-2.5 bg-slate-900 active:bg-slate-800 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-        >
-          <Phone className="w-3.5 h-3.5 text-emerald-400" />
-          <span>전화상담</span>
-        </a>
-        <button
-          onClick={() => handleOpenQuoteWithPurpose('Residential')}
-          className="flex-[1.5] py-2.5 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-          <span>⚡ 1분 무료 견적</span>
-        </button>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 px-3 py-2 shadow-2xl flex flex-col gap-1.5">
+        {(user?.isAdmin || isEditMode) && (
+          <div className="flex items-center justify-between bg-gradient-to-r from-slate-950 via-indigo-950 to-purple-950 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-md border border-indigo-500/40">
+            <div className="flex items-center gap-1.5">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-300"></span>
+              </span>
+              <span className="text-amber-300 text-[11px] font-black">실시간 고객접수</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
+                {pendingInquiryCount > 0 ? `${pendingInquiryCount}건 대기` : `총 ${totalInquiryCount}건`}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleNavigateToInquiries}
+              className="px-2.5 py-1 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 active:scale-95 text-slate-950 rounded-lg text-[11px] font-black flex items-center gap-1 cursor-pointer transition-all shadow-sm"
+            >
+              <ClipboardList className="w-3 h-3 text-slate-950" />
+              <span>접수 바로보기</span>
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <a
+            href={`tel:${footerConfig.phone.split(' ')[0] || '010-8647-7975'}`}
+            className="flex-1 py-2.5 bg-slate-900 active:bg-slate-800 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <Phone className="w-3.5 h-3.5 text-emerald-400" />
+            <span>전화상담</span>
+          </a>
+          <button
+            onClick={() => handleOpenQuoteWithPurpose('Residential')}
+            className="flex-[1.5] py-2.5 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+            <span>⚡ 1분 무료 견적</span>
+          </button>
+        </div>
       </div>
 
       {/* Modals Container */}

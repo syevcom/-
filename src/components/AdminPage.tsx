@@ -289,6 +289,7 @@ interface AdminPageProps {
   onSaveHomePopupConfig?: (config: HomePopupConfig) => void;
   onPreviewPopup?: (config?: HomePopupConfig) => void;
   onNavigateHome: () => void;
+  initialTab?: 'products' | 'residential' | 'brands' | 'commercial' | 'inquiries' | 'analytics' | 'settings' | 'popup' | 'backup';
 }
 
 interface ProductImageControlProps {
@@ -472,10 +473,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   homePopupConfig = DEFAULT_HOME_POPUP_CONFIG,
   onSaveHomePopupConfig,
   onPreviewPopup,
-  onNavigateHome
+  onNavigateHome,
+  initialTab
 }) => {
   const { formattedTime, remainingSeconds, isExpiringSoon, extendSession, logout } = useSecureAuth();
-  const [adminTab, setAdminTab] = useState<'products' | 'residential' | 'brands' | 'commercial' | 'inquiries' | 'analytics' | 'settings' | 'popup' | 'backup'>('products');
+  const [adminTab, setAdminTab] = useState<'products' | 'residential' | 'brands' | 'commercial' | 'inquiries' | 'analytics' | 'settings' | 'popup' | 'backup'>(initialTab || 'products');
+
+  useEffect(() => {
+    if (initialTab) {
+      setAdminTab(initialTab);
+    }
+  }, [initialTab]);
   const [visitorData, setVisitorData] = useState<VisitorAnalyticsData>(() => getVisitorAnalytics());
   
   // Cloud Backup & Restore States

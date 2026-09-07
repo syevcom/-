@@ -152,6 +152,7 @@ export interface Booking {
   location: string;
   address?: string;
   purpose: 'Commercial' | 'Residential' | 'ParkingLot';
+  selectedProduct?: string;
   memo?: string;
   notes?: string;
   status: '접수대기' | '상담예약완료' | '시공설계중' | '시공완료';

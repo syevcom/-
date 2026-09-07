@@ -29,7 +29,8 @@ import {
   Bell,
   Clock,
   ShieldAlert,
-  RefreshCw
+  RefreshCw,
+  ClipboardList
 } from 'lucide-react';
 import { User as UserType, ActivePage, HeaderConfig, MobileDesignConfig, DEFAULT_MOBILE_DESIGN_CONFIG } from '../types';
 import { SearchModal } from './SearchModal';
@@ -96,6 +97,9 @@ interface HeaderProps {
   onOpenMobileDesignCenter?: () => void;
   unreadNotificationCount?: number;
   onOpenNotificationCenter?: () => void;
+  pendingInquiryCount?: number;
+  totalInquiryCount?: number;
+  onOpenInquiries?: () => void;
 }
 
 export default function Header({
@@ -138,6 +142,9 @@ export default function Header({
   onOpenMobileDesignCenter,
   unreadNotificationCount = 0,
   onOpenNotificationCenter,
+  pendingInquiryCount = 0,
+  totalInquiryCount = 0,
+  onOpenInquiries,
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isInquiryDropdownOpen, setIsInquiryDropdownOpen] = useState(false);
@@ -267,6 +274,21 @@ export default function Header({
               </button>
             );
           })}
+
+          {/* Direct Admin Inquiries Button in Main Nav */}
+          {(user?.isAdmin || isEditMode) && onOpenInquiries && (
+            <button
+              onClick={onOpenInquiries}
+              className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-xs font-black flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ml-1 animate-pulse hover:animate-none"
+              title="실시간 고객 문의 및 견적 접수 현황 바로보기"
+            >
+              <ClipboardList className="w-3.5 h-3.5 text-indigo-600" />
+              <span>고객문의 접수</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
+                {pendingInquiryCount > 0 ? `${pendingInquiryCount}건 대기` : `${totalInquiryCount}건`}
+              </span>
+            </button>
+          )}
         </nav>
 
         {/* 3. Right side: Compact Installation Shortcuts + Utility Icons */}
@@ -361,7 +383,27 @@ export default function Header({
 
             {/* Admin control buttons: Visible ONLY when logged in as Admin or in Edit Mode */}
             {(user?.isAdmin || isEditMode) && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
+                {/* Large Prominent Customer Inquiries Button */}
+                {onOpenInquiries && (
+                  <button
+                    type="button"
+                    onClick={onOpenInquiries}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-black text-xs shadow-md shadow-indigo-600/20 border border-indigo-400/40 cursor-pointer transition-all hover:scale-105 active:scale-95"
+                    title="실시간 고객 설치 견적 및 A/S 접수 현황 바로보기"
+                  >
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-300"></span>
+                    </span>
+                    <ClipboardList className="w-3.5 h-3.5 text-amber-300" />
+                    <span className="tracking-tight whitespace-nowrap">📋 고객문의·견적</span>
+                    <span className="px-1.5 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black">
+                      {pendingInquiryCount > 0 ? `${pendingInquiryCount}건 접수대기` : `${totalInquiryCount}건`}
+                    </span>
+                  </button>
+                )}
+
                 {/* Admin Session Timeout Countdown Badge */}
                 {user?.isAdmin && remainingSeconds > 0 && (
                   <div 
@@ -457,6 +499,21 @@ export default function Header({
           >
             <Search className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
           </button>
+
+          {/* Mobile Direct Inquiries Button (Admins only) */}
+          {(user?.isAdmin || isEditMode) && onOpenInquiries && (
+            <button
+              onClick={onOpenInquiries}
+              className="h-9 sm:h-10 px-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md border border-indigo-400/40 cursor-pointer active:scale-95 transition-transform shrink-0"
+              title="고객 문의 및 견적 접수 현황 바로보기"
+            >
+              <ClipboardList className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <span className="whitespace-nowrap font-extrabold text-[11px] sm:text-xs">문의</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9.5px] shrink-0">
+                {pendingInquiryCount > 0 ? `${pendingInquiryCount}` : `${totalInquiryCount}`}
+              </span>
+            </button>
+          )}
 
           {/* Mobile Design Center Direct Button (Admins only) */}
           {(user?.isAdmin || isEditMode) && onOpenMobileDesignCenter && (
@@ -851,6 +908,37 @@ export default function Header({
                 <Search className="w-4 h-4 text-slate-600" />
               </button>
             </div>
+
+            {/* Admin Highlight Card in Mobile Drawer: Quick Inquiry Check */}
+            {(user?.isAdmin || isEditMode) && onOpenInquiries && (
+              <div className="mx-3 my-2.5 p-3.5 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white rounded-2xl border-2 border-indigo-400/50 shadow-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex h-2.5 w-2.5 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400"></span>
+                    </span>
+                    <span className="text-amber-300 font-black text-xs tracking-wider">실시간 고객 접수 관리</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
+                    {pendingInquiryCount > 0 ? `${pendingInquiryCount}건 접수대기` : `총 ${totalInquiryCount}건`}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenInquiries();
+                  }}
+                  className="w-full py-2.5 px-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-98 text-white rounded-xl font-black text-xs flex items-center justify-between shadow-lg cursor-pointer transition-all border border-indigo-400/30"
+                >
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-amber-300" />
+                    <span>고객 견적·상담 접수 바로보기</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-indigo-200" />
+                </button>
+              </div>
+            )}
 
             {/* 4 Quick Icons Grid (주문조회, MY쇼핑, 1:1문의, 장바구니) */}
             <div className="grid grid-cols-4 py-3.5 px-2 border-b border-slate-200 text-center bg-slate-50/70">

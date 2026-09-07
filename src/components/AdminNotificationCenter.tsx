@@ -52,6 +52,11 @@ export const AdminNotificationCenter: React.FC<AdminNotificationCenterProps> = (
   const unreadCount = notifications.filter(n => !n.isRead).length;
   const latestUnread = notifications.find(n => !n.isRead) || notifications[0];
 
+  const bookingCount = notifications.filter(n => n.type === 'booking' || n.type === 'consultation' || n.type === 'order').length;
+  const asCount = notifications.filter(n => n.type === 'as').length;
+  const unreadBookingCount = notifications.filter(n => !n.isRead && (n.type === 'booking' || n.type === 'consultation' || n.type === 'order')).length;
+  const unreadAsCount = notifications.filter(n => !n.isRead && n.type === 'as').length;
+
   const filteredNotifications = notifications.filter(n => {
     if (filterType === 'all') return true;
     if (filterType === 'booking') return n.type === 'booking' || n.type === 'consultation' || n.type === 'order';
@@ -218,33 +223,48 @@ export const AdminNotificationCenter: React.FC<AdminNotificationCenterProps> = (
               <div className="flex items-center gap-1 overflow-x-auto">
                 <button
                   onClick={() => setFilterType('all')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
                     filterType === 'all'
                       ? 'bg-slate-900 text-white'
                       : 'bg-white text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  전체 ({notifications.length})
+                  <span>전체 ({notifications.length})</span>
+                  {unreadCount > 0 && (
+                    <span className="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[9px] font-black">
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={() => setFilterType('booking')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
                     filterType === 'booking'
                       ? 'bg-emerald-600 text-white'
                       : 'bg-white text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  예약·상담
+                  <span>예약·상담 ({bookingCount})</span>
+                  {unreadBookingCount > 0 && (
+                    <span className="px-1.5 py-0.2 bg-amber-400 text-slate-950 rounded-full text-[9px] font-black">
+                      {unreadBookingCount}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={() => setFilterType('as')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 ${
                     filterType === 'as'
                       ? 'bg-amber-600 text-white'
                       : 'bg-white text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  A/S
+                  <span>A/S ({asCount})</span>
+                  {unreadAsCount > 0 && (
+                    <span className="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[9px] font-black">
+                      {unreadAsCount}
+                    </span>
+                  )}
                 </button>
               </div>
 
