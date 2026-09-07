@@ -38,7 +38,7 @@ import { RouteState, parseCurrentRoute, buildRouteUrl, pushRoute, replaceRoute, 
 
 import { PRODUCTS, SOLUTIONS, REVIEWS, FAQS, NOTICES, LOTTE_EVSIS_OPTION_GROUPS, ELECTREE_OPTION_GROUPS, CHARGEGO_OPTION_GROUPS, COOLCHARGE_OPTION_GROUPS, DEFAULT_RESIDENTIAL_OPTION_GROUPS, PUBLIC_CHARGER_OPTION_GROUPS } from './data';
 import { ActivePage, User, Booking, ASRequest, Product, Solution, Review, FAQ, HeaderConfig, CartItem, MobileDesignConfig, DEFAULT_MOBILE_DESIGN_CONFIG, AdminNotification } from './types';
-import { CalendarDays, ShieldCheck, Heart, Sparkles, Phone, HelpCircle, Landmark, Instagram, Youtube, ChevronUp, ChevronDown, MessageSquare, ChevronRight, Sliders, Smartphone, Check, ClipboardList, Settings } from 'lucide-react';
+import { CalendarDays, ShieldCheck, Heart, Sparkles, Phone, HelpCircle, Landmark, Instagram, Youtube, ChevronUp, ChevronDown, MessageSquare, ChevronRight, ChevronLeft, Sliders, Smartphone, Check, ClipboardList, Settings } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 const DEFAULT_FIELDS = {
@@ -433,6 +433,9 @@ export default function App() {
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const [isNotificationBannerDismissed, setIsNotificationBannerDismissed] = useState(false);
   const [showLoginAlertToast, setShowLoginAlertToast] = useState(false);
+
+  // Quick Channel (퀵채널) open/collapse state (always open by default on both PC and mobile, but collapsible)
+  const [isQuickChannelOpen, setIsQuickChannelOpen] = useState(true);
 
   // Admin active tab state for direct routing
   const [adminInitialTab, setAdminInitialTab] = useState<'products' | 'residential' | 'brands' | 'commercial' | 'inquiries' | 'analytics' | 'settings' | 'popup' | 'backup'>('products');
@@ -2054,6 +2057,74 @@ export default function App() {
     setShowLoginAlertToast(true);
   };
 
+  // Inquiry (Bookings) & A/S Request management handlers for Admin
+  const handleUpdateBookingStatus = (id: string, newStatus: Booking['status']) => {
+    setBookings((prev) => {
+      const updated = prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b));
+      localStorage.setItem('sy_bookings', JSON.stringify(updated));
+      return updated;
+    });
+
+    // If marked as completed or consulting, mark notification read
+    if (newStatus === '시공완료' || newStatus === '상담예약완료') {
+      try {
+        const savedRead = localStorage.getItem('sy_read_notif_ids');
+        const readSet = new Set<string>(savedRead ? JSON.parse(savedRead) : []);
+        readSet.add(`notif-bk-${id}`);
+        readSet.add(`notif-auto-bk-${id}`);
+        localStorage.setItem('sy_read_notif_ids', JSON.stringify(Array.from(readSet)));
+      } catch (e) {
+        console.error(e);
+      }
+      setNotifications((prev) => {
+        const updated = prev.map((n) => (n.targetId === id || n.id === `notif-bk-${id}` || n.id === `notif-auto-bk-${id}` ? { ...n, isRead: true } : n));
+        localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  };
+
+  const handleDeleteBooking = (id: string) => {
+    setBookings((prev) => {
+      const updated = prev.filter((b) => b.id !== id);
+      localStorage.setItem('sy_bookings', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleUpdateAsRequestStatus = (id: string, newStatus: ASRequest['status']) => {
+    setAsRequests((prev) => {
+      const updated = prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a));
+      localStorage.setItem('sy_as', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (newStatus === '처리완료') {
+      try {
+        const savedRead = localStorage.getItem('sy_read_notif_ids');
+        const readSet = new Set<string>(savedRead ? JSON.parse(savedRead) : []);
+        readSet.add(`notif-as-${id}`);
+        readSet.add(`notif-auto-as-${id}`);
+        localStorage.setItem('sy_read_notif_ids', JSON.stringify(Array.from(readSet)));
+      } catch (e) {
+        console.error(e);
+      }
+      setNotifications((prev) => {
+        const updated = prev.map((n) => (n.targetId === id || n.id === `notif-as-${id}` || n.id === `notif-auto-as-${id}` ? { ...n, isRead: true } : n));
+        localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  };
+
+  const handleDeleteAsRequest = (id: string) => {
+    setAsRequests((prev) => {
+      const updated = prev.filter((a) => a.id !== id);
+      localStorage.setItem('sy_as', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   // CMS configuration save handlers
   const handleSaveLogoConfig = (config: any) => {
     setLogoConfig(config);
@@ -2827,6 +2898,10 @@ export default function App() {
             onSaveBrands={handleSaveBrands}
             bookings={bookings}
             asRequests={asRequests}
+            onUpdateBookingStatus={handleUpdateBookingStatus}
+            onDeleteBooking={handleDeleteBooking}
+            onUpdateAsRequestStatus={handleUpdateAsRequestStatus}
+            onDeleteAsRequest={handleDeleteAsRequest}
             snsConfig={snsConfig}
             onSaveSnsConfig={handleSaveSnsConfig}
             footerConfig={footerConfig}
@@ -3045,82 +3120,152 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Floating SNS & Quick Navigation Bar on the Right side (Always Visible & Mobile Optimized) */}
+      {/* Floating SNS & Quick Navigation Bar on the Right side (Always Open by Default, Collapsible & Mobile Optimized) */}
       {snsConfig.showFloatingSns && (
         <div className="fixed right-2.5 bottom-28 sm:right-6 sm:bottom-28 z-40 flex flex-col gap-2 items-center">
-          {/* Always-visible Quick Channel (퀵채널) Panel */}
-          <div className="bg-white/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col gap-2 sm:gap-2.5 items-center relative">
-            {/* Quick Channel Label */}
-            <span className="text-[9px] sm:text-[10px] font-black text-slate-500 tracking-wider select-none">
-              퀵채널
-            </span>
-
-            {/* KakaoTalk URL */}
-            {snsConfig.kakaoUrl && (
-              <a
-                href={snsConfig.kakaoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="카카오톡 채널 상담"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FEE500] hover:scale-110 active:scale-95 flex items-center justify-center text-[#371D1E] shadow-md transition-all cursor-pointer"
+          <AnimatePresence mode="wait">
+            {isQuickChannelOpen ? (
+              /* Expanded Quick Channel Panel */
+              <motion.div
+                key="quick-channel-expanded"
+                initial={{ opacity: 0, scale: 0.85, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.85, x: 20 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col gap-2 sm:gap-2.5 items-center relative select-none"
               >
-                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 fill-[#371D1E] text-[#371D1E]" />
-              </a>
-            )}
+                {/* Header with Title and Fold/Collapse Button */}
+                <div className="w-full flex items-center justify-between pb-1.5 border-b border-slate-100 gap-1">
+                  <span className="text-[9px] sm:text-[10px] font-black text-slate-600 tracking-wider">
+                    퀵채널
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsQuickChannelOpen(false)}
+                    title="퀵채널 접기"
+                    aria-label="퀵채널 접기"
+                    className="p-1 -mr-0.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer flex items-center"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-            {/* Instagram URL - Always Visible */}
-            <a
-              href={snsConfig.instagramUrl || 'https://www.instagram.com/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="인스타그램 공식 채널 바로가기"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
-            >
-              <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
-            </a>
+                {/* KakaoTalk URL */}
+                {snsConfig.kakaoUrl && (
+                  <a
+                    href={snsConfig.kakaoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="카카오톡 채널 상담"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FEE500] hover:scale-110 active:scale-95 flex items-center justify-center text-[#371D1E] shadow-md transition-all cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 fill-[#371D1E] text-[#371D1E]" />
+                  </a>
+                )}
 
-            {/* YouTube URL - Always Visible */}
-            <a
-              href={snsConfig.youtubeUrl || 'https://www.youtube.com/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="유튜브 공식 채널 바로가기"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FF0000] hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
-            >
-              <Youtube className="w-4 h-4 sm:w-5 sm:h-5" />
-            </a>
+                {/* Instagram URL - Always Visible */}
+                <a
+                  href={snsConfig.instagramUrl || 'https://www.instagram.com/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="인스타그램 공식 채널 바로가기"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
+                >
+                  <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
+                </a>
 
-            {/* Naver Blog URL - Always Visible */}
-            <a
-              href={snsConfig.blogUrl || 'https://section.blog.naver.com/'}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="공식 네이버 블로그 바로가기"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#03C75A] hover:scale-110 active:scale-95 flex items-center justify-center text-white text-[10px] sm:text-[11px] font-black shadow-md transition-all cursor-pointer font-mono"
-            >
-              blog
-            </a>
+                {/* YouTube URL - Always Visible */}
+                <a
+                  href={snsConfig.youtubeUrl || 'https://www.youtube.com/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="유튜브 공식 채널 바로가기"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FF0000] hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer"
+                >
+                  <Youtube className="w-4 h-4 sm:w-5 sm:h-5" />
+                </a>
 
-            {/* Re-open Warranty / Popup Button */}
-            <button
-              onClick={() => setIsHomePopupOpen(true)}
-              title="품질보증서 / 정품등록 팝업 열기"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-800 hover:bg-purple-900 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-purple-400/40"
-            >
-              <span className="text-xs sm:text-sm">📜</span>
-            </button>
+                {/* Naver Blog URL - Always Visible */}
+                <a
+                  href={snsConfig.blogUrl || 'https://section.blog.naver.com/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="공식 네이버 블로그 바로가기"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#03C75A] hover:scale-110 active:scale-95 flex items-center justify-center text-white text-[10px] sm:text-[11px] font-black shadow-md transition-all cursor-pointer font-mono"
+                >
+                  blog
+                </a>
 
-            {/* Design Center shortcut (Only for Admin / Edit Mode) */}
-            {(user?.isAdmin || isEditMode) && (
-              <button
-                onClick={() => setIsMobileDesignCenterOpen(true)}
-                title="모바일 화면 디자인 센터"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-600 hover:bg-emerald-700 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-emerald-400/40"
+                {/* Re-open Warranty / Popup Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsHomePopupOpen(true)}
+                  title="품질보증서 / 정품등록 팝업 열기"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-800 hover:bg-purple-900 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-purple-400/40"
+                >
+                  <span className="text-xs sm:text-sm">📜</span>
+                </button>
+
+                {/* Design Center shortcut (Only for Admin / Edit Mode) */}
+                {(user?.isAdmin || isEditMode) && (
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileDesignCenterOpen(true)}
+                    title="모바일 화면 디자인 센터"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-600 hover:bg-emerald-700 hover:scale-110 active:scale-95 flex items-center justify-center text-white shadow-md transition-all cursor-pointer border border-emerald-400/40"
+                  >
+                    <Sliders className="w-4 h-4" />
+                  </button>
+                )}
+
+                {/* Bottom Quick Collapse text button */}
+                <button
+                  type="button"
+                  onClick={() => setIsQuickChannelOpen(false)}
+                  title="퀵채널 접기"
+                  className="w-full pt-1 border-t border-slate-100 flex items-center justify-center gap-0.5 text-[9px] font-bold text-slate-400 hover:text-slate-600 active:scale-95 cursor-pointer transition-colors"
+                >
+                  <span>접기</span>
+                  <ChevronRight className="w-2.5 h-2.5" />
+                </button>
+              </motion.div>
+            ) : (
+              /* Collapsed Quick Channel Button */
+              <motion.button
+                key="quick-channel-collapsed"
+                initial={{ opacity: 0, scale: 0.85, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.85, x: 20 }}
+                transition={{ duration: 0.2 }}
+                type="button"
+                onClick={() => setIsQuickChannelOpen(true)}
+                title="퀵채널 펼치기 (카카오톡·SNS·상담)"
+                aria-label="퀵채널 펼치기"
+                className="bg-white/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col items-center gap-1 hover:bg-white hover:scale-105 active:scale-95 transition-all cursor-pointer group relative select-none"
               >
-                <Sliders className="w-4 h-4" />
-              </button>
+                {/* Notification Ping Badge */}
+                <span className="absolute -top-1 -left-1 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                </span>
+
+                {/* Gradient SNS icon */}
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-yellow-400 via-amber-500 to-emerald-500 flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform">
+                  <MessageSquare className="w-4 h-4 fill-white" />
+                </div>
+
+                <div className="flex flex-col items-center leading-none">
+                  <span className="text-[9px] sm:text-[10px] font-black text-slate-700 tracking-tight">
+                    퀵채널
+                  </span>
+                  <span className="text-[8px] font-bold text-emerald-600 flex items-center gap-0.5 mt-0.5">
+                    <span>열기</span>
+                    <ChevronLeft className="w-2.5 h-2.5 group-hover:-translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+              </motion.button>
             )}
-          </div>
+          </AnimatePresence>
 
           {/* Quick Scroll Top / Bottom buttons */}
           <div className="bg-slate-900/90 backdrop-blur-md p-1 sm:p-1.5 rounded-2xl border border-slate-800 shadow-xl flex flex-col gap-1 sm:gap-1.5 items-center">

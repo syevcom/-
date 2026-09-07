@@ -269,6 +269,10 @@ interface AdminPageProps {
   onSaveBrands: (brands: Record<string, any>) => void;
   bookings: Booking[];
   asRequests: ASRequest[];
+  onUpdateBookingStatus?: (id: string, newStatus: Booking['status']) => void;
+  onDeleteBooking?: (id: string) => void;
+  onUpdateAsRequestStatus?: (id: string, newStatus: ASRequest['status']) => void;
+  onDeleteAsRequest?: (id: string) => void;
   snsConfig: {
     kakaoUrl: string;
     instagramUrl: string;
@@ -466,6 +470,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   onSaveBrands,
   bookings,
   asRequests,
+  onUpdateBookingStatus,
+  onDeleteBooking,
+  onUpdateAsRequestStatus,
+  onDeleteAsRequest,
   snsConfig,
   onSaveSnsConfig,
   footerConfig,
@@ -2987,7 +2995,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             {/* Bookings Table */}
             <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
               <div className="p-4 bg-slate-900 text-white font-black text-xs flex items-center justify-between">
-                <span>⚡ 충전기 무상설치 / 견적 상담 신청 목록 ({bookings.length}건)</span>
+                <span className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  <span>충전기 무상설치 / 견적 상담 신청 목록 ({bookings.length}건)</span>
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                  상태 버튼이나 드롭다운을 클릭하여 접수 상태를 즉시 변경할 수 있습니다.
+                </span>
               </div>
               {bookings.length === 0 ? (
                 <div className="p-8 text-center text-xs font-bold text-slate-400">
@@ -2995,55 +3009,172 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 overflow-x-auto">
-                  {bookings.map((b) => (
-                    <div key={b.id} className="p-4 hover:bg-slate-50 flex flex-wrap items-center justify-between gap-4 text-xs">
-                      <div className="space-y-1 max-w-xl">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-black text-slate-950 text-sm">{b.name} 고객님</span>
-                          <span className="text-[11px] px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg font-mono font-bold flex items-center gap-1">
-                            📞 {b.phone}
-                          </span>
-                          <span className="text-[10px] px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded font-bold">
-                            {b.purpose === 'Commercial' ? '⚡ 아파트·공동주택' : b.purpose === 'ParkingLot' ? '🏢 상업시설' : '🏠 가정용 홈'}
-                          </span>
-                          {b.status && (
-                            <span className="text-[10px] px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-800 rounded font-black">
-                              {b.status}
+                  {bookings.map((b) => {
+                    const currentStatus = b.status || '접수대기';
+                    return (
+                      <div key={b.id} className="p-4 sm:p-5 hover:bg-slate-50/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs transition-colors">
+                        <div className="space-y-1.5 max-w-2xl">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-black text-slate-950 text-sm sm:text-base">{b.name} 고객님</span>
+                            <span className="text-[11px] px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg font-mono font-bold flex items-center gap-1">
+                              📞 {b.phone}
                             </span>
+                            <span className="text-[10px] px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded font-bold">
+                              {b.purpose === 'Commercial' ? '⚡ 아파트·공동주택' : b.purpose === 'ParkingLot' ? '🏢 상업시설' : '🏠 가정용 홈'}
+                            </span>
+                            {/* Current Status Badge with pulse indicator */}
+                            <span className={`text-[10.5px] px-2.5 py-0.5 rounded-full font-black border flex items-center gap-1.5 ${
+                              currentStatus === '시공완료'
+                                ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                                : currentStatus === '상담예약완료'
+                                ? 'bg-blue-50 border-blue-300 text-blue-800'
+                                : currentStatus === '시공설계중'
+                                ? 'bg-purple-50 border-purple-300 text-purple-800'
+                                : 'bg-amber-50 border-amber-300 text-amber-800'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                currentStatus === '시공완료'
+                                  ? 'bg-emerald-500'
+                                  : currentStatus === '상담예약완료'
+                                  ? 'bg-blue-500'
+                                  : currentStatus === '시공설계중'
+                                  ? 'bg-purple-500'
+                                  : 'bg-amber-500 animate-pulse'
+                              }`} />
+                              {currentStatus}
+                            </span>
+                          </div>
+                          {(b.address || b.location) && (
+                            <p className="text-slate-700 font-medium">
+                              <span className="text-slate-400 font-bold">📍 주소/지역:</span> {b.address || b.location}
+                            </p>
+                          )}
+                          {(b.memo || b.notes) && (
+                            <p className="text-slate-700 font-medium bg-slate-100/90 p-2.5 rounded-xl mt-1 border border-slate-200/60 leading-relaxed">
+                              <span className="text-slate-500 font-bold">📝 요청내용:</span> {b.memo || b.notes}
+                            </p>
+                          )}
+                          {b.estimateCost && (
+                            <p className="text-emerald-700 font-bold text-xs mt-0.5 flex items-center gap-1">
+                              <span>💰 예상견적:</span>
+                              <span className="font-extrabold">{b.estimateCost}</span>
+                            </p>
                           )}
                         </div>
-                        {(b.address || b.location) && (
-                          <p className="text-slate-700 font-medium">
-                            <span className="text-slate-400 font-bold">📍 주소/지역:</span> {b.address || b.location}
-                          </p>
-                        )}
-                        {(b.memo || b.notes) && (
-                          <p className="text-slate-600 font-medium bg-slate-100 p-2 rounded-lg mt-1">
-                            <span className="text-slate-500 font-bold">📝 요청내용:</span> {b.memo || b.notes}
-                          </p>
-                        )}
-                        {b.estimateCost && (
-                          <p className="text-emerald-700 font-bold text-xs mt-0.5">
-                            💰 {b.estimateCost}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right flex flex-col items-end gap-1.5 shrink-0">
-                        <span className="block text-[11px] text-slate-400 font-mono">{b.createdAt || '오늘'}</span>
-                        <div className="flex items-center gap-1">
-                          <a
-                            href={`tel:${b.phone}`}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold cursor-pointer transition-colors"
-                          >
-                            전화걸기
-                          </a>
-                          <span className="px-2.5 py-1 bg-amber-100 text-amber-900 font-extrabold rounded-lg text-[10.5px]">
-                            {b.status || '상담 진행중'}
+
+                        {/* Actions & Status Changer Area */}
+                        <div className="flex flex-col items-start lg:items-end gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                          <span className="block text-[11px] text-slate-400 font-mono">
+                            접수일시: {b.createdAt || '오늘'}
                           </span>
+
+                          {/* Primary Action Buttons Row */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <a
+                              href={`tel:${b.phone?.replace(/[^0-9]/g, '') || b.phone}`}
+                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1 shadow-xs"
+                              title="고객 전화 연결"
+                            >
+                              <Phone className="w-3.5 h-3.5" />
+                              <span>전화걸기</span>
+                            </a>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(b.phone);
+                                setSaveSuccessMsg(`'${b.name}' 고객님 연락처(${b.phone})가 복사되었습니다.`);
+                                setTimeout(() => setSaveSuccessMsg(''), 3000);
+                              }}
+                              className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 border border-slate-200"
+                              title="연락처 복사"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">복사</span>
+                            </button>
+
+                            {/* Status Selector Dropdown */}
+                            <div className="relative inline-flex items-center">
+                              <select
+                                value={currentStatus}
+                                onChange={(e) => {
+                                  const newStatus = e.target.value as Booking['status'];
+                                  onUpdateBookingStatus?.(b.id, newStatus);
+                                  setSaveSuccessMsg(`'${b.name}' 고객님의 상태가 [${newStatus}](으)로 변경되었습니다.`);
+                                  setTimeout(() => setSaveSuccessMsg(''), 3500);
+                                }}
+                                className={`appearance-none cursor-pointer pl-2.5 pr-7 py-1.5 rounded-xl text-[11px] font-black border transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                                  currentStatus === '시공완료'
+                                    ? 'bg-emerald-100 text-emerald-950 border-emerald-300 hover:bg-emerald-200'
+                                    : currentStatus === '상담예약완료'
+                                    ? 'bg-blue-100 text-blue-950 border-blue-300 hover:bg-blue-200'
+                                    : currentStatus === '시공설계중'
+                                    ? 'bg-purple-100 text-purple-950 border-purple-300 hover:bg-purple-200'
+                                    : 'bg-amber-100 text-amber-950 border-amber-300 hover:bg-amber-200'
+                                }`}
+                                title="접수 상태 변경"
+                              >
+                                <option value="접수대기">🟡 접수대기</option>
+                                <option value="상담예약완료">🔵 상담예약완료</option>
+                                <option value="시공설계중">🟣 시공설계중</option>
+                                <option value="시공완료">🟢 시공완료</option>
+                              </select>
+                              <ChevronDown className="w-3.5 h-3.5 absolute right-2 pointer-events-none text-slate-700" />
+                            </div>
+
+                            {/* Delete Button */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`'${b.name}' 고객님의 접수 내역을 정말 삭제하시겠습니까?`)) {
+                                  onDeleteBooking?.(b.id);
+                                  setSaveSuccessMsg(`'${b.name}' 고객님의 상담 신청 건이 삭제되었습니다.`);
+                                  setTimeout(() => setSaveSuccessMsg(''), 3000);
+                                }
+                              }}
+                              className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-[11px] font-bold transition-colors cursor-pointer border border-rose-200"
+                              title="접수 내역 삭제"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          {/* 1-Click Quick Status Pills */}
+                          <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 flex-wrap">
+                            <span className="text-[10px] text-slate-500 font-bold px-1 hidden sm:inline">원클릭 변경:</span>
+                            {(['접수대기', '상담예약완료', '시공설계중', '시공완료'] as const).map((st) => {
+                              const isActive = currentStatus === st;
+                              return (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  onClick={() => {
+                                    onUpdateBookingStatus?.(b.id, st);
+                                    setSaveSuccessMsg(`'${b.name}' 고객님의 상태가 [${st}](으)로 변경되었습니다.`);
+                                    setTimeout(() => setSaveSuccessMsg(''), 3500);
+                                  }}
+                                  className={`px-2 py-0.5 rounded-lg text-[10.5px] font-black transition-all cursor-pointer ${
+                                    isActive
+                                      ? st === '시공완료'
+                                        ? 'bg-emerald-600 text-white shadow-xs'
+                                        : st === '상담예약완료'
+                                        ? 'bg-blue-600 text-white shadow-xs'
+                                        : st === '시공설계중'
+                                        ? 'bg-purple-600 text-white shadow-xs'
+                                        : 'bg-amber-500 text-white shadow-xs'
+                                      : 'text-slate-600 hover:bg-white hover:text-slate-950'
+                                  }`}
+                                  title={`${st} 상태로 즉시 변경`}
+                                >
+                                  {st}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -3051,7 +3182,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             {/* AS Requests Table */}
             <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
               <div className="p-4 bg-slate-900 text-white font-black text-xs flex items-center justify-between">
-                <span>🔧 긴급 A/S 및 기기 정비 접수 목록 ({asRequests.length}건)</span>
+                <span className="flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-rose-400" />
+                  <span>긴급 A/S 및 기기 정비 접수 목록 ({asRequests.length}건)</span>
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                  A/S 처리 진행 단계(접수완료 → 기사배정 → 처리완료)를 변경할 수 있습니다.
+                </span>
               </div>
               {asRequests.length === 0 ? (
                 <div className="p-8 text-center text-xs font-bold text-slate-400">
@@ -3059,25 +3196,157 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 overflow-x-auto">
-                  {asRequests.map((req) => (
-                    <div key={req.id} className="p-4 hover:bg-slate-50 flex flex-wrap items-center justify-between gap-4 text-xs">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-black text-slate-900">{req.userName}</span>
-                          <span className="text-[10px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">{req.phone}</span>
-                          <span className="text-[10px] px-2 py-0.5 bg-rose-100 text-rose-800 rounded font-bold">{req.issueType}</span>
+                  {asRequests.map((req) => {
+                    const currentStatus = req.status || '접수완료';
+                    return (
+                      <div key={req.id} className="p-4 sm:p-5 hover:bg-slate-50/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4 text-xs transition-colors">
+                        <div className="space-y-1.5 max-w-2xl">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-black text-slate-950 text-sm sm:text-base">{req.userName} 고객님</span>
+                            <span className="text-[11px] px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg font-mono font-bold flex items-center gap-1">
+                              📞 {req.phone}
+                            </span>
+                            <span className="text-[10px] px-2 py-0.5 bg-rose-50 border border-rose-200 text-rose-800 rounded font-bold">
+                              🚨 {req.issueType}
+                            </span>
+                            {/* Current AS Status Badge */}
+                            <span className={`text-[10.5px] px-2.5 py-0.5 rounded-full font-black border flex items-center gap-1.5 ${
+                              currentStatus === '처리완료'
+                                ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                                : currentStatus === '기사배정'
+                                ? 'bg-blue-50 border-blue-300 text-blue-800'
+                                : 'bg-rose-50 border-rose-300 text-rose-800'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                currentStatus === '처리완료'
+                                  ? 'bg-emerald-500'
+                                  : currentStatus === '기사배정'
+                                  ? 'bg-blue-500'
+                                  : 'bg-rose-500 animate-pulse'
+                              }`} />
+                              {currentStatus}
+                            </span>
+                          </div>
+                          {req.locationAddress && (
+                            <p className="text-slate-700 font-medium">
+                              <span className="text-slate-400 font-bold">📍 설치장소:</span> {req.locationAddress}
+                            </p>
+                          )}
+                          {req.description && (
+                            <p className="text-slate-700 font-medium bg-slate-100/90 p-2.5 rounded-xl mt-1 border border-slate-200/60 leading-relaxed">
+                              <span className="text-slate-500 font-bold">🔧 증상 및 요청:</span> {req.description}
+                            </p>
+                          )}
                         </div>
-                        <p className="text-slate-600 font-medium mt-1">설치장소: {req.locationAddress}</p>
-                        <p className="text-slate-500 font-normal mt-0.5">증상: {req.description}</p>
+
+                        {/* Actions & Status Changer Area */}
+                        <div className="flex flex-col items-start lg:items-end gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                          <span className="block text-[11px] text-slate-400 font-mono">
+                            접수일시: {req.date || '오늘'}
+                          </span>
+
+                          {/* Action Buttons Row */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <a
+                              href={`tel:${req.phone?.replace(/[^0-9]/g, '') || req.phone}`}
+                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold cursor-pointer transition-colors flex items-center gap-1 shadow-xs"
+                              title="고객 전화 연결"
+                            >
+                              <Phone className="w-3.5 h-3.5" />
+                              <span>전화걸기</span>
+                            </a>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(req.phone);
+                                setSaveSuccessMsg(`'${req.userName}' 고객님 연락처(${req.phone})가 복사되었습니다.`);
+                                setTimeout(() => setSaveSuccessMsg(''), 3000);
+                              }}
+                              className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 border border-slate-200"
+                              title="연락처 복사"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">복사</span>
+                            </button>
+
+                            {/* Status Selector Dropdown */}
+                            <div className="relative inline-flex items-center">
+                              <select
+                                value={currentStatus}
+                                onChange={(e) => {
+                                  const newStatus = e.target.value as ASRequest['status'];
+                                  onUpdateAsRequestStatus?.(req.id, newStatus);
+                                  setSaveSuccessMsg(`'${req.userName}' 고객님의 A/S 상태가 [${newStatus}](으)로 변경되었습니다.`);
+                                  setTimeout(() => setSaveSuccessMsg(''), 3500);
+                                }}
+                                className={`appearance-none cursor-pointer pl-2.5 pr-7 py-1.5 rounded-xl text-[11px] font-black border transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                                  currentStatus === '처리완료'
+                                    ? 'bg-emerald-100 text-emerald-950 border-emerald-300 hover:bg-emerald-200'
+                                    : currentStatus === '기사배정'
+                                    ? 'bg-blue-100 text-blue-950 border-blue-300 hover:bg-blue-200'
+                                    : 'bg-rose-100 text-rose-950 border-rose-300 hover:bg-rose-200'
+                                }`}
+                                title="A/S 상태 변경"
+                              >
+                                <option value="접수완료">🔴 접수완료</option>
+                                <option value="기사배정">🔵 기사배정</option>
+                                <option value="처리완료">🟢 처리완료</option>
+                              </select>
+                              <ChevronDown className="w-3.5 h-3.5 absolute right-2 pointer-events-none text-slate-700" />
+                            </div>
+
+                            {/* Delete Button */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`'${req.userName}' 고객님의 A/S 접수 건을 정말 삭제하시겠습니까?`)) {
+                                  onDeleteAsRequest?.(req.id);
+                                  setSaveSuccessMsg(`'${req.userName}' 고객님의 A/S 건이 삭제되었습니다.`);
+                                  setTimeout(() => setSaveSuccessMsg(''), 3000);
+                                }
+                              }}
+                              className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-[11px] font-bold transition-colors cursor-pointer border border-rose-200"
+                              title="A/S 접수 삭제"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          {/* 1-Click Quick AS Status Pills */}
+                          <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 flex-wrap">
+                            <span className="text-[10px] text-slate-500 font-bold px-1 hidden sm:inline">원클릭 변경:</span>
+                            {(['접수완료', '기사배정', '처리완료'] as const).map((st) => {
+                              const isActive = currentStatus === st;
+                              return (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  onClick={() => {
+                                    onUpdateAsRequestStatus?.(req.id, st);
+                                    setSaveSuccessMsg(`'${req.userName}' 고객님의 A/S 상태가 [${st}](으)로 변경되었습니다.`);
+                                    setTimeout(() => setSaveSuccessMsg(''), 3500);
+                                  }}
+                                  className={`px-2 py-0.5 rounded-lg text-[10.5px] font-black transition-all cursor-pointer ${
+                                    isActive
+                                      ? st === '처리완료'
+                                        ? 'bg-emerald-600 text-white shadow-xs'
+                                        : st === '기사배정'
+                                        ? 'bg-blue-600 text-white shadow-xs'
+                                        : 'bg-rose-600 text-white shadow-xs'
+                                      : 'text-slate-600 hover:bg-white hover:text-slate-950'
+                                  }`}
+                                  title={`${st} 상태로 즉시 변경`}
+                                >
+                                  {st}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="block text-[10px] text-slate-400 font-mono">{req.date}</span>
-                        <span className="inline-block mt-1 px-2.5 py-1 bg-rose-100 text-rose-800 font-extrabold rounded-lg text-[10px]">
-                          A/S 전담 기사 배치중
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
