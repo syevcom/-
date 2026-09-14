@@ -90,9 +90,43 @@
         "referrer": { "type": "string", "description": "Referrer URL" }
       },
       "required": ["id", "timestamp", "date", "page"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Customer EV charger installation and quotation requests",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique booking inquiry ID" },
+        "name": { "type": "string", "description": "Customer name" },
+        "phone": { "type": "string", "description": "Customer phone number" },
+        "location": { "type": "string", "description": "Installation location / address" },
+        "purpose": { "type": "string", "description": "Residential, Commercial, or ParkingLot" },
+        "status": { "type": "string", "description": "Pending, Consulting, Designing, or Completed" },
+        "memo": { "type": "string", "description": "Customer message or memo" },
+        "estimateCost": { "type": "string", "description": "Estimated cost string" },
+        "createdAt": { "type": "string", "description": "Creation formatted timestamp" },
+        "timestamp": { "type": "number", "description": "Unix timestamp in ms" }
+      },
+      "required": ["id", "name", "phone", "status", "createdAt"]
+    },
+    "AsRequest": {
+      "title": "AsRequest",
+      "description": "Customer EV charger after-service and maintenance requests",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique A/S request ID" },
+        "userName": { "type": "string", "description": "Customer name" },
+        "phone": { "type": "string", "description": "Customer phone number" },
+        "productName": { "type": "string", "description": "Charger product name or model" },
+        "serialNumber": { "type": "string", "description": "Serial number" },
+        "symptom": { "type": "string", "description": "Failure symptom or issue" },
+        "status": { "type": "string", "description": "Receipt status" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["id", "status", "createdAt"]
     }
   },
   "firestore": {
-    "rules": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /sy_cms_data/{document} {\n      allow read, write: if true;\n    }\n    match /sy_cms_backups/{document} {\n      allow read, write: if true;\n    }\n    match /sy_visitor_daily/{document} {\n      allow read, write: if true;\n    }\n    match /sy_visitor_logs/{document} {\n      allow read, write: if true;\n    }\n  }\n}"
+    "rules": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /sy_cms_data/{document} {\n      allow read, write: if true;\n    }\n    match /sy_cms_backups/{document} {\n      allow read, write: if true;\n    }\n    match /inquiries/{document} {\n      allow read, write: if true;\n    }\n    match /as_requests/{document} {\n      allow read, write: if true;\n    }\n    match /brandCatalogs/{document} {\n      allow read, write: if true;\n    }\n    match /productDetails/{document} {\n      allow read, write: if true;\n    }\n    match /sy_visitor_daily/{document} {\n      allow read, write: if true;\n    }\n    match /sy_visitor_logs/{document} {\n      allow read, write: if true;\n    }\n  }\n}"
   }
 }

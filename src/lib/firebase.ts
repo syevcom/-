@@ -21,6 +21,7 @@ import {
   uploadString 
 } from 'firebase/storage';
 import { useState, useEffect } from 'react';
+import { Booking, ASRequest } from '../types';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
@@ -852,6 +853,28 @@ export async function loadFromFirestore(): Promise<void> {
       }
 
       if (shouldSyncKey(key) && data && typeof data.value === 'string') {
+        if (key === 'sy_bookings') {
+          try {
+            const arr = JSON.parse(data.value);
+            if (Array.isArray(arr)) {
+              const clean = arr.filter((b: any) => b.id !== 'b-seed-1' && !b.name?.includes('김태우'));
+              localStorage.setItem(key, JSON.stringify(clean));
+              firebaseKeys.add(key);
+              return;
+            }
+          } catch (e) {}
+        }
+        if (key === 'sy_as') {
+          try {
+            const arr = JSON.parse(data.value);
+            if (Array.isArray(arr)) {
+              const clean = arr.filter((a: any) => a.id !== 'as-seed-1');
+              localStorage.setItem(key, JSON.stringify(clean));
+              firebaseKeys.add(key);
+              return;
+            }
+          } catch (e) {}
+        }
         localStorage.setItem(key, data.value);
         firebaseKeys.add(key);
       }
@@ -866,6 +889,13 @@ export async function loadFromFirestore(): Promise<void> {
       if (key && shouldSyncKey(key) && !firebaseKeys.has(key)) {
         const value = localStorage.getItem(key);
         if (value) {
+          // Prevent mock seeds from being pushed to Firestore
+          if (key === 'sy_bookings' && (value.includes('b-seed-1') || value.includes('김태우'))) {
+            continue;
+          }
+          if (key === 'sy_as' && value.includes('as-seed-1')) {
+            continue;
+          }
           await setDoc(doc(db, CMS_COLLECTION, key), {
             value,
             updatedAt: new Date().toISOString()
@@ -1106,5 +1136,238 @@ export function setupFirebaseStorageSync() {
     (window as any).syCreateBackup = () => createFirestoreBackup('manual');
     (window as any).syExportBackup = exportBackupToJsonFile;
     (window as any).syVerifyData = verifyDataIntegrity;
+  }
+}
+
+// ============================================================================
+// DEDICATED INQUIRIES & A/S REAL-TIME FIRESTORE PIPELINE
+// ============================================================================
+
+export const INQUIRIES_COLLECTION = 'inquiries';
+export const AS_COLLECTION = 'as_requests';
+
+/**
+ * Subscribes to customer installation/estimate inquiries in real-time
+ */
+export function subscribeToInquiries(callback: (bookings: Booking[]) => void): Unsubscribe {
+  try {
+    const colRef = collection(db, INQUIRIES_COLLECTION);
+    return onSnapshot(colRef, (snapshot) => {
+      const list: Booking[] = [];
+      snapshot.forEach((d) => {
+        const item = d.data() as Booking;
+        if (item && item.id !== 'b-seed-1' && !item.name?.includes('김태우')) {
+          list.push({ ...item, id: d.id });
+        }
+      });
+      // Sort newest first
+      list.sort((a, b) => {
+        const tA = (a as any).timestamp || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tB = (b as any).timestamp || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return tB - tA;
+      });
+      callback(list);
+      // Persist to local storage as clean cache
+      localStorage.setItem('sy_bookings', JSON.stringify(list));
+    }, (err) => {
+      console.warn('[Firestore] Inquiries real-time subscription error:', err);
+    });
+  } catch (e) {
+    console.error('[Firestore] Failed to initialize inquiries listener:', e);
+    return () => {};
+  }
+}
+
+/**
+ * Subscribes to A/S maintenance requests in real-time
+ */
+export function subscribeToAsRequests(callback: (requests: ASRequest[]) => void): Unsubscribe {
+  try {
+    const colRef = collection(db, AS_COLLECTION);
+    return onSnapshot(colRef, (snapshot) => {
+      const list: ASRequest[] = [];
+      snapshot.forEach((d) => {
+        const item = d.data() as ASRequest;
+        if (item && item.id !== 'as-seed-1') {
+          list.push({ ...item, id: d.id });
+        }
+      });
+      list.sort((a, b) => {
+        const tA = (a as any).timestamp || (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tB = (b as any).timestamp || (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return tB - tA;
+      });
+      callback(list);
+      localStorage.setItem('sy_as', JSON.stringify(list));
+    }, (err) => {
+      console.warn('[Firestore] AS requests real-time subscription error:', err);
+    });
+  } catch (e) {
+    console.error('[Firestore] Failed to initialize AS requests listener:', e);
+    return () => {};
+  }
+}
+
+/**
+ * Saves a new inquiry permanently to Firestore
+ */
+export async function saveInquiryToFirestore(booking: Booking): Promise<void> {
+  try {
+    const docRef = doc(db, INQUIRIES_COLLECTION, booking.id);
+    const dataToSave = {
+      ...booking,
+      timestamp: (booking as any).timestamp || Date.now(),
+      updatedAt: new Date().toISOString()
+    };
+    await setDoc(docRef, dataToSave);
+
+    // Update backup cache in sy_cms_data
+    try {
+      const raw = localStorage.getItem('sy_bookings');
+      const list: Booking[] = raw ? JSON.parse(raw) : [];
+      const filtered = list.filter((b) => b.id !== booking.id && b.id !== 'b-seed-1' && !b.name?.includes('김태우'));
+      const updated = [booking, ...filtered];
+      localStorage.setItem('sy_bookings', JSON.stringify(updated));
+      await setDoc(doc(db, CMS_COLLECTION, 'sy_bookings'), {
+        value: JSON.stringify(updated),
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) {
+      console.warn('[Firestore] Cache sync warning:', e);
+    }
+  } catch (error) {
+    console.error('[Firestore] Error saving inquiry:', error);
+    throw error;
+  }
+}
+
+/**
+ * Updates inquiry status (접수대기 -> 상담예약완료, 시공설계중, 시공완료)
+ */
+export async function updateInquiryStatusInFirestore(id: string, status: Booking['status']): Promise<void> {
+  try {
+    const docRef = doc(db, INQUIRIES_COLLECTION, id);
+    await setDoc(docRef, { status, updatedAt: new Date().toISOString() }, { merge: true });
+
+    // Sync to sy_cms_data
+    try {
+      const raw = localStorage.getItem('sy_bookings');
+      if (raw) {
+        const list: Booking[] = JSON.parse(raw);
+        const updated = list.map((b) => (b.id === id ? { ...b, status } : b));
+        localStorage.setItem('sy_bookings', JSON.stringify(updated));
+        await setDoc(doc(db, CMS_COLLECTION, 'sy_bookings'), {
+          value: JSON.stringify(updated),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    } catch (e) {}
+  } catch (error) {
+    console.error('[Firestore] Error updating inquiry status:', error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes inquiry from Firestore
+ */
+export async function deleteInquiryFromFirestore(id: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, INQUIRIES_COLLECTION, id));
+    try {
+      const raw = localStorage.getItem('sy_bookings');
+      if (raw) {
+        const list: Booking[] = JSON.parse(raw);
+        const updated = list.filter((b) => b.id !== id);
+        localStorage.setItem('sy_bookings', JSON.stringify(updated));
+        await setDoc(doc(db, CMS_COLLECTION, 'sy_bookings'), {
+          value: JSON.stringify(updated),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    } catch (e) {}
+  } catch (error) {
+    console.error('[Firestore] Error deleting inquiry:', error);
+    throw error;
+  }
+}
+
+/**
+ * Saves a new A/S request permanently to Firestore
+ */
+export async function saveAsRequestToFirestore(request: ASRequest): Promise<void> {
+  try {
+    const docRef = doc(db, AS_COLLECTION, request.id);
+    const dataToSave = {
+      ...request,
+      timestamp: (request as any).timestamp || Date.now(),
+      updatedAt: new Date().toISOString()
+    };
+    await setDoc(docRef, dataToSave);
+
+    try {
+      const raw = localStorage.getItem('sy_as');
+      const list: ASRequest[] = raw ? JSON.parse(raw) : [];
+      const filtered = list.filter((a) => a.id !== request.id && a.id !== 'as-seed-1');
+      const updated = [request, ...filtered];
+      localStorage.setItem('sy_as', JSON.stringify(updated));
+      await setDoc(doc(db, CMS_COLLECTION, 'sy_as'), {
+        value: JSON.stringify(updated),
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) {}
+  } catch (error) {
+    console.error('[Firestore] Error saving AS request:', error);
+    throw error;
+  }
+}
+
+/**
+ * Updates A/S request status (접수완료 -> 기사배정, 처리완료)
+ */
+export async function updateAsRequestStatusInFirestore(id: string, status: ASRequest['status']): Promise<void> {
+  try {
+    const docRef = doc(db, AS_COLLECTION, id);
+    await setDoc(docRef, { status, updatedAt: new Date().toISOString() }, { merge: true });
+
+    try {
+      const raw = localStorage.getItem('sy_as');
+      if (raw) {
+        const list: ASRequest[] = JSON.parse(raw);
+        const updated = list.map((a) => (a.id === id ? { ...a, status } : a));
+        localStorage.setItem('sy_as', JSON.stringify(updated));
+        await setDoc(doc(db, CMS_COLLECTION, 'sy_as'), {
+          value: JSON.stringify(updated),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    } catch (e) {}
+  } catch (error) {
+    console.error('[Firestore] Error updating AS request status:', error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes A/S request from Firestore
+ */
+export async function deleteAsRequestFromFirestore(id: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, AS_COLLECTION, id));
+    try {
+      const raw = localStorage.getItem('sy_as');
+      if (raw) {
+        const list: ASRequest[] = JSON.parse(raw);
+        const updated = list.filter((a) => a.id !== id);
+        localStorage.setItem('sy_as', JSON.stringify(updated));
+        await setDoc(doc(db, CMS_COLLECTION, 'sy_as'), {
+          value: JSON.stringify(updated),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    } catch (e) {}
+  } catch (error) {
+    console.error('[Firestore] Error deleting AS request:', error);
+    throw error;
   }
 }

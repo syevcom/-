@@ -492,6 +492,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       setAdminTab(initialTab);
     }
   }, [initialTab]);
+
+  const pendingBookingsCount = (bookings || []).filter(b => (b.status || '접수대기') === '접수대기').length;
+  const pendingAsCount = (asRequests || []).filter(a => (a.status || '접수완료') === '접수완료').length;
+  const totalPendingInquiries = pendingBookingsCount + pendingAsCount;
+
   const [visitorData, setVisitorData] = useState<VisitorAnalyticsData>(() => getVisitorAnalytics());
   
   // Cloud Backup & Restore States
@@ -1677,14 +1682,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
           <button
             onClick={() => setAdminTab('inquiries')}
-            className={`px-3 py-3 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-3 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer relative ${
               adminTab === 'inquiries'
-                ? 'bg-slate-900 text-white shadow-md'
+                ? 'bg-slate-900 text-white shadow-md ring-2 ring-indigo-400/50'
+                : totalPendingInquiries > 0
+                ? 'bg-amber-50 border border-amber-300 text-amber-950 hover:bg-amber-100 shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
+            title="고객 견적 및 AS 신청 목록 (상태 변경 및 관리)"
           >
-            <ClipboardList className="w-4 h-4 text-indigo-400 shrink-0" />
-            <span className="truncate">📋 문의 ({bookings.length + asRequests.length})</span>
+            <ClipboardList className={`w-4 h-4 ${totalPendingInquiries > 0 ? 'text-amber-500' : 'text-indigo-400'} shrink-0`} />
+            <span className="truncate">📋 고객 상담/접수</span>
+            {totalPendingInquiries > 0 ? (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black animate-pulse shrink-0">
+                {totalPendingInquiries}건 대기
+              </span>
+            ) : (
+              <span className="text-slate-400 font-normal text-xs shrink-0">
+                ({bookings.length + asRequests.length})
+              </span>
+            )}
           </button>
 
           <button
@@ -2982,6 +2999,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         {/* TAB 3: INQUIRIES & A/S DASHBOARD */}
         {adminTab === 'inquiries' && (
           <div className="space-y-6">
+            {/* Guide banner for changing 접수대기 status */}
+            <div className="bg-gradient-to-r from-amber-50 via-amber-100/50 to-orange-50 border-2 border-amber-300 p-4 sm:p-5 rounded-2xl shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-sm mt-0.5 sm:mt-0 text-base">
+                  💡
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-amber-950 flex items-center gap-2">
+                    <span>[접수대기] 상태 변경 방법 안내</span>
+                    <span className="text-[10.5px] px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 font-extrabold">
+                      현재 미처리 대기: {totalPendingInquiries}건
+                    </span>
+                  </h3>
+                  <p className="text-xs text-amber-900 font-semibold mt-1 leading-relaxed">
+                    고객이 온라인으로 접수한 신규 신청 건은 기본 <strong>[🟡 접수대기]</strong>로 표시됩니다.<br />
+                    상태를 변경하시려면 아래 각 신청 건 우측의 <strong>'원클릭 버튼([🔵 상담예약완료] / [🟣 시공설계중] / [🟢 시공완료])'</strong>이나 <strong>'상태 드롭다운 셀렉트'</strong>를 직접 클릭하세요. 클릭 즉시 클라우드에 실시간 반영됩니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
               <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
                 <ClipboardList className="w-5 h-5 text-indigo-600" />

@@ -31,7 +31,18 @@ import { MobileDesignCenterModal } from './components/MobileDesignCenterModal';
 import { AdminNotificationCenter } from './components/AdminNotificationCenter';
 import { AdminLoginAlertToast } from './components/AdminLoginAlertToast';
 import { BRAND_METADATA, HOME_PRODUCTS_DATA, PARKING_PRODUCTS_DATA } from './components/SolutionsSection';
-import { setupFirebaseStorageSync, loadFromFirestore } from './lib/firebase';
+import { 
+  setupFirebaseStorageSync, 
+  loadFromFirestore,
+  subscribeToInquiries,
+  subscribeToAsRequests,
+  saveInquiryToFirestore,
+  updateInquiryStatusInFirestore,
+  deleteInquiryFromFirestore,
+  saveAsRequestToFirestore,
+  updateAsRequestStatusInFirestore,
+  deleteAsRequestFromFirestore
+} from './lib/firebase';
 import { recordVisitorHit, initExternalAnalytics } from './lib/visitorAnalytics';
 import { secureAuthManager, useSecureAuth } from './lib/secureAuthManager';
 import { RouteState, parseCurrentRoute, buildRouteUrl, pushRoute, replaceRoute, findProductByIdOrSlug } from './lib/routerHelper';
@@ -692,51 +703,43 @@ export default function App() {
     if (savedBookings) {
       try {
         const parsed = JSON.parse(savedBookings);
-        setBookings(Array.isArray(parsed) ? parsed : []);
+        if (Array.isArray(parsed)) {
+          const clean = parsed.filter((b: any) => 
+            b.id !== 'b-seed-1' && 
+            !b.name?.includes('김태우')
+          );
+          setBookings(clean);
+          localStorage.setItem('sy_bookings', JSON.stringify(clean));
+        } else {
+          setBookings([]);
+        }
       } catch (e) {
         console.error('Failed to parse bookings', e);
+        setBookings([]);
       }
     } else {
-      // Seed pre-loaded bookings for first-time premium experience
-      const initialBookings: Booking[] = [
-        {
-          id: 'b-seed-1',
-          name: '김태우 소장',
-          phone: '010-9876-5432',
-          location: '서울',
-          purpose: 'ParkingLot',
-          memo: '테헤란로 오피스 빌딩 주차 면적 수익형 급속 충전 시공 설계',
-          status: '시공완료',
-          createdAt: '2026-06-12 10:20',
-          estimateCost: '18,500,000원'
-        }
-      ];
-      setBookings(initialBookings);
-      localStorage.setItem('sy_bookings', JSON.stringify(initialBookings));
+      setBookings([]);
     }
 
     const savedAS = localStorage.getItem('sy_as');
     if (savedAS) {
       try {
         const parsed = JSON.parse(savedAS);
-        setAsRequests(Array.isArray(parsed) ? parsed : []);
+        if (Array.isArray(parsed)) {
+          const clean = parsed.filter((a: any) => 
+            a.id !== 'as-seed-1'
+          );
+          setAsRequests(clean);
+          localStorage.setItem('sy_as', JSON.stringify(clean));
+        } else {
+          setAsRequests([]);
+        }
       } catch (e) {
         console.error('Failed to parse A/S', e);
+        setAsRequests([]);
       }
     } else {
-      const initialAS: ASRequest[] = [
-        {
-          id: 'as-seed-1',
-          userId: 'usr-seed',
-          productName: 'SY-AC11 프로 멀티 완속',
-          serialNumber: 'SY-2026-0811',
-          symptom: '전원 상태 지시등 점멸 이상',
-          status: '처리완료',
-          createdAt: '2026-06-14 11:30'
-        }
-      ];
-      setAsRequests(initialAS);
-      localStorage.setItem('sy_as', JSON.stringify(initialAS));
+      setAsRequests([]);
     }
 
     // Load Cart Items
@@ -1778,6 +1781,20 @@ export default function App() {
     };
   }, []);
 
+  // Connect real-time Firestore listeners for Inquiries and A/S Requests
+  useEffect(() => {
+    const unsubInquiries = subscribeToInquiries((realtimeBookings) => {
+      setBookings(realtimeBookings);
+    });
+    const unsubAS = subscribeToAsRequests((realtimeAS) => {
+      setAsRequests(realtimeAS);
+    });
+    return () => {
+      unsubInquiries();
+      unsubAS();
+    };
+  }, []);
+
   // Sync state helpers
   const handleLogin = (newUser: User) => {
     const isOwner = newUser.email === 'sy.car.com@gmail.com' || newUser.isAdmin || newUser.role === 'admin';
@@ -1974,7 +1991,12 @@ export default function App() {
       createdAt: new Date().toLocaleString('ko-KR', { hour12: false }).replace(/\. /g, '-').replace(':', ':')
     };
 
-    const updated = [freshBooking, ...bookings];
+    // Save directly to Firestore
+    saveInquiryToFirestore(freshBooking).catch((err) => {
+      console.error('Failed to persist inquiry to Firestore:', err);
+    });
+
+    const updated = [freshBooking, ...bookings.filter((b) => b.id !== freshBooking.id && b.id !== 'b-seed-1')];
     setBookings(updated);
     localStorage.setItem('sy_bookings', JSON.stringify(updated));
 
@@ -2028,7 +2050,12 @@ export default function App() {
       createdAt: new Date().toLocaleString('ko-KR', { hour12: false }).replace(/\. /g, '-').replace(':', ':')
     };
 
-    const updated = [freshAS, ...asRequests];
+    // Save directly to Firestore
+    saveAsRequestToFirestore(freshAS).catch((err) => {
+      console.error('Failed to persist AS request to Firestore:', err);
+    });
+
+    const updated = [freshAS, ...asRequests.filter((a) => a.id !== freshAS.id && a.id !== 'as-seed-1')];
     setAsRequests(updated);
     localStorage.setItem('sy_as', JSON.stringify(updated));
 
@@ -2059,32 +2086,51 @@ export default function App() {
 
   // Inquiry (Bookings) & A/S Request management handlers for Admin
   const handleUpdateBookingStatus = (id: string, newStatus: Booking['status']) => {
+    // 1. Update Firestore
+    updateInquiryStatusInFirestore(id, newStatus).catch((err) => {
+      console.error('Failed to update inquiry status in Firestore:', err);
+    });
+
+    // 2. Local state update
     setBookings((prev) => {
       const updated = prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b));
       localStorage.setItem('sy_bookings', JSON.stringify(updated));
       return updated;
     });
 
-    // If marked as completed or consulting, mark notification read
-    if (newStatus === '시공완료' || newStatus === '상담예약완료') {
-      try {
+    // If marked as completed or consulting, mark notification read and update status
+    try {
+      if (newStatus === '시공완료' || newStatus === '상담예약완료') {
         const savedRead = localStorage.getItem('sy_read_notif_ids');
         const readSet = new Set<string>(savedRead ? JSON.parse(savedRead) : []);
         readSet.add(`notif-bk-${id}`);
         readSet.add(`notif-auto-bk-${id}`);
         localStorage.setItem('sy_read_notif_ids', JSON.stringify(Array.from(readSet)));
-      } catch (e) {
-        console.error(e);
       }
-      setNotifications((prev) => {
-        const updated = prev.map((n) => (n.targetId === id || n.id === `notif-bk-${id}` || n.id === `notif-auto-bk-${id}` ? { ...n, isRead: true } : n));
-        localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
-        return updated;
-      });
+    } catch (e) {
+      console.error(e);
     }
+    setNotifications((prev) => {
+      const updated = prev.map((n) => {
+        if (n.targetId === id || n.id === `notif-bk-${id}` || n.id === `notif-auto-bk-${id}`) {
+          return { 
+            ...n, 
+            status: newStatus, 
+            ...(newStatus === '시공완료' || newStatus === '상담예약완료' ? { isRead: true } : {}) 
+          };
+        }
+        return n;
+      });
+      localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleDeleteBooking = (id: string) => {
+    deleteInquiryFromFirestore(id).catch((err) => {
+      console.error('Failed to delete inquiry from Firestore:', err);
+    });
+
     setBookings((prev) => {
       const updated = prev.filter((b) => b.id !== id);
       localStorage.setItem('sy_bookings', JSON.stringify(updated));
@@ -2093,31 +2139,48 @@ export default function App() {
   };
 
   const handleUpdateAsRequestStatus = (id: string, newStatus: ASRequest['status']) => {
+    updateAsRequestStatusInFirestore(id, newStatus).catch((err) => {
+      console.error('Failed to update AS request status in Firestore:', err);
+    });
+
     setAsRequests((prev) => {
       const updated = prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a));
       localStorage.setItem('sy_as', JSON.stringify(updated));
       return updated;
     });
 
-    if (newStatus === '처리완료') {
-      try {
+    try {
+      if (newStatus === '처리완료') {
         const savedRead = localStorage.getItem('sy_read_notif_ids');
         const readSet = new Set<string>(savedRead ? JSON.parse(savedRead) : []);
         readSet.add(`notif-as-${id}`);
         readSet.add(`notif-auto-as-${id}`);
         localStorage.setItem('sy_read_notif_ids', JSON.stringify(Array.from(readSet)));
-      } catch (e) {
-        console.error(e);
       }
-      setNotifications((prev) => {
-        const updated = prev.map((n) => (n.targetId === id || n.id === `notif-as-${id}` || n.id === `notif-auto-as-${id}` ? { ...n, isRead: true } : n));
-        localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
-        return updated;
-      });
+    } catch (e) {
+      console.error(e);
     }
+    setNotifications((prev) => {
+      const updated = prev.map((n) => {
+        if (n.targetId === id || n.id === `notif-as-${id}` || n.id === `notif-auto-as-${id}`) {
+          return { 
+            ...n, 
+            status: newStatus, 
+            ...(newStatus === '처리완료' ? { isRead: true } : {}) 
+          };
+        }
+        return n;
+      });
+      localStorage.setItem('sy_admin_notifications', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleDeleteAsRequest = (id: string) => {
+    deleteAsRequestFromFirestore(id).catch((err) => {
+      console.error('Failed to delete AS request from Firestore:', err);
+    });
+
     setAsRequests((prev) => {
       const updated = prev.filter((a) => a.id !== id);
       localStorage.setItem('sy_as', JSON.stringify(updated));
@@ -3078,6 +3141,8 @@ export default function App() {
               onMarkAllAsRead={handleMarkAllNotificationsAsRead}
               onDeleteNotification={handleDeleteNotification}
               onNavigateToAdmin={(tab) => handleNavigateToAdminWithTab(tab || 'inquiries')}
+              onUpdateBookingStatus={handleUpdateBookingStatus}
+              onUpdateAsRequestStatus={handleUpdateAsRequestStatus}
               isBannerDismissed={isNotificationBannerDismissed}
               onDismissBanner={() => setIsNotificationBannerDismissed(true)}
               isOpen={isNotificationCenterOpen}
@@ -3135,8 +3200,8 @@ export default function App() {
                 className="bg-white/95 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col gap-2 sm:gap-2.5 items-center relative select-none"
               >
                 {/* Header with Title and Fold/Collapse Button */}
-                <div className="w-full flex items-center justify-between pb-1.5 border-b border-slate-100 gap-1">
-                  <span className="text-[9px] sm:text-[10px] font-black text-slate-600 tracking-wider">
+                <div className="w-full flex items-center justify-between pb-1.5 border-b border-slate-100 gap-1.5">
+                  <span className="text-[10px] font-black text-slate-700 tracking-wider">
                     퀵채널
                   </span>
                   <button
@@ -3144,9 +3209,10 @@ export default function App() {
                     onClick={() => setIsQuickChannelOpen(false)}
                     title="퀵채널 접기"
                     aria-label="퀵채널 접기"
-                    className="p-1 -mr-0.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer flex items-center"
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 active:scale-95 transition-all cursor-pointer text-[9px] font-bold shrink-0"
                   >
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span>접기</span>
+                    <ChevronRight className="w-3 h-3" />
                   </button>
                 </div>
 

@@ -29,6 +29,8 @@ interface AdminNotificationCenterProps {
   onMarkAllAsRead: () => void;
   onDeleteNotification?: (id: string) => void;
   onNavigateToAdmin: (tab?: string) => void;
+  onUpdateBookingStatus?: (id: string, status: any) => void;
+  onUpdateAsRequestStatus?: (id: string, status: any) => void;
   isBannerDismissed: boolean;
   onDismissBanner: () => void;
   isOpen: boolean;
@@ -41,6 +43,8 @@ export const AdminNotificationCenter: React.FC<AdminNotificationCenterProps> = (
   onMarkAllAsRead,
   onDeleteNotification,
   onNavigateToAdmin,
+  onUpdateBookingStatus,
+  onUpdateAsRequestStatus,
   isBannerDismissed,
   onDismissBanner,
   isOpen,
@@ -152,8 +156,9 @@ export const AdminNotificationCenter: React.FC<AdminNotificationCenterProps> = (
                   if (latestUnread) onMarkAsRead(latestUnread.id);
                 }}
                 className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black flex items-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
+                title="고객 견적 및 AS 접수 관리 페이지로 이동하여 상태 변경"
               >
-                <span>📋 관리자에서 확인</span>
+                <span>📋 접수대기 상태 변경 및 관리</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
 
@@ -377,10 +382,77 @@ export const AdminNotificationCenter: React.FC<AdminNotificationCenterProps> = (
                         </div>
                       )}
 
+                      {/* Direct Status Changer inside Notification Card */}
+                      {notif.targetId && (
+                        <div className="mt-2.5 pt-2 border-t border-slate-100/90" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10px] font-black text-slate-500 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 text-amber-500" />
+                              접수 상태 원클릭 변경:
+                            </span>
+                            <span className={`text-[10px] px-1.5 py-0.2 rounded font-black border ${
+                              notif.status === '시공완료' || notif.status === '처리완료'
+                                ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                                : notif.status === '상담예약완료' || notif.status === '기사배정'
+                                ? 'bg-blue-50 border-blue-300 text-blue-700'
+                                : notif.status === '시공설계중'
+                                ? 'bg-purple-50 border-purple-300 text-purple-700'
+                                : 'bg-amber-50 border-amber-300 text-amber-800'
+                            }`}>
+                              현재: {notif.status || '접수대기'}
+                            </span>
+                          </div>
+
+                          {notif.type === 'as' ? (
+                            <div className="grid grid-cols-3 gap-1">
+                              {(['접수완료', '기사배정', '처리완료'] as const).map((st) => (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onUpdateAsRequestStatus?.(notif.targetId!, st);
+                                    notif.status = st;
+                                  }}
+                                  className={`py-1 px-1 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer text-center ${
+                                    (notif.status || '접수완료') === st
+                                      ? 'bg-slate-900 text-white shadow-xs'
+                                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                  }`}
+                                >
+                                  {st === '접수완료' ? '🟡 접수완료' : st === '기사배정' ? '🔵 기사배정' : '🟢 처리완료'}
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-4 gap-1">
+                              {(['접수대기', '상담예약완료', '시공설계중', '시공완료'] as const).map((st) => (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onUpdateBookingStatus?.(notif.targetId!, st);
+                                    notif.status = st;
+                                  }}
+                                  className={`py-1 px-1 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer text-center ${
+                                    (notif.status || '접수대기') === st
+                                      ? 'bg-slate-900 text-white shadow-xs'
+                                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                  }`}
+                                >
+                                  {st === '접수대기' ? '🟡 대기' : st === '상담예약완료' ? '🔵 예약' : st === '시공설계중' ? '🟣 설계' : '🟢 완료'}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {/* Bottom Action Footer */}
                       <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-bold">
                         <span className="text-blue-600 group-hover:underline flex items-center gap-0.5">
-                          관리자 상세 보기
+                          관리자 상세 관리창으로 이동
                           <ChevronRight className="w-3 h-3" />
                         </span>
 
