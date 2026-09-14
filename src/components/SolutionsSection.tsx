@@ -9,6 +9,8 @@ import { Check, ArrowRight, Zap, RefreshCw, Building2, Home, ParkingCircle, Laye
 import { motion, AnimatePresence } from 'motion/react';
 import { PRODUCTS, SPEEL_5KW_REPRESENTATIVE_IMAGE, SPEEL_11KW_REPRESENTATIVE_IMAGE, DEFAULT_RESIDENTIAL_OPTION_GROUPS, ELECTREE_OPTION_GROUPS, LOTTE_EVSIS_OPTION_GROUPS, CHARGEGO_OPTION_GROUPS, COOLCHARGE_OPTION_GROUPS, PUBLIC_CHARGER_OPTION_GROUPS, DEVICE_ONLY_OPTION_GROUPS, REPLACEMENT_OPTION_GROUPS, INSTALLATION_OPTION_GROUPS } from '../data';
 import PdfImageRenderer from './PdfImageRenderer';
+import { PdfDownloadCard } from './PdfDownloadCard';
+import { isPdfUrl } from '../lib/fileDownload';
 import DetailPageImage from './DetailPageImage';
 import { saveBrandPdf, deleteBrandPdf, loadAllBrandPdfs } from '../lib/indexedDb';
 import { compressImage } from '../lib/imageCompressor';
@@ -3616,16 +3618,41 @@ export default function SolutionsSection({
                 if (!isEditMode) {
                   return (
                     <div className="space-y-4 w-full max-w-[960px] mx-auto">
-                      {detailUrls.map((url, idx) => (
-                        <div key={idx} className="w-full max-w-[960px] mx-auto">
-                          <PdfImageRenderer 
-                            fileUrl={url} 
-                            fileName={detailNames[idx] || `${activeDetailProduct.name} 상세페이지 이미지 ${idx + 1}`} 
-                            brandName={activeDetailProduct.name} 
-                            isAdmin={false}
-                          />
-                        </div>
-                      ))}
+                      {detailUrls.map((url, idx) => {
+                        const isPdf = isPdfUrl(url);
+                        const pageTitle = detailNames[idx] || `${activeDetailProduct.name} 공식 사양서/카탈로그 ${detailUrls.length > 1 ? `(${idx + 1}/${detailUrls.length})` : ''}`;
+                        if (isPdf) {
+                          return (
+                            <div key={idx} className="w-full max-w-[960px] mx-auto">
+                              <PdfDownloadCard
+                                fileUrl={url}
+                                fileName={pageTitle}
+                                brandName={activeDetailProduct.name}
+                                description="고용량 공식 상세페이지 PDF 문서입니다. 기기에 직접 다운로드하여 보관하시거나 새 창에서 원본 화질로 바로 열람하실 수 있습니다."
+                                isAdmin={false}
+                                defaultOpenPreview={false}
+                              >
+                                <PdfImageRenderer 
+                                  fileUrl={url} 
+                                  fileName={pageTitle} 
+                                  brandName={activeDetailProduct.name} 
+                                  isAdmin={false}
+                                />
+                              </PdfDownloadCard>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={idx} className="w-full max-w-[960px] mx-auto">
+                            <PdfImageRenderer 
+                              fileUrl={url} 
+                              fileName={pageTitle} 
+                              brandName={activeDetailProduct.name} 
+                              isAdmin={false}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 }
@@ -4061,27 +4088,25 @@ export default function SolutionsSection({
 
                       {/* Brand PDF Catalog & Inline Document Viewer */}
                       <div className="border-0 sm:border border-slate-200/80 bg-transparent sm:bg-slate-50/50 rounded-none sm:rounded-2xl p-0 sm:p-4 space-y-4 relative z-10">
-                        {isEditMode && activePdfUrl && (
-                          <div className="flex justify-end border-b border-slate-200 pb-2">
-                            <button
-                              type="button"
-                              onClick={() => confirmDeleteBrandPdf(selectedAptBrand, brandData.name)}
-                              className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer border border-rose-200"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                              브로셔 삭제
-                            </button>
-                          </div>
-                        )}
-
                         {activePdfUrl ? (
                           <div className="space-y-2">
-                            <PdfImageRenderer 
-                              fileUrl={activePdfUrl} 
-                              fileName={activePdfName || 'catalog.pdf'} 
-                              brandName={brandData.name} 
+                            <PdfDownloadCard
+                              fileUrl={activePdfUrl}
+                              fileName={activePdfName || `${brandData.name} 공식 브로셔 및 제안서`}
+                              brandName={brandData.name}
+                              description={`${brandData.name} 아파트 전용 공식 카탈로그 및 제안서 문서입니다. 용량이 큰 파일이므로 기기에 직접 다운로드하여 보관하시거나 새 창에서 원본 화질로 바로 열람하실 수 있습니다.`}
                               isAdmin={isEditMode}
-                            />
+                              onDelete={() => confirmDeleteBrandPdf(selectedAptBrand, brandData.name)}
+                              onReplaceFile={(file) => handlePdfUpload(selectedAptBrand, file)}
+                              defaultOpenPreview={!isPdfUrl(activePdfUrl)}
+                            >
+                              <PdfImageRenderer 
+                                fileUrl={activePdfUrl} 
+                                fileName={activePdfName || 'catalog.pdf'} 
+                                brandName={brandData.name} 
+                                isAdmin={isEditMode}
+                              />
+                            </PdfDownloadCard>
                           </div>
                         ) : (
                           <div className="space-y-3">

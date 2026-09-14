@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, FileText, LayoutGrid, List, Sparkles, RefreshCw, Lock, Unlock, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, FileText, LayoutGrid, List, Sparkles, RefreshCw, Lock, Unlock, Check, Download, ExternalLink } from 'lucide-react';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
 import { resolvePostImgUrl } from '../lib/detailPagesData';
+import { downloadFile, openFileInNewTab } from '../lib/fileDownload';
 import DetailPageImage from './DetailPageImage';
 
 const IMAGE_FALLBACK_MAP: Record<string, string> = {
@@ -513,27 +514,82 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
 
   const displayName = isAdmin ? fileName : '공식 사양서 및 카탈로그';
 
-  // 2-A. Non-Admin View: Clean continuous scroll pages without top/bottom control bars
+  // 2-A. Non-Admin View: Clean continuous scroll pages with prominent direct download bar
   if (!isAdmin) {
     return (
-      <div className="w-full py-1 flex flex-col items-center relative scroll-smooth">
+      <div className="w-full py-1 flex flex-col items-center relative scroll-smooth space-y-3">
+        {/* Top Direct Action Bar */}
+        <div className="w-full max-w-3xl mx-auto px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-800 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-md">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
+            <div className="min-w-0">
+              <span className="text-white font-bold truncate block text-xs sm:text-sm">
+                {displayName}
+              </span>
+              <span className="text-[11px] text-slate-400 block truncate">
+                고용량 PDF 문서 (다운로드 또는 새 창에서 고속 열람 지원)
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => downloadFile(pdfUrl, displayName)}
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+              title="기기에 PDF 파일 직접 다운로드"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>PDF 다운로드</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openFileInNewTab(pdfUrl)}
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700 active:scale-95 cursor-pointer"
+              title="새 창에서 원본 바로보기"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>새 창에서 보기</span>
+            </button>
+          </div>
+        </div>
+
         {loading && (
-          <div className="flex flex-col items-center justify-center space-y-2 py-10">
+          <div className="flex flex-col items-center justify-center space-y-3 py-10 bg-slate-50 border border-slate-200 rounded-2xl w-full max-w-3xl">
             <div className="w-7 h-7 rounded-full border-2 border-slate-300 border-t-emerald-600 animate-spin" />
-            <p className="text-xs font-bold text-slate-500">카탈로그 문서 로딩 중...</p>
+            <p className="text-xs font-bold text-slate-700">카탈로그 문서 로딩 중...</p>
+            <p className="text-[11px] text-slate-500">용량이 큰 PDF는 상단의 [PDF 다운로드] 버튼으로 기기에 직접 받아 바로 보실 수 있습니다.</p>
           </div>
         )}
 
         {error && (
-          <div className="flex flex-col items-center justify-center p-6 text-center space-y-3">
+          <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 bg-slate-50 border border-slate-200 rounded-2xl w-full max-w-3xl">
             <p className="text-xs text-rose-600 font-bold">{error}</p>
-            <button
-              type="button"
-              onClick={() => setFallbackToImage(true)}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-sm"
-            >
-              이미지로 보기
-            </button>
+            <p className="text-xs text-slate-600 font-medium">용량이 큰 고화질 PDF 파일입니다. 기기에 직접 다운로드하여 바로 확인하세요.</p>
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => downloadFile(pdfUrl, displayName)}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Download className="w-4 h-4" />
+                <span>PDF 파일 직접 다운로드</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openFileInNewTab(pdfUrl)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>새 창에서 보기</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFallbackToImage(true)}
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
+              >
+                이미지로 보기
+              </button>
+            </div>
           </div>
         )}
 

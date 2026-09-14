@@ -9,6 +9,8 @@ import { Product, CartItem, ProductOptionGroup } from '../types';
 import { DEFAULT_RESIDENTIAL_OPTION_GROUPS, PUBLIC_CHARGER_OPTION_GROUPS, DEVICE_ONLY_OPTION_GROUPS, REPLACEMENT_OPTION_GROUPS, INSTALLATION_OPTION_GROUPS } from '../data';
 import { resolveDetailData, loadUnifiedProductDetails, DEFAULT_PRODUCT_DETAILS, ProductDetailItem } from '../lib/detailPagesData';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
+import { isPdfUrl } from '../lib/fileDownload';
+import { PdfDownloadCard } from './PdfDownloadCard';
 import PdfImageRenderer from './PdfImageRenderer';
 import DetailPageImage from './DetailPageImage';
 
@@ -1092,24 +1094,45 @@ export default function ProductDetailModal({
 
               return (
                 <div className="space-y-4 w-full max-w-[960px] mx-auto">
-                  {detailUrls.map((url, idx) => (
-                    <div key={idx} className="w-full max-w-[960px] mx-auto rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 shadow-none sm:shadow-sm bg-white">
-                      <PdfImageRenderer
-                        fileUrl={url}
-                        fileName={detailNames[idx] || `${product.name} 상세페이지 이미지 ${idx + 1}`}
-                        brandName={product.name}
-                        isAdmin={false}
-                        onError={() => {
-                          const targetFileName = url.split('/').pop() || url;
-                          console.error(`❌ [ProductDetailModal 404 Error] 상세페이지 이미지 로드 실패`);
-                          console.error(`- 상품명: ${product.name} (ID: ${product.id})`);
-                          console.error(`- 대상 파일명: ${targetFileName}`);
-                          console.error(`- 전체 요청 URL: ${url}`);
-                          console.error(`- 인덱스: ${idx + 1}번째 페이지`);
-                        }}
-                      />
-                    </div>
-                  ))}
+                  {detailUrls.map((url, idx) => {
+                    const isPdf = isPdfUrl(url);
+                    const pageTitle = detailNames[idx] || `${product.name} 공식 사양서/카탈로그 ${detailUrls.length > 1 ? `(${idx + 1}/${detailUrls.length})` : ''}`;
+                    if (isPdf) {
+                      return (
+                        <div key={idx} className="w-full max-w-[960px] mx-auto">
+                          <PdfDownloadCard
+                            fileUrl={url}
+                            fileName={pageTitle}
+                            brandName={product.name}
+                            description="고용량 공식 상세페이지 PDF 문서입니다. 기기에 직접 다운로드하여 보관하시거나 새 창에서 원본 화질로 바로 열람하실 수 있습니다."
+                            isAdmin={false}
+                            defaultOpenPreview={false}
+                          >
+                            <PdfImageRenderer
+                              fileUrl={url}
+                              fileName={pageTitle}
+                              brandName={product.name}
+                              isAdmin={false}
+                            />
+                          </PdfDownloadCard>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={idx} className="w-full max-w-[960px] mx-auto rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 shadow-none sm:shadow-sm bg-white">
+                        <PdfImageRenderer
+                          fileUrl={url}
+                          fileName={detailNames[idx] || `${product.name} 상세페이지 이미지 ${idx + 1}`}
+                          brandName={product.name}
+                          isAdmin={false}
+                          onError={() => {
+                            const targetFileName = url.split('/').pop() || url;
+                            console.error(`❌ [ProductDetailModal 404 Error] 상세페이지 이미지 로드 실패: ${product.name} (${targetFileName})`);
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })()}
