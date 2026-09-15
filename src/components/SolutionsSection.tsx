@@ -3628,7 +3628,7 @@ export default function SolutionsSection({
                                 fileUrl={url}
                                 fileName={pageTitle}
                                 brandName={activeDetailProduct.name}
-                                description="고용량 공식 상세페이지 PDF 문서입니다. 기기에 직접 다운로드하여 보관하시거나 새 창에서 원본 화질로 바로 열람하실 수 있습니다."
+                                description="고용량 공식 상세페이지 PDF 문서입니다. 기기에 직접 다운로드하여 간편하게 확인하실 수 있습니다."
                                 isAdmin={false}
                                 defaultOpenPreview={false}
                               >
@@ -4094,7 +4094,7 @@ export default function SolutionsSection({
                               fileUrl={activePdfUrl}
                               fileName={activePdfName || `${brandData.name} 공식 브로셔 및 제안서`}
                               brandName={brandData.name}
-                              description={`${brandData.name} 아파트 전용 공식 카탈로그 및 제안서 문서입니다. 용량이 큰 파일이므로 기기에 직접 다운로드하여 보관하시거나 새 창에서 원본 화질로 바로 열람하실 수 있습니다.`}
+                              description={`${brandData.name} 아파트 전용 공식 카탈로그 및 제안서 문서입니다. 용량이 큰 파일이므로 기기에 직접 다운로드하여 간편하게 확인하실 수 있습니다.`}
                               isAdmin={isEditMode}
                               onDelete={() => confirmDeleteBrandPdf(selectedAptBrand, brandData.name)}
                               onReplaceFile={(file) => handlePdfUpload(selectedAptBrand, file)}

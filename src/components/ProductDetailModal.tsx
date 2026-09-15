@@ -1104,7 +1104,7 @@ export default function ProductDetailModal({
                             fileUrl={url}
                             fileName={pageTitle}
                             brandName={product.name}
-                            description="고용량 공식 상세페이지 PDF 문서입니다. 기기에 직접 다운로드하여 보관하시거나 새 창에서 원본 화질로 바로 열람하실 수 있습니다."
+                            description="고용량 공식 상세페이지 PDF 문서입니다. 기기에 직접 다운로드하여 간편하게 확인하실 수 있습니다."
                             isAdmin={false}
                             defaultOpenPreview={false}
                           >

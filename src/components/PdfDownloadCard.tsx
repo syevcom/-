@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FileText, Download, ExternalLink, Eye, EyeOff, Trash2, Upload, Sparkles } from 'lucide-react';
-import { downloadFile, openFileInNewTab, isPdfUrl } from '../lib/fileDownload';
+import { FileText, Download, Eye, EyeOff, Trash2, Upload, Sparkles } from 'lucide-react';
+import { downloadFile, isPdfUrl } from '../lib/fileDownload';
 
 interface PdfDownloadCardProps {
   fileUrl: string;
@@ -40,10 +40,6 @@ export const PdfDownloadCard: React.FC<PdfDownloadCardProps> = ({
     }
   };
 
-  const handleView = () => {
-    openFileInNewTab(fileUrl);
-  };
-
   return (
     <div className="w-full bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-800 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl space-y-4 overflow-hidden relative group">
       {/* Decorative top accent line */}
@@ -71,50 +67,40 @@ export const PdfDownloadCard: React.FC<PdfDownloadCardProps> = ({
               {displayTitle}
             </h4>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal">
-              {description || '용량이 큰 고화질 카탈로그 문서입니다. 기기에 직접 다운로드하거나 새 창에서 원본 화질로 바로 열람하실 수 있습니다.'}
+              {description || '용량이 큰 고화질 카탈로그 문서입니다. 기기에 직접 다운로드하여 간편하게 확인하실 수 있습니다.'}
             </p>
           </div>
         </div>
 
-        {/* Action Buttons: Direct Download & View in New Tab */}
+        {/* Action Buttons: Direct Download */}
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto shrink-0 pt-2 md:pt-0">
           <button
             type="button"
             onClick={handleDownload}
             disabled={isDownloading}
-            className="flex-1 md:flex-none px-4 sm:px-5 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl sm:rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-75"
+            className="flex-1 md:flex-none px-5 sm:px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl sm:rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-75"
             title="기기에 PDF 파일 직접 다운로드"
           >
             <Download className={`w-4 h-4 text-slate-950 ${isDownloading ? 'animate-bounce' : ''}`} />
             <span>{isDownloading ? '다운로드 중...' : 'PDF 파일 다운로드'}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handleView}
-            className="flex-1 md:flex-none px-4 sm:px-5 py-3 bg-slate-800/90 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm rounded-xl sm:rounded-2xl border border-slate-700 hover:border-slate-600 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-            title="새 탭에서 원본 바로보기"
-          >
-            <ExternalLink className="w-4 h-4 text-slate-300" />
-            <span>새 창에서 바로보기</span>
-          </button>
-
           {children && (
             <button
               type="button"
               onClick={() => setShowPreview(!showPreview)}
-              className="px-3 py-3 bg-slate-800/50 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl sm:rounded-2xl border border-slate-800 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="px-4 py-3 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl sm:rounded-2xl border border-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               title={showPreview ? '화면 미리보기 닫기' : '화면에서 미리보기'}
             >
               {showPreview ? (
                 <>
                   <EyeOff className="w-4 h-4 text-slate-400" />
-                  <span className="hidden sm:inline">미리보기 닫기</span>
+                  <span>미리보기 닫기</span>
                 </>
               ) : (
                 <>
                   <Eye className="w-4 h-4 text-slate-400" />
-                  <span className="hidden sm:inline">화면에서 보기</span>
+                  <span>화면에서 보기</span>
                 </>
               )}
             </button>

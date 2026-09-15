@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, FileText, LayoutGrid, List, Sparkles, RefreshCw, Lock, Unlock, Check, Download, ExternalLink } from 'lucide-react';
 import { getOptimizedImageUrl } from '../lib/imageOptimizer';
 import { resolvePostImgUrl } from '../lib/detailPagesData';
-import { downloadFile, openFileInNewTab } from '../lib/fileDownload';
+import { downloadFile } from '../lib/fileDownload';
 import DetailPageImage from './DetailPageImage';
 
 const IMAGE_FALLBACK_MAP: Record<string, string> = {
@@ -142,7 +142,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
     }
   };
 
-  const displayName = isAdmin ? fileName : '공식 사양서 및 카탈로그';
+  const displayName = fileName || '공식 사양서 및 카탈로그';
 
   // 1-A. Non-Admin View: Pure clean image output with tap-to-expand lightbox for mobile/desktop
   if (!isAdmin) {
@@ -512,7 +512,7 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
     };
   }, [pdfLibLoaded, pdfUrl]);
 
-  const displayName = isAdmin ? fileName : '공식 사양서 및 카탈로그';
+  const displayName = fileName || '공식 사양서 및 카탈로그';
 
   // 2-A. Non-Admin View: Clean continuous scroll pages with prominent direct download bar
   if (!isAdmin) {
@@ -527,7 +527,7 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
                 {displayName}
               </span>
               <span className="text-[11px] text-slate-400 block truncate">
-                고용량 PDF 문서 (다운로드 또는 새 창에서 고속 열람 지원)
+                고용량 PDF 문서 (기기 직접 다운로드 지원)
               </span>
             </div>
           </div>
@@ -535,20 +535,11 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
             <button
               type="button"
               onClick={() => downloadFile(pdfUrl, displayName)}
-              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               title="기기에 PDF 파일 직접 다운로드"
             >
               <Download className="w-3.5 h-3.5" />
               <span>PDF 다운로드</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => openFileInNewTab(pdfUrl)}
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700 active:scale-95 cursor-pointer"
-              title="새 창에서 원본 바로보기"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>새 창에서 보기</span>
             </button>
           </div>
         </div>
@@ -573,14 +564,6 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
               >
                 <Download className="w-4 h-4" />
                 <span>PDF 파일 직접 다운로드</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => openFileInNewTab(pdfUrl)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>새 창에서 보기</span>
               </button>
               <button
                 type="button"
@@ -744,14 +727,6 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
                 className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black shadow-lg transition-all flex items-center gap-1"
               >
                 📥 파일 즉시 다운로드
-              </a>
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-black transition-all flex items-center gap-1"
-              >
-                🖥️ 새 창에서 보기
               </a>
             </div>
           </div>
