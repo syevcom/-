@@ -495,6 +495,10 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
           setPdfDoc(doc);
           setNumPages(doc.numPages);
           setLoading(false);
+        } else {
+          // Component unmounted (or URL changed) before load finished —
+          // release this document immediately instead of leaking it.
+          try { doc.destroy(); } catch { /* ignore */ }
         }
       } catch (err: any) {
         console.error('PDF.js load error:', err);
@@ -509,6 +513,17 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
 
     return () => {
       isMounted = false;
+      // pdf.js documents hold significant memory in their worker process
+      // (fonts, decoded images, object caches). Without an explicit destroy()
+      // call, switching between many PDFs (e.g. cycling through apartment
+      // brand catalogs) leaks memory with every switch until the tab
+      // eventually crashes with an Out-of-Memory error.
+      setPdfDoc((prevDoc: any) => {
+        if (prevDoc) {
+          try { prevDoc.destroy(); } catch { /* ignore */ }
+        }
+        return null;
+      });
     };
   }, [pdfLibLoaded, pdfUrl]);
 
@@ -901,6 +916,10 @@ function ScrollPageItem({ pdfDoc, pageNum, zoom, brandName, isAdmin }: { pdfDoc:
         if (isMounted) {
           setRendered(true);
         }
+        // Free this page's cached fonts/images now that it's painted onto the
+        // canvas — the canvas pixels remain visible, but pdf.js no longer
+        // needs to hold the decoded page resources in memory.
+        try { page.cleanup(); } catch { /* not critical */ }
       } catch (err: any) {
         if (err?.name !== 'RenderingCancelledException' && !err?.message?.includes('cancelling')) {
           console.error(`Page ${pageNum} render error:`, err);
@@ -967,13 +986,39 @@ function ScrollPageItem({ pdfDoc, pageNum, zoom, brandName, isAdmin }: { pdfDoc:
 // Fullscreen high-res render page
 function FullscreenPageItem({ pdfDoc, pageNum }: { pdfDoc: any; pageNum: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const renderTaskRef = useRef<any>(null);
+
+  // Same lazy-render-on-scroll-into-view guard as ScrollPageItem: fullscreen
+  // mode renders at an even higher resolution (2.5x), so rendering every
+  // page the instant fullscreen opens is what was crashing the tab with
+  // "Out of Memory" on documents with many photo-heavy pages.
+  const [shouldRender, setShouldRender] = useState(false);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    if (pageNum <= 1) {
+      setShouldRender(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '1200px 0px 1200px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [pageNum]);
 
   useEffect(() => {
     let isMounted = true;
 
     const render = async () => {
-      if (!pdfDoc || !canvasRef.current) return;
+      if (!shouldRender || !pdfDoc || !canvasRef.current) return;
 
       if (renderTaskRef.current) {
         try {
@@ -1012,6 +1057,7 @@ function FullscreenPageItem({ pdfDoc, pageNum }: { pdfDoc: any; pageNum: number 
         renderTaskRef.current = renderTask;
 
         await renderTask.promise;
+        try { page.cleanup(); } catch { /* not critical */ }
       } catch (err: any) {
         if (err?.name !== 'RenderingCancelledException' && !err?.message?.includes('cancelling')) {
           console.error(`Page ${pageNum} fullscreen render error:`, err);
@@ -1033,10 +1079,10 @@ function FullscreenPageItem({ pdfDoc, pageNum }: { pdfDoc: any; pageNum: number 
         }
       }
     };
-  }, [pdfDoc, pageNum]);
+  }, [pdfDoc, pageNum, shouldRender]);
 
   return (
-    <div className="shadow-2xl rounded-xl bg-white overflow-hidden select-none w-full max-w-4xl border border-slate-800">
+    <div ref={wrapperRef} className="shadow-2xl rounded-xl bg-white overflow-hidden select-none w-full max-w-4xl border border-slate-800" style={{ minHeight: shouldRender ? undefined : '600px' }}>
       <canvas ref={canvasRef} className="block w-full h-auto object-contain" />
     </div>
   );
