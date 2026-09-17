@@ -11,7 +11,7 @@ const IMAGE_FALLBACK_MAP: Record<string, string> = {
   '/images/home-detail-speel-7kw.jpg': 'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png',
   '/images/home-detail-speel-11kw.jpg': 'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png',
   '/images/home-detail-coolcharge.jpg': 'https://i.postimg.cc/C5bmNYPW/kulchaji.png',
-  '/images/home-detail-electree.png': 'https://i.postimg.cc/13nqFM8p/illegteuli.png',
+  '/images/home-detail-electree.jpg': 'https://i.postimg.cc/13nqFM8p/illegteuli.png',
   '/images/home-detail-chajigo1.jpg': 'https://i.postimg.cc/d1b5rDBp/chajigo1.png',
   '/images/home-detail-chajigo2.jpg': 'https://i.postimg.cc/br13T8CM/chajigo2.png',
   '/images/home-detail-chajigo3.jpg': 'https://i.postimg.cc/90yJpV8K/chajigo3.png',
@@ -23,7 +23,7 @@ const IMAGE_FALLBACK_MAP: Record<string, string> = {
   'https://i.postimg.cc/50hsLj3Z/seupil7sangsepeiji.png': '/images/home-detail-speel-7kw.jpg',
   'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.jpg',
   'https://i.postimg.cc/C5bmNYPW/kulchaji.png': '/images/home-detail-coolcharge.jpg',
-  'https://i.postimg.cc/13nqFM8p/illegteuli.png': '/images/home-detail-electree.png',
+  'https://i.postimg.cc/13nqFM8p/illegteuli.png': '/images/home-detail-electree.jpg',
   'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.jpg',
   'https://i.postimg.cc/br13T8CM/chajigo2.png': '/images/home-detail-chajigo2.jpg',
   'https://i.postimg.cc/90yJpV8K/chajigo3.png': '/images/home-detail-chajigo3.jpg',
@@ -50,9 +50,13 @@ interface PdfImageRendererProps {
   brandName?: string;
   isAdmin?: boolean;
   onError?: (e?: any) => void;
+  // A pre-rendered cover-page image to show if the PDF itself fails to
+  // open/decode (corrupted file, browser restriction, etc). Without this,
+  // the "view as image" fallback has nothing real to display.
+  coverImage?: string;
 }
 
-export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', brandName = '브랜드', isAdmin = false, onError }: PdfImageRendererProps) {
+export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', brandName = '브랜드', isAdmin = false, onError, coverImage }: PdfImageRendererProps) {
   const resolvedUrl = resolvePostImgUrl(fileUrl);
   const isDataPdf = resolvedUrl.startsWith('data:application/pdf');
   const isDataImage = resolvedUrl.startsWith('data:image/');
@@ -67,7 +71,7 @@ export default function PdfImageRenderer({ fileUrl, fileName = 'document.pdf', b
     return <ImageCatalogViewer imageUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} onError={onError} />;
   }
 
-  return <PdfCatalogViewer pdfUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
+  return <PdfCatalogViewer pdfUrl={resolvedUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} coverImage={coverImage} />;
 }
 
 const PRESET_ZOOM_LEVELS = [50, 75, 100, 125, 150, 180, 200, 250, 300];
@@ -376,7 +380,7 @@ function ImageCatalogViewer({ imageUrl, fileName, brandName, isAdmin, onError }:
 }
 
 // 2. High-Tech PDF Canvas Renderer using Mozilla PDF.js (CDN-loaded) - Continuous Scroll Only
-function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: string; fileName: string; brandName: string; isAdmin: boolean }) {
+function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin, coverImage }: { pdfUrl: string; fileName: string; brandName: string; isAdmin: boolean; coverImage?: string }) {
   const [pdfLibLoaded, setPdfLibLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -397,7 +401,25 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   if (fallbackToImage) {
-    return <ImageCatalogViewer imageUrl={pdfUrl} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
+    if (coverImage) {
+      return <ImageCatalogViewer imageUrl={coverImage} fileName={fileName} brandName={brandName} isAdmin={isAdmin} />;
+    }
+    // No pre-rendered cover available for this document — showing the raw
+    // .pdf URL as an <img> always fails, so tell the person clearly instead
+    // of silently displaying nothing.
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 bg-slate-50 border border-slate-200 rounded-2xl w-full max-w-3xl mx-auto">
+        <p className="text-xs text-slate-600 font-medium">이 문서는 미리 준비된 표지 이미지가 없어 이미지로 볼 수 없어요.</p>
+        <button
+          type="button"
+          onClick={() => downloadFile(pdfUrl, fileName)}
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
+        >
+          <Download className="w-4 h-4" />
+          <span>PDF 파일 직접 다운로드</span>
+        </button>
+      </div>
+    );
   }
 
   const showToast = (msg: string) => {
@@ -580,14 +602,18 @@ function PdfCatalogViewer({ pdfUrl, fileName, brandName, isAdmin }: { pdfUrl: st
                 <Download className="w-4 h-4" />
                 <span>PDF 파일 직접 다운로드</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setFallbackToImage(true)}
-                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
-              >
-                이미지로 보기
-              </button>
             </div>
+            {coverImage && (
+              <div className="w-full max-w-md pt-4 mt-2 border-t border-slate-200">
+                <p className="text-[11px] text-slate-500 mb-2">전체 문서는 위 버튼으로 다운로드해서 보시고, 표지만 미리 확인하세요:</p>
+                <img
+                  src={coverImage}
+                  alt={`${brandName} 카탈로그 표지`}
+                  className="w-full h-auto rounded-xl shadow-sm border border-slate-200"
+                  loading="lazy"
+                />
+              </div>
+            )}
           </div>
         )}
 
