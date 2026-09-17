@@ -721,46 +721,56 @@ export function resolvePostImgUrl(url?: string | null): string {
 }
 
 // 2. Initial brand catalogs for Apartment category with direct official links
-export const DEFAULT_BRAND_CATALOGS: Record<string, { pdfUrl?: string; pdfName?: string; description?: string; deleted?: boolean }> = {
+export const DEFAULT_BRAND_CATALOGS: Record<string, { pdfUrl?: string; pdfName?: string; description?: string; deleted?: boolean; coverImage?: string }> = {
   'sk일렉링크': {
     pdfUrl: 'https://i.postimg.cc/nL4Tv36Y/SKilleglingkeu-beulosyueo-26-01-09-(1).png',
-    pdfName: 'SK일렉링크 아파트 공식 브로셔 및 무상 설치 제안서'
+    pdfName: 'SK일렉링크 아파트 공식 브로셔 및 무상 설치 제안서',
+    coverImage: '/images/apt-cover-sk-electlink.jpg'
   },
   'SK일렉링크': {
     pdfUrl: 'https://i.postimg.cc/nL4Tv36Y/SKilleglingkeu-beulosyueo-26-01-09-(1).png',
-    pdfName: 'SK일렉링크 아파트 공식 브로셔 및 무상 설치 제안서'
+    pdfName: 'SK일렉링크 아파트 공식 브로셔 및 무상 설치 제안서',
+    coverImage: '/images/apt-cover-sk-electlink.jpg'
   },
   '플러그링크': {
     pdfUrl: 'https://i.postimg.cc/DZ5gN8fT/peulleogeulingkeuyeong-eobbeulosyeo-gongtong-250529.png',
-    pdfName: '플러그링크 스마트 로드밸런싱 아파트 공식 카탈로그'
+    pdfName: '플러그링크 스마트 로드밸런싱 아파트 공식 카탈로그',
+    coverImage: '/images/apt-cover-pluglink.jpg'
   },
   '이엘일렉트릭': {
     pdfUrl: 'https://i.postimg.cc/qqRLH4gn/iel-illegteulig-hoesasogaeseo-260121.png',
-    pdfName: '이엘일렉트릭 화재안심 완속 충전기 공식 브로셔'
+    pdfName: '이엘일렉트릭 화재안심 완속 충전기 공식 브로셔',
+    coverImage: '/images/apt-cover-el-electric.jpg'
   },
   '나이스차져': {
     pdfUrl: 'https://i.postimg.cc/yNmnFLwW/2-NICEinpeula(ju)-naiseuchajeo-jeongicha-wansogchungjeongi-jeanseo.png',
-    pdfName: '나이스차져 금융 인프라 기반 전기차 완속충전기 제안서'
+    pdfName: '나이스차져 금융 인프라 기반 전기차 완속충전기 제안서',
+    coverImage: '/images/apt-cover-nice-charger.jpg'
   },
   '나이스차저': {
     pdfUrl: 'https://i.postimg.cc/yNmnFLwW/2-NICEinpeula(ju)-naiseuchajeo-jeongicha-wansogchungjeongi-jeanseo.png',
-    pdfName: '나이스차져 금융 인프라 기반 전기차 완속충전기 제안서'
+    pdfName: '나이스차져 금융 인프라 기반 전기차 완속충전기 제안서',
+    coverImage: '/images/apt-cover-nice-charger.jpg'
   },
   '에버온': {
     pdfUrl: 'https://i.postimg.cc/hvkCBvwp/(KOR)-2026-ebeoon-Company-Brochure-(1).png',
-    pdfName: '에버온 전국 1위 완속 충전 인프라 공식 회사소개서 및 카탈로그'
+    pdfName: '에버온 전국 1위 완속 충전 인프라 공식 회사소개서 및 카탈로그',
+    coverImage: '/images/apt-cover-everon.jpg'
   },
   '아이파킹': {
     pdfUrl: 'https://i.postimg.cc/cJRTQFVt/i-PARKING-EV-yeong-eob-yong-pyojunjeanseo-2602-yogeum-insang-ban-yeong.png',
-    pdfName: '아이파킹 EV 무인 주차관제 연동 충전 솔루션 제안서'
+    pdfName: '아이파킹 EV 무인 주차관제 연동 충전 솔루션 제안서',
+    coverImage: '/images/apt-cover-iparking.jpg'
   },
   'LG유플러스볼트업': {
     pdfUrl: 'https://i.postimg.cc/s2YKpTty/LGyupeulleoseubolteueob-jeanseo-260701.png',
-    pdfName: 'LG유플러스 볼트업(VoltUp) 프리미엄 충전망 제안서'
+    pdfName: 'LG유플러스 볼트업(VoltUp) 프리미엄 충전망 제안서',
+    coverImage: '/images/apt-cover-lgu-voltup.jpg'
   },
   'LG유플러스 볼트업': {
     pdfUrl: 'https://i.postimg.cc/s2YKpTty/LGyupeulleoseubolteueob-jeanseo-260701.png',
-    pdfName: 'LG유플러스 볼트업(VoltUp) 프리미엄 충전망 제안서'
+    pdfName: 'LG유플러스 볼트업(VoltUp) 프리미엄 충전망 제안서',
+    coverImage: '/images/apt-cover-lgu-voltup.jpg'
   }
 };
 
