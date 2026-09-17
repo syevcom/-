@@ -59,8 +59,8 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['쿨차지 상세페이지']
   },
   'product-res-5kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 5kW 개인용 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
@@ -119,8 +119,8 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
   },
   'product-res-7kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 7kW 가정용 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
@@ -159,8 +159,8 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['쿨차지 상세페이지']
   },
   'product-res-11kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 11kW 3상 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
@@ -264,8 +264,8 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['쿨차지 상세페이지']
   },
   'res-5kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 5kW 개인용 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
@@ -302,8 +302,8 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['차지고 상세페이지 1부', '차지고 상세페이지 2부', '차지고 상세페이지 3부']
   },
   'res-7kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 7kW 가정용 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
@@ -332,8 +332,8 @@ export const DEFAULT_PRODUCT_DETAILS: Record<string, ProductDetailItem> = {
     pdfNames: ['쿨차지 상세페이지']
   },
   'res-11kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 11kW 3상 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
@@ -470,38 +470,38 @@ export const DEFAULT_HOME_DETAILS: Record<string, ProductDetailItem> = {
   },
   // Electree (5kW, 7kW, 11kW)
   'res-5kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 개인용 전기차 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
   'product-res-5kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 개인용 전기차 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
   'res-7kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 개인용 전기차 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
   'product-res-7kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 개인용 전기차 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
   'res-11kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 개인용 전기차 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
   'product-res-11kw-electree': {
-    pdfUrl: '/images/home-detail-electree.png',
-    pdfUrls: ['/images/home-detail-electree.png'],
+    pdfUrl: '/images/home-detail-electree.jpg',
+    pdfUrls: ['/images/home-detail-electree.jpg'],
     pdfName: '일렉트리 개인용 전기차 충전기 상세페이지',
     pdfNames: ['일렉트리 상세페이지']
   },
@@ -674,7 +674,7 @@ export const POSTIMG_URL_MAP: Record<string, string> = {
   'https://postimg.cc/zyNvZCSg': '/images/home-detail-speel-7kw.jpg',
   'https://postimg.cc/FYvz5ygk': '/images/home-detail-speel-5kw.jpg',
   'https://postimg.cc/fVsyncjX': '/images/home-detail-speel-11kw.jpg',
-  'https://postimg.cc/PCHJsWzx': '/images/home-detail-electree.png',
+  'https://postimg.cc/PCHJsWzx': '/images/home-detail-electree.jpg',
   'https://postimg.cc/CR41FRm2': '/images/home-detail-coolcharge.jpg',
   'https://postimg.cc/4YGyk6b6': '/images/home-detail-chajigo1.jpg',
   'https://postimg.cc/LJVXHJNY': '/images/home-detail-chajigo2.jpg',
@@ -689,7 +689,7 @@ export const POSTIMG_URL_MAP: Record<string, string> = {
   'https://i.postimg.cc/FRMT31Zw/seupil11sangsepeiji.png': '/images/home-detail-speel-11kw.jpg',
   'https://i.postimg.cc/qvPCxnnp/kulchaji.png': '/images/home-detail-coolcharge.jpg',
   'https://i.postimg.cc/C5bmNYPW/kulchaji.png': '/images/home-detail-coolcharge.jpg',
-  'https://i.postimg.cc/13nqFM8p/illegteuli.png': '/images/home-detail-electree.png',
+  'https://i.postimg.cc/13nqFM8p/illegteuli.png': '/images/home-detail-electree.jpg',
   'https://i.postimg.cc/bwDtnLZB/chajigo1.png': '/images/home-detail-chajigo1.jpg',
   'https://i.postimg.cc/d1b5rDBp/chajigo1.png': '/images/home-detail-chajigo1.jpg',
   'https://i.postimg.cc/T3zWJmb9/chajigo2.png': '/images/home-detail-chajigo2.jpg',
