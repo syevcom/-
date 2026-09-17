@@ -1268,7 +1268,8 @@ export default function SolutionsSection({
       base[k] = {
         ...BRAND_METADATA[k],
         pdfUrl: isDeleted ? undefined : resolvePostImgUrl(def?.pdfUrl),
-        pdfName: isDeleted ? undefined : def?.pdfName
+        pdfName: isDeleted ? undefined : def?.pdfName,
+        coverImage: def?.coverImage
       };
     });
 
@@ -1320,7 +1321,8 @@ export default function SolutionsSection({
               updated[brandKey] = {
                 ...updated[brandKey],
                 pdfUrl: isDeleted ? undefined : (cat?.pdfUrl || def?.pdfUrl || updated[brandKey]?.pdfUrl),
-                pdfName: isDeleted ? undefined : (cat?.pdfName || def?.pdfName || updated[brandKey]?.pdfName)
+                pdfName: isDeleted ? undefined : (cat?.pdfName || def?.pdfName || updated[brandKey]?.pdfName),
+                coverImage: def?.coverImage || updated[brandKey]?.coverImage
               };
             });
             return updated;
@@ -4105,6 +4107,7 @@ export default function SolutionsSection({
                                 fileName={activePdfName || 'catalog.pdf'} 
                                 brandName={brandData.name} 
                                 isAdmin={isEditMode}
+                                coverImage={brandData.coverImage}
                               />
                             </PdfDownloadCard>
                           </div>
